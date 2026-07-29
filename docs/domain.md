@@ -14,7 +14,7 @@ The software should implement this domain model. The domain model should not be 
 
 # Core Relationships
 
-The basic flow of the protocol is:
+The protocol supports two kinds of voluntary exchange.
 
 ## Local Exchange
 
@@ -35,12 +35,12 @@ Future versions of the protocol extend this flow.
 
 When Participants belong to different Home Commons:
 
-1. The exchange is performed under an active Reciprocity Agreement between the two Commons.
-2. Each Commons independently recognises the completed exchange according to the Reciprocity Agreement.
+1. The exchange occurs under an active Reciprocity Agreement between the two Commons.
+2. Each Commons independently recognises the completed exchange.
 3. Each Commons updates the reciprocal relationship of its own Participant.
-4. Any obligations between the two Commons are managed through the Reciprocity Agreement rather than through a global Ledger.
+4. Any obligations between the Commons are managed according to their Reciprocity Agreement.
 
-Both local and Cross Commons Exchanges follow the same principles of voluntary exchange while preserving the independence of every Commons.
+Both forms of exchange preserve voluntary participation while keeping every Commons autonomous.
 
 # Participant
 
@@ -99,7 +99,9 @@ Each Commons maintains its own:
 * Commons Balances.
 * Governance.
 
-Commons cooperate with other Commons through the Commons Protocol while remaining politically and economically autonomous.
+Commons may voluntarily cooperate with other Commons through Reciprocity Agreements while remaining politically and economically autonomous.
+
+Each Commons remains responsible only for its own Participants.
 
 # Commons Evolution
 
@@ -109,7 +111,7 @@ It is expected to evolve over time.
 
 During the early adoption of the protocol, a Commons may cover a relatively large geographic area in order to create a viable local economy and overcome network effects.
 
-As participation grows, larger Commons naturally divide into smaller autonomous Commons.
+As participation grows, larger Commons naturally divide into smaller autonomous geographic Commons.
 
 For example:
 
@@ -138,6 +140,8 @@ Indooroopilly Commons
 The long term direction of the protocol is progressively smaller geographic Commons that remain economically viable.
 
 Subdivision should occur only when both the local community and the local economy are capable of operating independently.
+
+Commons divide geographically rather than according to ideology, profession, or shared interests.
 
 Migration into a newly established Commons should always be voluntary.
 
@@ -172,6 +176,29 @@ Each Commons determines its own rules for:
 * Removal.
 
 Future versions of the protocol may support voluntary migration between Commons as new geographic Commons are established.
+
+# Reciprocity Agreement
+
+A Reciprocity Agreement is a voluntary agreement between two Commons that allows their Participants to exchange goods, services, and other voluntary contributions across Commons.
+
+A Reciprocity Agreement does not merge the participating Commons.
+
+Each Commons remains fully autonomous and responsible only for its own Participants.
+
+A Reciprocity Agreement may define:
+
+* Which Participants are covered.
+* Recognition rules for Cross Commons Exchanges.
+* Maximum outstanding obligations between the Commons.
+* Dispute procedures.
+* Settlement procedures.
+* Conditions for suspension or termination.
+
+Reciprocity Agreements are voluntary.
+
+Any Commons may choose whether to establish, continue, suspend, or terminate an agreement with another Commons.
+
+The detailed protocol remains a future area of design.
 
 # Commons Balance
 
@@ -419,7 +446,7 @@ The Ledger may record events such as:
 * A reversed Exchange.
 * A Dispute outcome.
 * A correction approved through a valid process.
-* A future Cross Commons Exchange.
+* Recognition of a Cross Commons Exchange under a Reciprocity Agreement.
 
 Every change to a Commons Balance should be traceable to one or more Ledger Entries.
 
@@ -437,9 +464,7 @@ The exact level of public visibility remains unresolved because transparency mus
 
 A Ledger Entry is a recognised event that changes or explains one or more Commons Balances.
 
-A completed Exchange normally creates corresponding changes for both Participants.
-
-For example:
+For a local Exchange:
 
 > Alice receives help worth 20 units from Bob.
 
@@ -448,6 +473,8 @@ The Ledger records:
 * Alice's balance decreases by 20.
 * Bob's balance increases by 20.
 * The combined change across the Commons is zero.
+
+Cross Commons Exchanges follow a different recognition process through Reciprocity Agreements.
 
 A Ledger Entry should identify:
 
@@ -672,18 +699,7 @@ Cross Commons Exchanges require an active Reciprocity Agreement between the part
 
 Each Commons remains responsible only for its own Participants.
 
-Neither Commons shares its Ledger or transfers ownership of its Commons Balances.
-
-Instead, each Commons independently recognises the exchange according to the terms of the Reciprocity Agreement.
-
-A Reciprocity Agreement may define:
-
-* Which Participants may be guaranteed.
-* Maximum outstanding obligations.
-* Dispute procedures.
-* Recognition rules.
-* Temporary suspension of guarantees.
-* Settlement of outstanding obligations between the Commons.
+Each Commons independently recognises the completed exchange and records the resulting change in its own Ledger.
 
 Cross Commons Exchanges do not require:
 
@@ -692,25 +708,33 @@ Cross Commons Exchanges do not require:
 * A universal balance.
 * A central authority.
 
-Future protocol versions will define the detailed mechanics of Reciprocity Agreements.
+A Reciprocity Agreement may define:
 
-Cross Commons Exchange remains outside the first application MVP.
+* Participant guarantee rules.
+* Recognition rules.
+* Maximum outstanding obligations.
+* Settlement procedures.
+* Dispute procedures.
+* Temporary suspension of guarantees.
+
+The detailed protocol remains a future area of design.
+
+Cross Commons Exchange is outside the first application MVP.
 
 # Commons Interoperability
 
-Commons Interoperability allows independent Commons to cooperate while remaining politically and economically autonomous.
+Commons Interoperability allows autonomous Commons to cooperate while preserving local independence.
 
-Interoperability is based on shared protocol rules rather than shared authority.
+Interoperability is achieved through shared protocol rules and voluntary Reciprocity Agreements.
 
-Commons remain free to decide:
+Commons remain free to determine:
 
-* Whether to establish Reciprocity Agreements.
-* Which Commons to cooperate with.
 * Their own governance.
-* Their own membership rules.
+* Their own membership.
 * Their own local economy.
+* Whether to establish, suspend, or terminate Reciprocity Agreements.
 
-Interoperability should not require:
+Interoperability does not require:
 
 * A central marketplace.
 * A central bank.
@@ -719,15 +743,7 @@ Interoperability should not require:
 * Uniform governance.
 * Uniform prices.
 
-The protocol should define the minimum shared rules necessary for Commons to:
-
-* Recognise one another.
-* Establish Reciprocity Agreements.
-* Verify exchanges.
-* Resolve inter Commons disputes.
-* Maintain secure communication.
-
-Everything else remains under local control.
+The protocol should define the minimum shared rules required for Commons to recognise one another, exchange information securely, and cooperate voluntarily.
 
 # Governance
 
@@ -747,9 +763,9 @@ Governance may also determine:
 
 * Membership rules.
 * When a Commons should divide into smaller geographic Commons.
-* Whether Reciprocity Agreements should be established, suspended, or terminated with other Commons.
+* Whether Reciprocity Agreements should be established, suspended, or terminated.
 
-Detailed governance remains outside the initial exchange application.
+Detailed governance is outside the initial exchange application.
 
 The first application should avoid embedding permanent administrative power into its core domain unless operationally unavoidable.
 
