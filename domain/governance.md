@@ -1,143 +1,148 @@
-# Ledger
+# Governance
 
 > Working Draft
 
 ## Purpose
 
-This document defines how the Commons Protocol records reciprocal relationships.
+This document defines how Commons govern themselves and resolve disagreements.
 
-It describes the Ledger, the events recorded within it, how completed exchanges become part of permanent history, and how factual participation history allows Participants to form trust without relying on reputation scores.
+It describes disputes, temporary juries, governance principles, abuse prevention, and participant notifications.
 
 It intentionally avoids implementation details such as databases, APIs, programming languages, authentication providers, and user interface design.
 
 ---
 
-# Ledger
+# Dispute
 
-The Ledger is the shared record of recognised reciprocal activity within a Commons.
+A Dispute occurs when Participants cannot agree about an Agreement, Exchange, completion, cancellation, or Ledger outcome.
 
-The Ledger records relationships and contributions rather than stored wealth.
+A Dispute may concern:
 
-It provides a transparent history of the events that explain every Commons Balance.
-
-The Ledger may record events such as:
-
-* A Completed Exchange.
-* A reversed Exchange.
-* A Dispute outcome.
-* A correction approved through a valid process.
-* Recognition of a Cross Commons Exchange under a Reciprocity Agreement.
-
-Every change to a Commons Balance should be traceable to one or more Ledger Entries.
-
-A balance without an explainable Ledger history should not be trusted.
-
-The Ledger is conceptually append only.
-
-Past entries should never be silently changed or deleted.
-
-When a correction is necessary, a new Ledger Entry records the correction while preserving the original history.
-
-The exact level of public visibility remains unresolved because transparency must be balanced against personal privacy.
-
----
-
-# Ledger Entry
-
-A Ledger Entry is a recognised event that changes or explains one or more Commons Balances.
-
-For a local Exchange:
-
-> Alice receives help worth 20 units from Bob.
-
-The Ledger records:
-
-* Alice's balance decreases by 20.
-* Bob's balance increases by 20.
-* The combined change across the Commons is zero.
-
-Cross Commons Exchanges follow a different recognition process through Reciprocity Agreements.
-
-A Ledger Entry should identify:
-
-* The Commons.
-* The Participants affected.
-* The value.
-* The reason for the change.
-* The Agreement or Dispute that produced it.
-* When it was recognised.
-
-A Ledger Entry is not a payment moving between stored accounts.
-
-It is a change in recorded reciprocal relationships.
-
----
-
-# Completed Exchange
-
-A Completed Exchange is an Agreement that has been fulfilled and recognised.
-
-It links together:
-
-* The original Request.
-* The accepted Offer.
-* The final Agreement.
-* The Participants.
+* Work not being completed.
+* Work not matching the Agreement.
+* A requester refusing valid completion.
+* A provider claiming completion incorrectly.
+* A cancellation.
+* Damage or loss.
+* Misrepresentation.
 * The agreed value.
-* Completion confirmations.
-* The resulting Ledger Entries.
+* Another claimed breach of the Agreement.
 
-A Completed Exchange becomes part of the factual participation history of both Participants.
+A Dispute should reference the original Request, Offer, Agreement, and available evidence.
 
-It should not create stars, ratings, badges, or popularity scores.
+A Dispute does not automatically imply wrongdoing.
 
----
-
-# Profile
-
-A Profile presents factual information about a Participant.
-
-A Profile may show:
-
-* The Participant's chosen name.
-* A description.
-* Relevant skills or interests.
-* Home Commons.
-* Completed Exchanges.
-* Current Requests.
-* Current Offers.
-* Participation history.
-* Dispute outcomes where appropriate.
-* Verification information where appropriate.
-
-A Profile should not contain:
-
-* Star ratings.
-* Likes.
-* Popularity rankings.
-* Leaderboards.
-* Contribution badges.
-* A single reputation score.
-* Labels implying moral worth.
-
-The system may present factual participation history without converting that history into a social score.
-
-The visibility of Commons Balances and detailed Ledger history remains unresolved.
+Until resolved, the disputed Ledger change should not be treated as final.
 
 ---
 
-# Trust
+# Jury
 
-Trust is not represented by one calculated score.
+A Jury is a temporary group of Participants responsible for resolving a specific Dispute.
 
-Participants form trust through factual information such as:
+A Jury is not a permanent moderation body.
 
-* Previous completed Exchanges.
-* The type of work previously performed.
-* Whether Agreements were completed.
-* Whether Disputes occurred.
-* How Disputes were resolved.
-* How long the Participant has belonged to the Commons.
-* Whether identity or skills have been verified.
+Its authority exists only for the Dispute it was selected to consider.
 
-The protocol should avoid pretending that trust can be accurately reduced to a single number.
+After the decision is complete, the Jury dissolves.
+
+Jurors should be independent from the Participants involved in the Dispute.
+
+Jury decisions may result in:
+
+* Confirming the original Agreement.
+* Confirming full completion.
+* Confirming partial completion.
+* Cancelling the Exchange.
+* Adjusting the final value.
+* Reversing a Ledger Entry.
+* Another outcome permitted by the Commons rules.
+
+The following questions remain unresolved:
+
+* How jurors are selected.
+* How many jurors are required.
+* What level of participation history is required.
+* How conflicts of interest are identified.
+* Whether appeals are allowed.
+* How jurors are compensated for their time.
+* How dishonest jury behaviour is handled.
+
+These questions do not need to be solved for the earliest version of the application if Disputes are excluded from the initial MVP.
+
+---
+
+# Governance
+
+Governance concerns decisions affecting a Commons as a whole.
+
+The broader Commons philosophy rejects permanent representatives and permanent concentrations of authority.
+
+Responsibility should be:
+
+* Temporary.
+* Limited to a defined task.
+* Transparent.
+* Accountable to the Commons.
+* Dissolved when the task is complete.
+
+Governance may also determine:
+
+* Membership rules.
+* When a Commons should divide into smaller geographic Commons.
+* Whether Reciprocity Agreements should be established, suspended, or terminated.
+
+Detailed governance is outside the initial exchange application.
+
+The first application should avoid embedding permanent administrative power into its core domain unless operationally unavoidable.
+
+---
+
+# Abuse
+
+The protocol must account for Participants who attempt to exploit it.
+
+Potential abuse includes:
+
+* Fake Requests.
+* Fake Offers.
+* Fake Exchanges.
+* Collusion.
+* Duplicate identities.
+* Spam.
+* Artificial values.
+* Dishonest completion claims.
+* Dishonest Disputes.
+* Harassment.
+* Manipulation of governance processes.
+
+The protocol should prefer:
+
+* Transparency.
+* Traceable history.
+* Mutual confirmation.
+* Temporary review processes.
+* Community oversight.
+
+It should avoid relying entirely on hidden central enforcement.
+
+The exact abuse prevention mechanisms belong in later security and protocol documents.
+
+---
+
+# Notifications
+
+A Notification informs a Participant about relevant activity.
+
+Examples include:
+
+* A new Offer.
+* An Offer being accepted.
+* A message about an Agreement.
+* A completion request.
+* A Dispute.
+* A Jury selection request.
+
+Notifications are an application feature rather than a foundational protocol concept.
+
+They should not influence Commons Balances or domain outcomes.
