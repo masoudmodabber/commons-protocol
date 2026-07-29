@@ -16,6 +16,8 @@ The software should implement this domain model. The domain model should not be 
 
 The basic flow of the protocol is:
 
+## Local Exchange
+
 1. A Participant belongs to a Home Commons.
 2. A Participant creates a Request.
 3. Other Participants submit Offers.
@@ -26,6 +28,19 @@ The basic flow of the protocol is:
 8. The Agreement becomes a Completed Exchange.
 9. The Commons Ledger records the exchange.
 10. The Participants' Commons Balances are updated.
+
+## Cross Commons Exchange
+
+Future versions of the protocol extend this flow.
+
+When Participants belong to different Home Commons:
+
+1. The exchange is performed under an active Reciprocity Agreement between the two Commons.
+2. Each Commons independently recognises the completed exchange according to the Reciprocity Agreement.
+3. Each Commons updates the reciprocal relationship of its own Participant.
+4. Any obligations between the two Commons are managed through the Reciprocity Agreement rather than through a global Ledger.
+
+Both local and Cross Commons Exchanges follow the same principles of voluntary exchange while preserving the independence of every Commons.
 
 # Participant
 
@@ -651,34 +666,68 @@ This diversity is considered a strength of the protocol rather than a problem to
 
 # Cross Commons Exchange
 
-A Cross Commons Exchange is an exchange involving Participants or resources from different Commons.
+A Cross Commons Exchange is a voluntary exchange between Participants belonging to different Home Commons.
 
-Each Commons maintains its own Ledger and Commons Balances.
+Cross Commons Exchanges require an active Reciprocity Agreement between the participating Commons.
 
-A Cross Commons Exchange must eventually be recognised by both Commons without requiring a central bank or central Ledger.
+Each Commons remains responsible only for its own Participants.
 
-The two Commons should independently confirm the same Exchange.
+Neither Commons shares its Ledger or transfers ownership of its Commons Balances.
 
-The earlier philosophical model proposes dual confirmation through temporary rotating delegates, but the detailed protocol is not yet defined.
+Instead, each Commons independently recognises the exchange according to the terms of the Reciprocity Agreement.
 
-Cross Commons Exchange is outside the first application MVP.
+A Reciprocity Agreement may define:
+
+* Which Participants may be guaranteed.
+* Maximum outstanding obligations.
+* Dispute procedures.
+* Recognition rules.
+* Temporary suspension of guarantees.
+* Settlement of outstanding obligations between the Commons.
+
+Cross Commons Exchanges do not require:
+
+* A global Ledger.
+* A central bank.
+* A universal balance.
+* A central authority.
+
+Future protocol versions will define the detailed mechanics of Reciprocity Agreements.
+
+Cross Commons Exchange remains outside the first application MVP.
 
 # Commons Interoperability
 
-Commons Interoperability means independent Commons can cooperate through shared protocol rules while retaining local autonomy.
+Commons Interoperability allows independent Commons to cooperate while remaining politically and economically autonomous.
+
+Interoperability is based on shared protocol rules rather than shared authority.
+
+Commons remain free to decide:
+
+* Whether to establish Reciprocity Agreements.
+* Which Commons to cooperate with.
+* Their own governance.
+* Their own membership rules.
+* Their own local economy.
 
 Interoperability should not require:
 
 * A central marketplace.
 * A central bank.
 * A central administrator.
-* A single global Ledger.
-* Uniform local governance.
-* Uniform local prices.
+* A global Ledger.
+* Uniform governance.
+* Uniform prices.
 
-The Commons Protocol should define the minimum shared rules required for Commons to recognise one another and exchange information safely.
+The protocol should define the minimum shared rules necessary for Commons to:
 
-Those rules remain a future area of design.
+* Recognise one another.
+* Establish Reciprocity Agreements.
+* Verify exchanges.
+* Resolve inter Commons disputes.
+* Maintain secure communication.
+
+Everything else remains under local control.
 
 # Governance
 
@@ -694,7 +743,13 @@ Responsibility should be:
 * Accountable to the Commons.
 * Dissolved when the task is complete.
 
-Detailed governance is outside the initial exchange application.
+Governance may also determine:
+
+* Membership rules.
+* When a Commons should divide into smaller geographic Commons.
+* Whether Reciprocity Agreements should be established, suspended, or terminated with other Commons.
+
+Detailed governance remains outside the initial exchange application.
 
 The first application should avoid embedding permanent administrative power into its core domain unless operationally unavoidable.
 
@@ -768,7 +823,8 @@ The MVP may initially exclude:
 
 * Disputes.
 * Juries.
-* Cross Commons Exchange.
+* Reciprocity Agreements.
+* Cross Commons Exchanges.
 * Complex governance.
 * Infrastructure funding.
 * Research funding.
@@ -800,8 +856,11 @@ The following questions remain unresolved and should be tracked separately in `d
 * How should Disputes and Juries work?
 * Can an Agreement be cancelled unilaterally?
 * How should group Exchanges work?
-* How should Cross Commons values be reconciled?
-* What shared rules are necessary for Commons Interoperability?
+* How should Reciprocity Agreements be negotiated?
+* How should outstanding obligations between Commons be managed?
+* How should guarantee limits be determined?
+* Under what conditions should a Commons suspend or terminate a Reciprocity Agreement?
+* What minimum protocol rules are required for Commons Interoperability?
 * What should the accounting unit be called?
 
 # Domain Principles
@@ -813,11 +872,14 @@ The domain model should preserve the following principles:
 * Participants may refuse any exchange.
 * The protocol records value but does not set it.
 * A Commons Balance records a relationship, not stored wealth.
+* Every Participant belongs to one Home Commons.
+* Each Commons is responsible only for its own Participants.
+* Cross Commons cooperation occurs through voluntary Reciprocity Agreements.
+* No global Ledger or central authority is required.
 * No balance grants political authority.
 * No balance grants ownership of another person's labour.
 * Trust comes from factual participation rather than social scoring.
 * Ledger changes must be explainable through traceable events.
 * Commons remain locally autonomous.
-* Cross Commons cooperation should not require central control.
 * Temporary responsibility is preferred over permanent authority.
 * The first application should remain simpler than the full protocol.
