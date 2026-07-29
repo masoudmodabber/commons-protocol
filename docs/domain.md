@@ -16,24 +16,25 @@ The software should implement this domain model. The domain model should not be 
 
 The basic flow of the protocol is:
 
-1. A Participant belongs to a Commons.
+1. A Participant belongs to a Home Commons.
 2. A Participant creates a Request.
 3. Other Participants submit Offers.
 4. The requester accepts one Offer.
 5. The accepted Offer becomes an Agreement.
-6. The participants perform the agreed work or exchange.
-7. Both participants confirm completion.
+6. The Participants perform the agreed exchange.
+7. Both Participants confirm completion.
 8. The Agreement becomes a Completed Exchange.
-9. The Ledger records the exchange.
-10. The participants' Commons Balances are updated.
+9. The Commons Ledger records the exchange.
+10. The Participants' Commons Balances are updated.
 
 # Participant
 
-A Participant is an individual who takes part in one or more Commons.
+A Participant is an individual who belongs to one Home Commons.
 
 A Participant may:
 
-* Join or create a Commons.
+* Join a Home Commons.
+* Help establish a new Commons when one is created.
 * Create Requests.
 * Submit Offers.
 * Accept or refuse exchanges.
@@ -45,15 +46,21 @@ A Participant may:
 
 A Participant is never required to accept a Request, submit an Offer, or complete work without first entering a voluntary Agreement.
 
-A Participant may belong to more than one Commons.
+A Participant has one Commons Balance representing their current reciprocal relationship with their Home Commons.
 
-A Participant has a separate relationship and Commons Balance with each Commons.
+Participants remain free to exchange with Participants from other Commons through Cross Commons Exchanges.
+
+Belonging to one Home Commons does not restrict participation in the wider market.
 
 # Commons
 
-A Commons is an autonomous community whose participants exchange work, services, goods, knowledge, or other forms of help through a shared reciprocal Ledger.
+A Commons is an autonomous geographic community whose Participants exchange work, services, goods, knowledge, and other forms of voluntary assistance through a shared reciprocal Ledger.
 
-A Commons decides its own:
+A Commons is defined by geography rather than shared interests.
+
+Its purpose is to allow people living within the same local area to cooperate, govern themselves, and build reciprocal relationships.
+
+Each Commons decides its own:
 
 * Membership rules.
 * Culture.
@@ -61,43 +68,111 @@ A Commons decides its own:
 * Priorities.
 * Local expectations.
 
-A Commons does not control prices or assign work.
+A Commons does not:
 
-Participants within the Commons remain free to negotiate value and refuse any exchange.
+* Assign work.
+* Set prices.
+* Guarantee Requests will be fulfilled.
+* Require Participants to trade.
 
-Each Commons maintains its own Ledger and its own Commons Balances.
+Participants remain free to negotiate value, compete with one another, and refuse any exchange.
 
-Commons may eventually cooperate with other Commons through the shared Commons Protocol.
+Each Commons maintains its own:
+
+* Membership.
+* Commons Ledger.
+* Commons Balances.
+* Governance.
+
+Commons cooperate with other Commons through the Commons Protocol while remaining politically and economically autonomous.
+
+# Commons Evolution
+
+A Commons is not a permanent administrative unit.
+
+It is expected to evolve over time.
+
+During the early adoption of the protocol, a Commons may cover a relatively large geographic area in order to create a viable local economy and overcome network effects.
+
+As participation grows, larger Commons naturally divide into smaller autonomous Commons.
+
+For example:
+
+Australia
+
+↓
+
+Brisbane Commons
+
+↓
+
+South Brisbane Commons
+
+West Brisbane Commons
+
+North Brisbane Commons
+
+↓
+
+West End Commons
+
+Toowong Commons
+
+Indooroopilly Commons
+
+The long term direction of the protocol is progressively smaller geographic Commons that remain economically viable.
+
+Subdivision should occur only when both the local community and the local economy are capable of operating independently.
+
+Migration into a newly established Commons should always be voluntary.
+
+No central authority determines when a Commons must divide.
+
+The exact protocol governing Commons subdivision remains a future area of design.
 
 # Membership
 
-Membership represents the relationship between a Participant and a Commons.
+Membership represents the relationship between a Participant and their Home Commons.
 
-Membership allows a Participant to take part in the Commons economy and governance processes.
+Every Participant has exactly one active Membership at a time.
+
+Membership allows a Participant to participate in the Commons economy and governance.
 
 A Membership may contain factual information such as:
 
 * When the Participant joined.
 * Whether the Membership is active.
 * The Participant's Commons Balance.
-* The Participant's completed exchanges within that Commons.
-* The Participant's unresolved Agreements or Disputes.
+* Completed Exchanges.
+* Active Agreements.
+* Active Disputes.
 
-Membership does not grant additional political power based on balance, popularity, wealth, or contribution history.
+Membership does not grant additional political authority based upon wealth, contribution history, popularity, or Commons Balance.
 
-The exact rules for joining, leaving, suspending, or removing members are determined by each Commons.
+Each Commons determines its own rules for:
 
-The first application may initially support simple open or invitation based membership while leaving more complex membership governance for later development.
+* Joining.
+* Leaving.
+* Suspension.
+* Removal.
+
+Future versions of the protocol may support voluntary migration between Commons as new geographic Commons are established.
 
 # Commons Balance
 
-A Commons Balance represents the current reciprocal relationship between a Participant and a specific Commons.
+A Commons Balance represents the current reciprocal relationship between a Participant and their Home Commons.
 
-It is not money, currency, wealth, a credit score, or a reputation score.
+It is not:
 
-A positive Commons Balance means the Participant has contributed more to the Commons than they have received from it.
+* Money.
+* Currency.
+* Wealth.
+* A credit score.
+* A reputation score.
 
-A negative Commons Balance means the Participant has received more from the Commons than they have contributed back.
+A positive Commons Balance means the Participant has contributed more to their Home Commons than they have received from it.
+
+A negative Commons Balance means the Participant has received more from their Home Commons than they have contributed back.
 
 A defining interpretation is:
 
@@ -107,7 +182,9 @@ A positive balance does not entitle Alice to any specific person's labour.
 
 Other Participants remain free to accept or refuse her Requests.
 
-They may choose to help because completing the exchange improves their own relationship with the Commons.
+They may choose to help because completing the exchange strengthens their own relationship with the Commons.
+
+A Commons Balance is a measure of reciprocal contribution, not stored value.
 
 ## Balance Changes
 
@@ -126,7 +203,7 @@ The change records that Bob has contributed more to the Commons and Alice has re
 
 A Commons Balance:
 
-* Belongs to the relationship between one Participant and one Commons.
+* Represents the relationship between one Participant and one Home Commons.
 * Changes only through recognised Ledger entries.
 * Cannot earn interest.
 * Cannot produce passive income.
@@ -136,6 +213,7 @@ A Commons Balance:
 * Cannot be invested to generate more balance.
 * Does not represent ownership of the Commons.
 * Does not represent ownership of another person's labour.
+* Cannot be transferred independently of the Participant.
 
 Whether balances can expire, decay, or have practical limits remains unresolved.
 
@@ -283,13 +361,17 @@ An Exchange may involve:
 * Sharing access to a resource.
 * Performing another agreed contribution.
 
-The Exchange is not complete merely because one Participant claims that it is complete.
+An Exchange is not complete merely because one Participant claims that it is complete.
 
 Completion normally requires confirmation from both Participants.
 
-The first application should focus on exchanges between two Participants within the same Commons.
+Most Exchanges occur within a Participant's Home Commons.
 
-More complex exchanges involving groups, organisations, or multiple Commons can be added later.
+Future versions of the protocol will also support Cross Commons Exchanges between Participants belonging to different Commons.
+
+The first application should focus on Exchanges between two Participants within the same Commons.
+
+More complex Exchanges involving groups, organisations, or multiple Commons can be added later.
 
 # Completion
 
@@ -314,25 +396,25 @@ The Ledger is the shared record of recognised reciprocal activity within a Commo
 
 The Ledger records relationships and contributions rather than stored wealth.
 
-It should provide a transparent history of events that affect Commons Balances.
+It provides a transparent history of the events that explain every Commons Balance.
 
 The Ledger may record events such as:
 
-* A completed Exchange.
+* A Completed Exchange.
 * A reversed Exchange.
 * A Dispute outcome.
 * A correction approved through a valid process.
 * A future Cross Commons Exchange.
 
-The Ledger should preserve enough history to explain how every Commons Balance was produced.
+Every change to a Commons Balance should be traceable to one or more Ledger Entries.
 
-A balance without a traceable Ledger history should not be trusted.
+A balance without an explainable Ledger history should not be trusted.
 
 The Ledger is conceptually append only.
 
-Past entries should not be silently changed or deleted.
+Past entries should never be silently changed or deleted.
 
-When a correction is necessary, the correction should be represented by a new Ledger entry that refers to the earlier entry.
+When a correction is necessary, a new Ledger Entry records the correction while preserving the original history.
 
 The exact level of public visibility remains unresolved because transparency must be balanced against personal privacy.
 
@@ -392,7 +474,7 @@ A Profile may show:
 * The Participant's chosen name.
 * A description.
 * Relevant skills or interests.
-* Commons Memberships.
+* Home Commons.
 * Completed Exchanges.
 * Current Requests.
 * Current Offers.
@@ -410,9 +492,9 @@ A Profile should not contain:
 * A single reputation score.
 * Labels implying moral worth.
 
-The system may show factual history without converting that history into a social score.
+The system may present factual participation history without converting that history into a social score.
 
-The visibility of balances and detailed exchange history remains unresolved.
+The visibility of Commons Balances and detailed Ledger history remains unresolved.
 
 # Trust
 
@@ -516,6 +598,10 @@ Value is the quantity voluntarily accepted by Participants when forming an Agree
 
 Value is discovered through negotiation rather than assigned by the protocol.
 
+The protocol records value.
+
+It never determines it.
+
 The same work may have different values:
 
 * At different times.
@@ -525,19 +611,23 @@ The same work may have different values:
 * Under different conditions.
 * When supply or demand changes.
 
-The protocol should not enforce uniform pricing.
+No Commons is expected to have identical prices.
+
+Differences between Commons are a natural consequence of free markets.
 
 The unit used to express value is an accounting unit within a Commons.
 
 It is not intended to behave as transferable money.
 
-The name and presentation of this unit remain unresolved.
+The name and presentation of this accounting unit remain unresolved.
 
 # Local Market
 
-Each Commons contains its own local market.
+Every Commons contains its own local market.
 
-A local market emerges from:
+A local market emerges naturally from the voluntary interactions of its Participants.
+
+It is shaped by:
 
 * Requests.
 * Offers.
@@ -551,7 +641,13 @@ A local market emerges from:
 
 No central authority manages the local market.
 
-A Commons may establish behavioural rules, but it should not determine the value of voluntary exchanges.
+No Commons determines the value of voluntary exchanges.
+
+Prices emerge through free negotiation between Participants.
+
+Different Commons are expected to develop different local economies.
+
+This diversity is considered a strength of the protocol rather than a problem to be solved.
 
 # Cross Commons Exchange
 
