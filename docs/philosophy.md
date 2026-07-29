@@ -95,7 +95,9 @@ the system asks:
 
 # Commons
 
-Society consists of many independent Commons.
+Society consists of many independent geographic Commons.
+
+Each participant belongs to one Home Commons.
 
 Each Commons decides its own:
 
@@ -230,7 +232,7 @@ The first implementation should remain intentionally simple.
 
 Members can:
 
-1. Create or join a Commons.
+1. Establish or join a geographic Commons.
 2. Post requests.
 3. Offer services.
 4. Negotiate value.
@@ -277,19 +279,49 @@ Not centralized enforcement.
 
 # Long Term Vision
 
-The long term goal is a world of independent Commons:
+The long term goal is a world of small, autonomous geographic Commons.
 
-* Neighborhoods.
-* Universities.
-* Villages.
-* Professional communities.
-* Hobby groups.
+The protocol aims to make political and economic structures progressively smaller, bringing decision making closer to the people affected by it.
 
-Each remains autonomous.
+During the early stages of adoption, a Commons may cover a relatively large geographic area. This helps create enough activity for people to find requests, offers, and trading partners.
 
-Each follows the same protocol.
+As participation grows, larger Commons should naturally divide into smaller autonomous Commons.
 
-Together they form a decentralized economy without requiring a central government, central bank, or central marketplace.
+For example:
+
+Australia
+
+↓
+
+Brisbane Commons
+
+↓
+
+South Brisbane Commons
+
+West Brisbane Commons
+
+North Brisbane Commons
+
+↓
+
+West End Commons
+
+Toowong Commons
+
+Indooroopilly Commons
+
+A Commons should divide when smaller geographic communities have enough active participants and economic activity to sustain themselves.
+
+Migration into a newly established Commons should be voluntary.
+
+Participants may remain in the existing Commons or join the newly established local Commons.
+
+Decentralization is therefore not a fixed starting point.
+
+It is a continuous process.
+
+Commons begin at the largest practical scale required for participation and become progressively smaller as they grow.
 
 ---
 
