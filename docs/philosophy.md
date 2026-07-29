@@ -32,6 +32,10 @@ The Commons Protocol asks a different question:
 
 > Can we preserve free markets while preventing wealth from becoming concentrated power?
 
+It also asks whether large scale cooperation requires centralized institutions.
+
+The protocol proposes that independent Commons can cooperate voluntarily through shared rules and mutual trust rather than through centralized governments or globally transferable wealth.
+
 The app is simply the first experiment.
 
 The protocol is the real product.
@@ -99,6 +103,8 @@ Society consists of many independent geographic Commons.
 
 Each participant belongs to one Home Commons.
 
+A Home Commons is the community responsible for maintaining a participant's membership, reciprocal balance, governance, and participation history.
+
 Each Commons decides its own:
 
 * Membership
@@ -110,7 +116,51 @@ No central authority governs all Commons.
 
 Instead, every Commons follows the same protocol, much like independent websites all follow Internet protocols.
 
+Commons remain politically and economically independent while being free to cooperate with other Commons through voluntary Reciprocity Agreements.
+
+Participants never belong to another Commons simply because they exchange goods or services with one of its members.
+
+Each Commons remains responsible only for its own participants.
+
 Local autonomy and global interoperability exist together.
+
+---
+
+# Commons Relationships
+
+Commons are independent communities.
+
+No Commons has authority over another.
+
+However, Commons may voluntarily establish relationships with one another through bilateral Reciprocity Agreements.
+
+A Reciprocity Agreement is not a political union.
+
+It is a mutual agreement that:
+
+* Each Commons recognizes the other's governance.
+* Each Commons accepts the integrity of the other's Ledger.
+* Each Commons guarantees the obligations of its own participants.
+* Each Commons agrees on how disputes and outstanding obligations between them will be handled.
+
+This allows Participants from different Commons to exchange goods and services without becoming members of each other's Commons.
+
+When Alice from Brisbane Commons exchanges with Bob from Gold Coast Commons:
+
+* Alice remains a member only of Brisbane Commons.
+* Bob remains a member only of Gold Coast Commons.
+* Brisbane Commons guarantees Alice's obligations.
+* Gold Coast Commons guarantees Bob's obligations.
+
+Each Commons remains responsible only for its own participants.
+
+Guarantees are voluntary.
+
+A Commons may refuse to guarantee a particular participant, suspend guarantees for repeated abuse, or choose not to establish Reciprocity Agreements with another Commons.
+
+Outstanding obligations between two Commons may naturally decrease through future exchanges flowing in the opposite direction.
+
+Cross Commons cooperation therefore emerges through voluntary trust rather than central authority or globally transferable money.
 
 ---
 
@@ -124,7 +174,7 @@ The Commons Balance is intentionally **not** called:
 * Points
 * Reputation
 
-It represents the reciprocal relationship between a participant and their Commons.
+It represents the reciprocal relationship between a participant and their Home Commons.
 
 A positive balance means:
 
@@ -137,6 +187,10 @@ A negative balance means:
 One defining sentence is:
 
 > **"The Commons collectively owes Alice roughly 100 units of future help."**
+
+This relationship exists only between a participant and their Home Commons.
+
+Cross Commons exchanges are handled separately through Reciprocity Agreements between Commons.
 
 This is not wealth.
 
@@ -188,7 +242,11 @@ Historical trades may help participants estimate reasonable values, but they nev
 
 Two neighboring Commons may value the same work differently.
 
-That is expected.
+Different Commons are expected to develop different local economies.
+
+That is not a flaw.
+
+It is a natural consequence of free markets operating under different local conditions.
 
 ---
 
@@ -238,7 +296,9 @@ Members can:
 4. Negotiate value.
 5. Complete work.
 6. Confirm completion.
-7. Update their reciprocal balances.
+7. Update their Home Commons balances.
+
+Future versions will support Cross Commons exchanges between participants whose Commons have established Reciprocity Agreements.
 
 The app exists to test the protocol.
 
@@ -323,6 +383,12 @@ It is a continuous process.
 
 Commons begin at the largest practical scale required for participation and become progressively smaller as they grow.
 
+Smaller Commons are not intended to become isolated.
+
+They remain free to cooperate with other Commons through voluntary Reciprocity Agreements whenever doing so benefits both communities.
+
+The protocol encourages strong local economies while allowing wider cooperation where it is genuinely valuable, without requiring globally centralized markets or institutions.
+
 ---
 
 # Design Principles
@@ -334,7 +400,8 @@ Commons begin at the largest practical scale required for participation and beco
 * Transparency.
 * Reciprocity.
 * Local autonomy.
-* Global interoperability.
+* Voluntary cooperation between Commons.
+* Global interoperability through shared protocols.
 * Temporary responsibility instead of permanent authority.
 * Relationships instead of wealth.
 
