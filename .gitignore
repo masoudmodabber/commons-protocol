@@ -1,1 +1,6 @@
 commons-protocol-docs.zip
+**/bin/
+**/obj/
+**/node_modules/
+**/dist/
+*.tsbuildinfo

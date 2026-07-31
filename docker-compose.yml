@@ -1,0 +1,41 @@
+services:
+  database:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_DB: commons
+      POSTGRES_USER: commons
+      POSTGRES_PASSWORD: commons
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U commons -d commons"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Commons.Api/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__Commons: Host=database;Port=5432;Database=commons;Username=commons;Password=commons
+    depends_on:
+      database:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build:
+      context: frontend/commons-web
+      dockerfile: Dockerfile
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+
+volumes:
+  postgres-data:
