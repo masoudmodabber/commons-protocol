@@ -1,0 +1,4 @@
+name: commons-cloud
+runtime: dotnet
+main: Commons.Cloud.Infrastructure
+description: Azure infrastructure for Commons Market
