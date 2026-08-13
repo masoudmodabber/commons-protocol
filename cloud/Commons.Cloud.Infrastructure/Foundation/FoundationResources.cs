@@ -5,6 +5,7 @@ using Pulumi.AzureNative.Authorization;
 using Pulumi.AzureNative.ContainerRegistry;
 using Pulumi.AzureNative.KeyVault;
 using Pulumi.AzureNative.ManagedIdentity;
+using Pulumi.AzureNative.OperationalInsights;
 using Pulumi.AzureNative.Resources;
 
 namespace Commons.Cloud.Infrastructure.Foundation;
@@ -100,13 +101,27 @@ internal sealed class FoundationResources
             Tags = tags,
         });
 
+        LogAnalyticsWorkspace = new Workspace("log-analytics-workspace", new WorkspaceArgs
+        {
+            ResourceGroupName = ResourceGroup.Name,
+            Location = ResourceGroup.Location,
+            RetentionInDays = 30,
+            Sku = new Pulumi.AzureNative.OperationalInsights.Inputs.WorkspaceSkuArgs
+            {
+                Name = WorkspaceSkuNameEnum.PerGB2018,
+            },
+            Tags = tags,
+        });
+
         ApplicationInsights = new Component("application-insights", new ComponentArgs
         {
             ResourceGroupName = ResourceGroup.Name,
             Location = ResourceGroup.Location,
             Kind = "web",
             ApplicationType = ApplicationType.Web,
+            IngestionMode = IngestionMode.LogAnalytics,
             RequestSource = RequestSource.Rest,
+            WorkspaceResourceId = LogAnalyticsWorkspace.Id,
             Tags = tags,
         });
     }
@@ -122,6 +137,8 @@ internal sealed class FoundationResources
     public FederatedIdentityCredential GitHubFederatedCredential { get; }
 
     public Vault KeyVault { get; }
+
+    public Workspace LogAnalyticsWorkspace { get; }
 
     public Component ApplicationInsights { get; }
 }
