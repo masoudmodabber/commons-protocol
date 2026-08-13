@@ -24,6 +24,16 @@ internal sealed class FoundationResources
 
         Registry = new Registry("container-registry", new RegistryArgs
         {
+            RegistryName = clientConfig.Apply(current =>
+            {
+                var environment = new string(settings.Environment
+                    .Where(char.IsLetterOrDigit)
+                    .ToArray());
+                var subscriptionSuffix = current.SubscriptionId
+                    .Replace("-", string.Empty, StringComparison.Ordinal)[..8];
+
+                return $"commons{environment}{subscriptionSuffix}".ToLowerInvariant();
+            }),
             ResourceGroupName = ResourceGroup.Name,
             Location = ResourceGroup.Location,
             AdminUserEnabled = false,
