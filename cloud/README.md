@@ -44,23 +44,63 @@ Its admin account and anonymous pulls are disabled; GitHub receives only the
 behind Private Link would require the Premium SKU and a self-hosted runner with
 network access to the VNet.
 
-## Required configuration
+## Azure Blob state backend
 
-Create a stack and configure it before running a preview:
+Pulumi state is stored in Azure Blob Storage rather than Pulumi Cloud. Create
+this bootstrap infrastructure manually and keep it outside the dev and
+production stacks:
+
+* One dedicated resource group
+* One StorageV2 storage account
+* Private blob containers named `pulumi-dev` and `pulumi-prod`
+
+Require HTTPS and TLS 1.2, disable anonymous blob access and shared-key
+authorization, and enable blob versioning plus blob and container soft delete.
+The storage endpoint must remain network-accessible to GitHub-hosted runners,
+but blob data access is authorized only through Microsoft Entra RBAC.
+
+Grant the human bootstrap principal `Storage Blob Data Contributor` on both
+containers. Do not allow either application stack to manage or delete its own
+state storage.
+
+## Stack initialization and configuration
+
+Use a separate backend container and passphrase for each stack. Keep both
+passphrases in a password manager.
+
+Initialize the development stack:
 
 ```bash
-pulumi stack init dev
+export PULUMI_CONFIG_PASSPHRASE="<strong-dev-passphrase>"
+pulumi login "azblob://pulumi-dev?storage_account=<storage-account-name>"
+pulumi stack init dev --secrets-provider passphrase
+pulumi config set environment development
 pulumi config set location australiaeast
 pulumi config set staticWebAppLocation "East Asia"
-pulumi config set apiImage example.azurecr.io/commons-api:latest
-pulumi config set githubOidcSubject repo:OWNER/REPOSITORY:ref:refs/heads/main
+pulumi config set apiImage "<temporary-bootstrap-image>"
+pulumi config set githubOidcSubject \
+  "repo:OWNER/REPOSITORY:environment:development"
+pulumi config set postgresAdministratorPassword --secret
+```
+
+Initialize production after logging into its backend:
+
+```bash
+export PULUMI_CONFIG_PASSPHRASE="<strong-prod-passphrase>"
+pulumi login "azblob://pulumi-prod?storage_account=<storage-account-name>"
+pulumi stack init prod --secrets-provider passphrase
+pulumi config set environment production
+pulumi config set location australiaeast
+pulumi config set staticWebAppLocation "East Asia"
+pulumi config set apiImage "<temporary-bootstrap-image>"
+pulumi config set githubOidcSubject \
+  "repo:OWNER/REPOSITORY:environment:prod"
 pulumi config set postgresAdministratorPassword --secret
 ```
 
 Optional configuration:
 
 ```bash
-pulumi config set environment dev
 pulumi config set postgresAdministratorLogin commonsadmin
 pulumi config set postgresVersion 18
 pulumi config set postgresSkuName Standard_B1ms
@@ -72,30 +112,37 @@ pulumi config set postgresSubnetAddressPrefix 10.20.1.0/24
 pulumi config set privateEndpointsSubnetAddressPrefix 10.20.2.0/27
 ```
 
-Only override the network ranges before the first deployment. The three subnet
-ranges must be non-overlapping members of the VNet address space, and the
-Container Apps subnet must remain at least `/27`.
+Only override the network ranges before the first deployment. The subnet ranges
+must be non-overlapping members of the VNet address space, and the Container
+Apps subnet must remain at least `/27`.
 
-The GitHub OIDC subject is deliberately explicit. It may target a branch, tag,
-pull request, or protected GitHub environment. For example:
+Commit the generated `Pulumi.dev.yaml` and `Pulumi.prod.yaml` stack settings
+files. They contain required configuration and encrypted ciphertext, not the
+passphrases. Never commit either passphrase.
 
-```text
-repo:OWNER/REPOSITORY:environment:production
-```
-
-After the initial deployment, expose these stack outputs as GitHub Actions
-variables:
-
-* `AZURE_CLIENT_ID` from `githubDeploymentClientId`
-* `AZURE_TENANT_ID` from `tenantId`
-* `AZURE_SUBSCRIPTION_ID` from `subscriptionId`
-
-The GitHub workflow must request `id-token: write` and authenticate with these
-values. No Azure client secret is required.
+## Initial deployment and state RBAC
 
 The first deployment must be run by an existing Azure principal that can create
-resource groups, managed identities, and role assignments. Subsequent
-deployments can use the federated GitHub identity.
+resource groups, managed identities, and role assignments. `apiImage` must
+identify an existing image during this bootstrap deployment.
+
+After bootstrapping each stack, retrieve:
+
+```bash
+pulumi stack output githubDeploymentClientId
+pulumi stack output githubDeploymentPrincipalId
+pulumi stack output tenantId
+pulumi stack output subscriptionId
+```
+
+Grant each `githubDeploymentPrincipalId` the `Storage Blob Data Contributor`
+role on only its corresponding state container. This assignment is deliberately
+managed outside the application stacks because an environment must not control
+access to or deletion of its own state.
+
+Subsequent deployments authenticate to Azure with the federated GitHub
+identity. Azure CLI authentication is also used by Pulumi to access the Blob
+backend; no storage account key, SAS token, or Azure client secret is required.
 
 Because PostgreSQL and Key Vault data-plane access are private, administrative
 database connections and direct secret reads must originate from the VNet or a
@@ -103,9 +150,43 @@ connected network. Pulumi manages the Key Vault secret through Azure Resource
 Manager, so the GitHub deployment does not need direct data-plane access to the
 vault.
 
-`apiImage` must identify an image that exists when the Container App is
-created. A first-time deployment may create the registry first, push the API
-image, and then deploy the remaining resources.
+Creating this project does not deploy anything. Review a `pulumi preview`
+before the first deliberate `pulumi up`.
 
-No stack configuration is committed, and creating this project does not deploy
-anything. Review a `pulumi preview` before the first deliberate `pulumi up`.
+## GitHub Actions
+
+The `Deploy Development` workflow runs for each push to `main`. It validates
+the backend and frontend, builds both canonical Dockerfiles, publishes an
+immutable API image, updates the development Pulumi stack, deploys the Static
+Web App, and verifies the API health endpoint.
+
+Create a GitHub environment named `development` and add these environment
+variables:
+
+* `AZURE_CLIENT_ID`
+* `AZURE_TENANT_ID`
+* `AZURE_SUBSCRIPTION_ID`
+* `AZURE_STORAGE_ACCOUNT`
+* `PULUMI_BACKEND_URL`
+* `PULUMI_STACK`
+
+Use these environment-specific values:
+
+| Setting | `development` |
+| --- | --- |
+| `PULUMI_BACKEND_URL` | `azblob://pulumi-dev?storage_account=NAME` |
+| `PULUMI_STACK` | `dev` |
+
+Add `PULUMI_CONFIG_PASSPHRASE` as a secret in the environment, using the
+development stack passphrase.
+
+The Azure federated credential subject must use the GitHub environment name:
+
+```text
+repo:OWNER/REPOSITORY:environment:development
+```
+
+The first deployment remains a manual bootstrap because the workflow identity
+and registry are created by the stack. After bootstrapping, assign
+state-container RBAC and put the stack outputs into the GitHub environment
+variables. Production deployment is intentionally not configured yet.

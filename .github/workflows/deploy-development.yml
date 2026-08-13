@@ -1,0 +1,188 @@
+name: Deploy Development
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: development
+  cancel-in-progress: false
+
+jobs:
+  build-test-deploy:
+    name: Build, test, and deploy
+    runs-on: ubuntu-latest
+    environment: development
+    env:
+      AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      AZURE_STORAGE_ACCOUNT: ${{ vars.AZURE_STORAGE_ACCOUNT }}
+      PULUMI_BACKEND_URL: ${{ vars.PULUMI_BACKEND_URL }}
+      PULUMI_STACK: ${{ vars.PULUMI_STACK }}
+      PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore backend
+        run: dotnet restore backend/Commons.sln
+
+      - name: Build backend
+        run: dotnet build backend/Commons.sln --configuration Release --no-restore
+
+      - name: Test backend
+        run: dotnet test backend/Commons.sln --configuration Release --no-build
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/commons-web/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend/commons-web
+        run: npm ci
+
+      - name: Build frontend
+        working-directory: frontend/commons-web
+        run: npm run build
+
+      - name: Detect frontend tests
+        id: frontend-tests
+        shell: bash
+        run: |
+          if find frontend/commons-web \
+            \( -path '*/node_modules' -o -path '*/dist' \) -prune -o \
+            -type f \( -name '*.test.*' -o -name '*.spec.*' \) -print -quit | grep -q .; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Test frontend
+        if: steps.frontend-tests.outputs.found == 'true'
+        working-directory: frontend/commons-web
+        run: npm test
+
+      - name: Build API Docker image
+        run: docker build --file backend/Commons.Api/Dockerfile --tag commons-api:${{ github.sha }} .
+
+      - name: Build frontend Docker image
+        run: docker build --file frontend/commons-web/Dockerfile --tag commons-web:${{ github.sha }} frontend/commons-web
+
+      - name: Authenticate to Azure with OIDC
+        uses: azure/login@v3
+        with:
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Install Pulumi CLI
+        uses: pulumi/actions@v7
+
+      - name: Connect to Pulumi state and select stack
+        working-directory: cloud
+        run: |
+          test -n "$AZURE_STORAGE_ACCOUNT"
+          test -n "$PULUMI_BACKEND_URL"
+          test -n "$PULUMI_STACK"
+          test -n "$PULUMI_CONFIG_PASSPHRASE"
+          test -f "Pulumi.${PULUMI_STACK}.yaml"
+          pulumi login "$PULUMI_BACKEND_URL"
+          pulumi stack select "$PULUMI_STACK"
+
+      - name: Read deployment resource names
+        id: infrastructure
+        working-directory: cloud
+        shell: bash
+        run: |
+          registry=$(pulumi stack output containerRegistryLoginServer)
+          resource_group=$(pulumi stack output resourceGroupName)
+          static_web_app=$(pulumi stack output staticWebAppName)
+          test -n "$registry"
+          test -n "$resource_group"
+          test -n "$static_web_app"
+          echo "registry=$registry" >> "$GITHUB_OUTPUT"
+          echo "resource-group=$resource_group" >> "$GITHUB_OUTPUT"
+          echo "static-web-app=$static_web_app" >> "$GITHUB_OUTPUT"
+
+      - name: Push API image to Azure Container Registry
+        id: api-image
+        shell: bash
+        env:
+          REGISTRY: ${{ steps.infrastructure.outputs.registry }}
+        run: |
+          image="$REGISTRY/commons-api:${GITHUB_SHA}"
+          az acr login --name "${REGISTRY%%.*}"
+          docker tag "commons-api:${GITHUB_SHA}" "$image"
+          docker push "$image"
+          echo "uri=$image" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy development Pulumi stack
+        working-directory: cloud
+        env:
+          API_IMAGE: ${{ steps.api-image.outputs.uri }}
+        run: |
+          pulumi config set apiImage "$API_IMAGE"
+          pulumi up --yes --skip-preview
+
+      - name: Read deployed endpoints
+        id: deployment
+        working-directory: cloud
+        run: |
+          echo "api-url=$(pulumi stack output apiUrl)" >> "$GITHUB_OUTPUT"
+
+      - name: Get Static Web App deployment token
+        id: static-web-app-token
+        shell: bash
+        env:
+          RESOURCE_GROUP: ${{ steps.infrastructure.outputs.resource-group }}
+          STATIC_WEB_APP: ${{ steps.infrastructure.outputs.static-web-app }}
+        run: |
+          token=$(az staticwebapp secrets list \
+            --resource-group "$RESOURCE_GROUP" \
+            --name "$STATIC_WEB_APP" \
+            --query properties.apiKey \
+            --output tsv)
+          test -n "$token"
+          echo "::add-mask::$token"
+          echo "token=$token" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy frontend to Azure Static Web Apps
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ steps.static-web-app-token.outputs.token }}
+          action: upload
+          app_location: frontend/commons-web/dist
+          output_location: ""
+          skip_app_build: true
+          skip_api_build: true
+
+      - name: Verify API health
+        shell: bash
+        env:
+          API_URL: ${{ steps.deployment.outputs.api-url }}
+        run: |
+          test -n "$API_URL"
+          for attempt in {1..30}; do
+            if curl --fail --silent --show-error --max-time 10 "$API_URL/health"; then
+              exit 0
+            fi
+            echo "API is not healthy yet (attempt $attempt of 30)."
+            sleep 10
+          done
+          echo "API health check failed: $API_URL/health" >&2
+          exit 1

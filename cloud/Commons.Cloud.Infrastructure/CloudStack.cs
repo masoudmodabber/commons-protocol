@@ -52,10 +52,12 @@ internal sealed class CloudStack : Stack
         ApiUrl = hosting.Api.Configuration.Apply(configuration =>
             configuration?.Ingress?.Fqdn is { Length: > 0 } fqdn ? $"https://{fqdn}" : string.Empty);
         FrontendUrl = hosting.Frontend.DefaultHostname.Apply(hostname => $"https://{hostname}");
+        StaticWebAppName = hosting.Frontend.Name;
         PostgreSqlHost = data.Server.FullyQualifiedDomainName;
         KeyVaultUri = foundation.KeyVault.Properties.Apply(properties => properties.VaultUri ?? string.Empty);
         ApplicationInsightsConnectionString = foundation.ApplicationInsights.ConnectionString;
         GitHubDeploymentClientId = foundation.GitHubDeploymentIdentity.ClientId;
+        GitHubDeploymentPrincipalId = foundation.GitHubDeploymentIdentity.PrincipalId;
         TenantId = clientConfig.Apply(current => current.TenantId);
         SubscriptionId = clientConfig.Apply(current => current.SubscriptionId);
     }
@@ -75,6 +77,9 @@ internal sealed class CloudStack : Stack
     [Output("frontendUrl")]
     public Output<string> FrontendUrl { get; }
 
+    [Output("staticWebAppName")]
+    public Output<string> StaticWebAppName { get; }
+
     [Output("postgresSqlHost")]
     public Output<string> PostgreSqlHost { get; }
 
@@ -86,6 +91,9 @@ internal sealed class CloudStack : Stack
 
     [Output("githubDeploymentClientId")]
     public Output<string> GitHubDeploymentClientId { get; }
+
+    [Output("githubDeploymentPrincipalId")]
+    public Output<string> GitHubDeploymentPrincipalId { get; }
 
     [Output("tenantId")]
     public Output<string> TenantId { get; }
