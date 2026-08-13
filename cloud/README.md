@@ -160,6 +160,11 @@ the backend and frontend, builds both canonical Dockerfiles, publishes an
 immutable API image, updates the development Pulumi stack, deploys the Static
 Web App, and verifies the API health endpoint.
 
+Pulumi runs once before publishing the application image so a new stack can
+create its registry and hosting resources from the configured bootstrap image.
+After the API image is published, Pulumi runs again with the immutable image
+URI and updates the Container App. Both operations are idempotent.
+
 Create a GitHub environment named `development` and add these environment
 variables:
 
