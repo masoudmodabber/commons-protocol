@@ -1,0 +1,9 @@
+encryptionsalt: v1:dmDTAFSbdqE=:v1:bhtEb88kuRmi4uik:8ftevU7DOpPxaV3RRG1Wb+xzsbZ3RA==
+config:
+  commons-cloud:apiImage: mcr.microsoft.com/k8se/quickstart:latest
+  commons-cloud:environment: development
+  commons-cloud:githubOidcSubject: repo:masoudmodabber/commons-protocol:environment:development
+  commons-cloud:location: australiaeast
+  commons-cloud:postgresAdministratorPassword:
+    secure: v1:/pnSrBh/1iVwN2VG:kWKO0i1SELgzG+xnbyGzbz9ey4TDsjYtTej6n45PeoJec/CBOjT2HlR0HsEHVydXXxOj2+QelvlyoZhx
+  commons-cloud:staticWebAppLocation: East Asia
