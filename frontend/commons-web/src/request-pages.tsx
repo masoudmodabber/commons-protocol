@@ -244,6 +244,9 @@ export function RequestDetailPage({
         <div><dt>Home Commons</dt><dd>{request.homeCommons.name}</dd></div>
       </dl>
       <div className="request-actions">
+        <a className="primary-link" href={`#/requests/${request.id}/offers`}>
+          View Offers
+        </a>
         {request.status === "Open" && (
           <>
             <button type="button" className="primary-button"

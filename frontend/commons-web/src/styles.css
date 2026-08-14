@@ -381,6 +381,47 @@ button { cursor: pointer; }
   color: #5b6e65;
 }
 
+.offer-comparison-guidance {
+  margin: 0 0 1.5rem;
+  color: #718078;
+  line-height: 1.5;
+}
+
+.offer-comparison-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 1rem;
+  margin: 0 0 1.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.offer-comparison-grid > li {
+  display: grid;
+  align-content: start;
+  gap: 1rem;
+  border: 1px solid #dce4db;
+  border-radius: 0.9rem;
+  padding: 1rem;
+  background: #fff;
+}
+
+.offer-comparison-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.offer-comparison-heading h2 { margin: 0; color: #244b3f; font-size: 1.1rem; }
+
+.offer-comparison-term { display: grid; gap: 0.45rem; color: #35584d; }
+.offer-comparison-term > strong { color: #718078; font-size: 0.75rem; text-transform: uppercase; }
+.offer-comparison-term > span { font-weight: 800; }
+.offer-comparison-term ul { display: grid; gap: 0.65rem; margin: 0; padding: 0; list-style: none; }
+.offer-comparison-term li { display: grid; gap: 0.2rem; }
+.offer-comparison-term li span { color: #5b6e65; }
+
 .request-status {
   border-radius: 999px;
   padding: 0.4rem 0.75rem;

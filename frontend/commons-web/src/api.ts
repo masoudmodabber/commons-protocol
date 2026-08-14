@@ -64,6 +64,11 @@ export interface OfferDetails {
   }>;
 }
 
+export interface RequestOfferComparison {
+  request: OfferSubmissionOptions["request"];
+  offers: OfferDetails[];
+}
+
 interface AccessTokenResponse {
   accessToken: string;
 }
@@ -233,6 +238,17 @@ export function withdrawOffer(accessToken: string, offerId: string): Promise<Off
   return request<OfferDetails>(
     `/api/offers/${offerId}/withdraw`,
     { method: "POST" },
+    accessToken,
+  );
+}
+
+export function getRequestOffers(
+  accessToken: string,
+  requestId: string,
+): Promise<RequestOfferComparison> {
+  return request<RequestOfferComparison>(
+    `/api/requests/${requestId}/offers`,
+    {},
     accessToken,
   );
 }

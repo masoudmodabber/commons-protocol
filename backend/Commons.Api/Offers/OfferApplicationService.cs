@@ -184,6 +184,47 @@ public sealed class OfferApplicationService(CommonsDbContext dbContext)
         return WithdrawOfferResult.Withdrawn(details);
     }
 
+    public async Task<RequestOfferComparison?> GetActiveForRequestCreatorAsync(
+        string authenticatedUserId,
+        Guid requestId,
+        CancellationToken cancellationToken)
+    {
+        var participantId = await dbContext.Participants
+            .AsNoTracking()
+            .Where(participant => participant.AuthenticatedUserId == authenticatedUserId)
+            .Select(participant => (Guid?)participant.Id)
+            .SingleOrDefaultAsync(cancellationToken);
+
+        if (participantId is null)
+        {
+            return null;
+        }
+
+        var ownsRequest = await dbContext.Requests
+            .AsNoTracking()
+            .AnyAsync(request =>
+                request.Id == requestId
+                && request.CreatorParticipantId == participantId.Value,
+                cancellationToken);
+
+        if (!ownsRequest)
+        {
+            return null;
+        }
+
+        var offers = await ProjectOfferDetails(dbContext.Offers
+                .AsNoTracking()
+                .Where(offer =>
+                    offer.RequestId == requestId
+                    && offer.Status == OfferStatus.Active)
+                .OrderBy(offer => offer.Id))
+            .ToListAsync(cancellationToken);
+
+        return new RequestOfferComparison(
+            await ProjectRequestSummary(requestId, cancellationToken),
+            offers);
+    }
+
     private async Task<AvailableRequestContext?> GetAvailableRequestContextAsync(
         string authenticatedUserId,
         Guid requestId,
@@ -291,6 +332,10 @@ public sealed record OfferCapabilityOption(Guid Id, string Text);
 public sealed record OfferSubmissionOptions(
     OfferRequestSummary Request,
     IReadOnlyList<OfferCapabilityOption> Capabilities);
+
+public sealed record RequestOfferComparison(
+    OfferRequestSummary Request,
+    IReadOnlyList<OfferDetails> Offers);
 
 public sealed record OfferDetails(
     Guid Id,

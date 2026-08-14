@@ -30,6 +30,14 @@ Deferred from US 010:
 
 * Decide whether the Request creator should receive a notification when an Offer is withdrawn.
 
+Deferred from US 011:
+
+* Consider whether withdrawn Offers should later be visible to the Request creator in a separate historical view.
+
+* Consider sorting and filtering Offers when a Request receives many responses.
+
+* Do not introduce automated Offer ranking, scoring, recommended prices, or preferred Offers without a separate product decision.
+
 ## Requests
 
 Deferred from US 003:

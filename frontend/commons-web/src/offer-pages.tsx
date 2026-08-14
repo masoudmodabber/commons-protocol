@@ -4,6 +4,7 @@ import {
   getOffer,
   getMyOffers,
   getOfferSubmissionOptions,
+  getRequestOffers,
   submitOffer,
   withdrawOffer,
 } from "./api";
@@ -224,6 +225,88 @@ export function MyOffersPage({ accessToken }: { accessToken: string }) {
           ))}
         </ul>
       )}
+    </section>
+  );
+}
+
+export function RequestOffersPage({
+  accessToken,
+  requestId,
+}: {
+  accessToken: string;
+  requestId: string;
+}) {
+  const comparisonQuery = useQuery({
+    queryKey: ["request-offers", accessToken, requestId],
+    queryFn: () => getRequestOffers(accessToken, requestId),
+  });
+
+  if (comparisonQuery.isPending) {
+    return <p className="status-message feature-page">Loading Offers…</p>;
+  }
+
+  if (comparisonQuery.isError) {
+    return (
+      <p className="error-message feature-page" role="alert">
+        {comparisonQuery.error.message}
+      </p>
+    );
+  }
+
+  const comparison = comparisonQuery.data;
+
+  return (
+    <section className="feature-page requests" aria-labelledby="request-offers-heading">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">Active proposals received</p>
+          <h1 id="request-offers-heading">Offers for {comparison.request.title}</h1>
+        </div>
+      </div>
+      <p className="request-description">{comparison.request.description}</p>
+      <p className="offer-comparison-guidance">
+        Review each Participant&apos;s proposed terms. Offers may use different forms of
+        return and are not ranked or reduced to a single score.
+      </p>
+
+      {comparison.offers.length === 0 && (
+        <p className="empty-state">This Request has no Active Offers.</p>
+      )}
+      {comparison.offers.length > 0 && (
+        <ul className="offer-comparison-grid">
+          {comparison.offers.map(offer => (
+            <li key={offer.id}>
+              <div className="offer-comparison-heading">
+                <h2>{offer.creator.displayName}</h2>
+                <span className="request-status">{offer.status}</span>
+              </div>
+              {offer.commonsAccountingUnits !== null && (
+                <div className="offer-comparison-term">
+                  <strong>Commons accounting units requested</strong>
+                  <span>{offer.commonsAccountingUnits}</span>
+                </div>
+              )}
+              {offer.requestedContributions.length > 0 && (
+                <div className="offer-comparison-term">
+                  <strong>Requested contributions</strong>
+                  <ul>
+                    {offer.requestedContributions.map(contribution => (
+                      <li key={contribution.capabilityId}>
+                        <strong>{contribution.capabilityTextSnapshot}</strong>
+                        <span>{contribution.description}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <a className="text-link" href={`#/requests/${comparison.request.id}`}>
+        Back to Request
+      </a>
     </section>
   );
 }

@@ -58,6 +58,19 @@ public sealed class OffersController(OfferApplicationService offerService) : Con
         };
     }
 
+    [HttpGet("requests/{requestId:guid}/offers")]
+    public async Task<ActionResult<RequestOfferComparison>> CompareForRequestCreator(
+        Guid requestId,
+        CancellationToken cancellationToken)
+    {
+        var comparison = await offerService.GetActiveForRequestCreatorAsync(
+            GetAuthenticatedUserId(),
+            requestId,
+            cancellationToken);
+
+        return comparison is null ? NotFound() : Ok(comparison);
+    }
+
     [HttpGet("offers/{offerId:guid}")]
     public async Task<ActionResult<OfferDetails>> Get(
         Guid offerId,

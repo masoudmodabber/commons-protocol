@@ -193,6 +193,56 @@ So that I can understand the proposed terms and choose the Offer that best suits
 
 Offers may differ in Commons accounting units, requested Capability contributions, or combinations of both, and do not need to be directly comparable by a single numerical value.
 
+### Acceptance Criteria
+
+1. Only an authenticated Participant can view Offers submitted on their own Requests.
+
+2. A Participant can view Offers only for Requests they created.
+
+3. A Participant cannot view Offers submitted on another Participant's Request by changing a Request identifier or other client supplied value.
+
+4. The Request creator can open one of their Requests and view the Active Offers submitted for it.
+
+5. Withdrawn Offers are not included in the active Offer comparison list.
+
+6. Each Offer identifies the Participant who submitted it.
+
+7. Each Offer shows the Commons accounting units requested, when included.
+
+8. Each Offer shows every requested Capability contribution, when included.
+
+9. Each requested Capability contribution shows the stored Capability text snapshot and stored description.
+
+10. Historical Offer terms must be displayed from the stored Offer data and Capability snapshot rather than from the current live Capability.
+
+11. Offers may contain Commons accounting units only.
+
+12. Offers may contain requested Capability contributions only.
+
+13. Offers may contain both Commons accounting units and requested Capability contributions.
+
+14. The application must not calculate or display a single score, ranking, recommended Offer, recommended price, or preferred Offer.
+
+15. The application must not assume that Offers are numerically comparable.
+
+16. The Request creator may inspect the terms of each Active Offer.
+
+17. Viewing or comparing Offers does not modify the Request or any Offer.
+
+18. Viewing or comparing Offers does not create an Agreement, Exchange, Ledger Entry, Completed Exchange, or Commons Balance change.
+
+19. Accepting or rejecting an Offer is not part of this story.
+
+20. Negotiating an Offer is not part of this story.
+
+21. The authenticated Participant identity and ownership of the Request must be resolved from trusted server side state.
+
+22. Request ownership must not be accepted from the client as authoritative.
+
+23. The complete flow must be usable through the React frontend.
+
+24. The story is not complete if Offers can only be viewed through API calls, Postman, curl, or direct database access.
+
 ---
 
 ## US 012 Accept an Offer
