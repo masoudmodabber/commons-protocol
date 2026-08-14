@@ -306,6 +306,9 @@ export function BrowseRequestDetailPage({
         <div><dt>Home Commons</dt><dd>{request.homeCommons.name}</dd></div>
       </dl>
       <div className="request-actions">
+        <a className="primary-link" href={`#/available-requests/${request.id}/offer`}>
+          Submit an Offer
+        </a>
         <a className="text-link" href="#/available-requests">Back to Available Requests</a>
       </div>
     </section>

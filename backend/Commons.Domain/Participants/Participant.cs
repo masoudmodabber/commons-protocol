@@ -1,6 +1,7 @@
 namespace Commons.Domain.Participants;
 
 using global::Commons.Domain.Requests;
+using global::Commons.Domain.Offers;
 
 public sealed class Participant
 {
@@ -78,4 +79,30 @@ public sealed class Participant
 
     public Request CreateRequest(string title, string description) =>
         new(Id, Membership.HomeCommonsId, title, description);
+
+    public Offer SubmitOffer(
+        Request request,
+        long? commonsAccountingUnits,
+        IReadOnlyCollection<RequestedContributionTerms> requestedContributions)
+    {
+        if (request.CreatorParticipantId == Id)
+        {
+            throw new DomainRuleViolationException(
+                "A Participant cannot submit an Offer on their own Request.");
+        }
+
+        if (request.HomeCommonsId != Membership.HomeCommonsId)
+        {
+            throw new DomainRuleViolationException(
+                "An Offer can only be submitted for a Request in the Participant's Home Commons.");
+        }
+
+        if (request.Status != RequestStatus.Open)
+        {
+            throw new DomainRuleViolationException(
+                "An Offer can only be submitted for an Open Request.");
+        }
+
+        return new Offer(Id, request.Id, commonsAccountingUnits, requestedContributions);
+    }
 }

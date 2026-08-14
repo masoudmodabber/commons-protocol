@@ -23,7 +23,7 @@ export function AuthenticatedLayout({
           </NavigationLink>
           <NavigationLink
             href="#/available-requests"
-            active={path.startsWith("/available-requests")}
+            active={path.startsWith("/available-requests") || path.startsWith("/offers")}
           >
             Available Requests
           </NavigationLink>

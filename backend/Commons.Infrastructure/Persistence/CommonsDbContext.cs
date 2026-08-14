@@ -1,5 +1,6 @@
 using Commons.Domain.Participants;
 using Commons.Domain.Requests;
+using Commons.Domain.Offers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +16,10 @@ public sealed class CommonsDbContext(DbContextOptions<CommonsDbContext> options)
     public DbSet<Capability> Capabilities => Set<Capability>();
 
     public DbSet<Request> Requests => Set<Request>();
+
+    public DbSet<Offer> Offers => Set<Offer>();
+
+    public DbSet<RequestedContribution> RequestedContributions => Set<RequestedContribution>();
 
     public DbSet<CommonsEntity> Commons => Set<CommonsEntity>();
 

@@ -7,7 +7,8 @@ public static class RelationalSchemaInitializer
     private static readonly string[] SchemaResourceNames =
     [
         "Commons.Infrastructure.Persistence.Schema.schema-v002-capabilities.sql",
-        "Commons.Infrastructure.Persistence.Schema.schema-v003-requests.sql"
+        "Commons.Infrastructure.Persistence.Schema.schema-v003-requests.sql",
+        "Commons.Infrastructure.Persistence.Schema.schema-v004-offers.sql"
     ];
 
     public static async Task InitializeAsync(

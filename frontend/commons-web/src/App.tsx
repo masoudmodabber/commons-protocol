@@ -4,6 +4,7 @@ import { ApiError, getProfile, ParticipantProfile } from "./api";
 import { Authentication, JoinCommonsPage } from "./entry-pages";
 import { navigate, useHashPath } from "./navigation";
 import { CapabilitiesPage, ProfilePage } from "./participant-pages";
+import { OfferDetailPage, SubmitOfferPage } from "./offer-pages";
 import {
   BrowseRequestDetailPage,
   BrowseRequestsPage,
@@ -80,7 +81,9 @@ function ParticipantApplication({
   onSignOut: () => void;
 }) {
   const path = useHashPath();
+  const submitOfferMatch = /^\/available-requests\/([^/]+)\/offer$/.exec(path);
   const availableRequestMatch = /^\/available-requests\/([^/]+)$/.exec(path);
+  const offerMatch = /^\/offers\/([^/]+)$/.exec(path);
   const requestMatch = /^\/requests\/([^/]+)$/.exec(path);
 
   let page = <ProfilePage profile={profile} />;
@@ -93,6 +96,8 @@ function ParticipantApplication({
     page = <CreateRequestPage profile={profile} accessToken={accessToken} />;
   } else if (path === "/available-requests") {
     page = <BrowseRequestsPage accessToken={accessToken} />;
+  } else if (submitOfferMatch) {
+    page = <SubmitOfferPage accessToken={accessToken} requestId={submitOfferMatch[1]} />;
   } else if (availableRequestMatch) {
     page = (
       <BrowseRequestDetailPage
@@ -100,6 +105,8 @@ function ParticipantApplication({
         requestId={availableRequestMatch[1]}
       />
     );
+  } else if (offerMatch) {
+    page = <OfferDetailPage accessToken={accessToken} offerId={offerMatch[1]} />;
   } else if (requestMatch) {
     page = <RequestDetailPage accessToken={accessToken} requestId={requestMatch[1]} />;
   }

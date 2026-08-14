@@ -8,6 +8,22 @@ Items here are not rejected and are not necessarily fully designed.
 
 When an item is selected for implementation, it should be discussed, turned into a user story with acceptance criteria, and moved into the appropriate epic.
 
+## Offers
+
+Deferred from US 008:
+
+* Consider allowing custom requested contributions that do not reference a Capability already listed by the Request creator.
+
+* Consider showing factual examples of how similar completed Exchanges were previously agreed, including Commons accounting units and other contributions involved.
+
+* Historical examples must remain informational rather than recommended prices or suggested exchange terms.
+
+* Before implementing historical examples, discuss risks including price anchoring, misleading comparisons, sparse data, and the application indirectly becoming a price setter.
+
+* Consider whether requested contributions should eventually become more structured than Capability plus free text description, for example quantities, units, dates, locations, or other typed details.
+
+* Reconsider whether Commons accounting units need fractional values after observing real exchange behaviour. Whole units are used initially to avoid unnecessary monetary precision and currency-like presentation.
+
 ## Requests
 
 Deferred from US 003:

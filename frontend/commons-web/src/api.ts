@@ -40,6 +40,29 @@ export interface RequestDetails {
   homeCommons: CommonsSummary;
 }
 
+export interface OfferSubmissionOptions {
+  request: {
+    id: string;
+    title: string;
+    description: string;
+    creator: { participantId: string; displayName: string };
+    homeCommons: CommonsSummary;
+  };
+  capabilities: CapabilitySummary[];
+}
+
+export interface OfferDetails {
+  id: string;
+  commonsAccountingUnits: number | null;
+  creator: { participantId: string; displayName: string };
+  request: OfferSubmissionOptions["request"];
+  requestedContributions: Array<{
+    capabilityId: string;
+    capabilityTextSnapshot: string;
+    description: string;
+  }>;
+}
+
 interface AccessTokenResponse {
   accessToken: string;
 }
@@ -169,6 +192,36 @@ export function getBrowseRequest(
   requestId: string,
 ): Promise<RequestDetails> {
   return request<RequestDetails>(`/api/requests/browse/${requestId}`, {}, accessToken);
+}
+
+export function getOfferSubmissionOptions(
+  accessToken: string,
+  requestId: string,
+): Promise<OfferSubmissionOptions> {
+  return request<OfferSubmissionOptions>(
+    `/api/requests/browse/${requestId}/offer-options`,
+    {},
+    accessToken,
+  );
+}
+
+export function submitOffer(
+  accessToken: string,
+  requestId: string,
+  input: {
+    commonsAccountingUnits: number | null;
+    requestedContributions: Array<{ capabilityId: string; description: string }>;
+  },
+): Promise<OfferDetails> {
+  return request<OfferDetails>(
+    `/api/requests/${requestId}/offers`,
+    { method: "POST", body: JSON.stringify(input) },
+    accessToken,
+  );
+}
+
+export function getOffer(accessToken: string, offerId: string): Promise<OfferDetails> {
+  return request<OfferDetails>(`/api/offers/${offerId}`, {}, accessToken);
 }
 
 export function editRequest(
