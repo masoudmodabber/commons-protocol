@@ -80,7 +80,7 @@ describe("US 011 View and Compare Offers", () => {
     window.location.hash = "";
   });
 
-  it("opens a read-only factual comparison from My Requests", async () => {
+  it("opens a factual comparison from My Requests", async () => {
     sessionStorage.setItem("commons-access-token", "access-token");
     window.location.hash = "/requests";
 
@@ -141,8 +141,9 @@ describe("US 011 View and Compare Offers", () => {
     expect(screen.getByText(/not ranked or reduced to a single score/i)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Back to Request" }))
       .toHaveAttribute("href", "#/requests/request-1");
+    expect(screen.getAllByRole("button", { name: "Accept Offer" })).toHaveLength(3);
     expect(screen.queryByRole("button", {
-      name: /accept|reject|withdraw|negotiate/i,
+      name: /reject|withdraw|negotiate/i,
     })).not.toBeInTheDocument();
     expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
     expect(within(carolOffer).queryByRole("link")).not.toBeInTheDocument();

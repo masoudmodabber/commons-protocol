@@ -46,6 +46,16 @@ Deferred from US 011:
 
 * Keep clarification messaging separate from Offer term changes unless a later product decision explicitly combines them.
 
+Deferred from US 012:
+
+* Define how an Agreement may later be changed after an Offer has been accepted.
+
+* Decide whether changes to an Agreement create a new version, an amendment, a replacement Agreement, or another form of negotiated record.
+
+* Define whether and under what conditions an Agreement may be cancelled or terminated before the Exchange is completed.
+
+* Define how Participants are notified when their Offer becomes Accepted or Closed.
+
 ## Requests
 
 Deferred from US 003:

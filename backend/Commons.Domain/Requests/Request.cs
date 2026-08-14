@@ -1,3 +1,5 @@
+using Commons.Domain.Agreements;
+using Commons.Domain.Offers;
 using Commons.Domain.Participants;
 
 namespace Commons.Domain.Requests;
@@ -69,5 +71,46 @@ public sealed class Request
         }
 
         Status = RequestStatus.Cancelled;
+    }
+
+    public Agreement AcceptOffer(
+        Offer selectedOffer,
+        IReadOnlyCollection<Offer> offersOnRequest)
+    {
+        if (Status != RequestStatus.Open)
+        {
+            throw new RequestNotOpenException("Only an Open Request can have an Offer accepted.");
+        }
+
+        if (selectedOffer is null)
+        {
+            throw new DomainRuleViolationException("An Offer must be selected for acceptance.");
+        }
+
+        if (offersOnRequest is null)
+        {
+            throw new DomainRuleViolationException("The Offers on the Request are required.");
+        }
+
+        if (selectedOffer.RequestId != Id || offersOnRequest.Any(offer => offer.RequestId != Id))
+        {
+            throw new DomainRuleViolationException("Every supplied Offer must belong to the Request.");
+        }
+
+        if (!offersOnRequest.Any(offer => offer.Id == selectedOffer.Id))
+        {
+            throw new DomainRuleViolationException("The selected Offer must be included with the Request Offers.");
+        }
+
+        selectedOffer.Accept();
+
+        foreach (var offer in offersOnRequest.Where(offer => offer.Id != selectedOffer.Id))
+        {
+            offer.CloseBecauseAnotherOfferWasAccepted();
+        }
+
+        Status = RequestStatus.Matched;
+
+        return Agreement.FromAcceptedOffer(this, selectedOffer);
     }
 }

@@ -1,3 +1,4 @@
+using Commons.Api.Agreements;
 using Commons.Api.Participants;
 using Commons.Api.Offers;
 using Commons.Api.Requests;
@@ -34,6 +35,7 @@ builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<ParticipantApplicationService>();
 builder.Services.AddScoped<RequestApplicationService>();
 builder.Services.AddScoped<OfferApplicationService>();
+builder.Services.AddScoped<AgreementApplicationService>();
 
 var app = builder.Build();
 

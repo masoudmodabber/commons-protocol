@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  acceptOffer,
+  getAgreement,
   getOffer,
   getMyOffers,
   getOfferSubmissionOptions,
@@ -236,9 +238,23 @@ export function RequestOffersPage({
   accessToken: string;
   requestId: string;
 }) {
+  const queryClient = useQueryClient();
   const comparisonQuery = useQuery({
     queryKey: ["request-offers", accessToken, requestId],
     queryFn: () => getRequestOffers(accessToken, requestId),
+  });
+  const acceptMutation = useMutation({
+    mutationFn: (offerId: string) => acceptOffer(accessToken, offerId),
+    onSuccess: async (agreement) => {
+      queryClient.setQueryData(["agreement", accessToken, agreement.id], agreement);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["request-offers", accessToken, requestId] }),
+        queryClient.invalidateQueries({ queryKey: ["request", accessToken, requestId] }),
+        queryClient.invalidateQueries({ queryKey: ["my-requests", accessToken] }),
+        queryClient.invalidateQueries({ queryKey: ["my-offers", accessToken] }),
+      ]);
+      navigate(`/agreements/${agreement.id}`);
+    },
   });
 
   if (comparisonQuery.isPending) {
@@ -299,9 +315,21 @@ export function RequestOffersPage({
                   </ul>
                 </div>
               )}
+              <button
+                className="primary-button"
+                type="button"
+                disabled={acceptMutation.isPending}
+                onClick={() => acceptMutation.mutate(offer.id)}
+              >
+                {acceptMutation.isPending ? "Accepting…" : "Accept Offer"}
+              </button>
             </li>
           ))}
         </ul>
+      )}
+
+      {acceptMutation.isError && (
+        <p className="error-message" role="alert">{acceptMutation.error.message}</p>
       )}
 
       <a className="text-link" href={`#/requests/${comparison.request.id}`}>
@@ -387,6 +415,11 @@ export function OfferDetailPage({
             {withdrawMutation.isPending ? "Withdrawing…" : "Withdraw Offer"}
           </button>
         )}
+        {offer.agreementId && (
+          <a className="primary-link" href={`#/agreements/${offer.agreementId}`}>
+            View Agreement
+          </a>
+        )}
         <a className="text-link" href="#/offers">Back to My Offers</a>
         <a className="text-link" href={`#/available-requests/${offer.request.id}`}>
           View Request
@@ -395,6 +428,96 @@ export function OfferDetailPage({
       {withdrawMutation.isError && (
         <p className="error-message" role="alert">{withdrawMutation.error.message}</p>
       )}
+    </section>
+  );
+}
+
+export function AgreementDetailPage({
+  accessToken,
+  agreementId,
+  participantId,
+}: {
+  accessToken: string;
+  agreementId: string;
+  participantId: string;
+}) {
+  const agreementQuery = useQuery({
+    queryKey: ["agreement", accessToken, agreementId],
+    queryFn: () => getAgreement(accessToken, agreementId),
+  });
+
+  if (agreementQuery.isPending) {
+    return <p className="status-message feature-page">Loading Agreement…</p>;
+  }
+
+  if (agreementQuery.isError) {
+    return (
+      <p className="error-message feature-page" role="alert">
+        {agreementQuery.error.message}
+      </p>
+    );
+  }
+
+  const agreement = agreementQuery.data;
+
+  return (
+    <section className="feature-page requests" aria-labelledby="agreement-heading">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">Offer accepted successfully</p>
+          <h1 id="agreement-heading">Agreement for {agreement.request.title}</h1>
+        </div>
+      </div>
+      <p className="request-description">{agreement.request.description}</p>
+      <p className="offer-comparison-guidance">
+        The selected Offer is Accepted, the Request is Matched, and any other Active
+        Offers on the Request were Closed.
+      </p>
+      <dl className="request-details">
+        <div><dt>Request status</dt><dd>{agreement.request.status}</dd></div>
+        <div><dt>Accepted Offer status</dt><dd>{agreement.acceptedOffer.status}</dd></div>
+        <div>
+          <dt>Request creator</dt>
+          <dd>{agreement.request.creator.displayName}</dd>
+        </div>
+        <div>
+          <dt>Offer creator</dt>
+          <dd>{agreement.acceptedOffer.creator.displayName}</dd>
+        </div>
+        {agreement.commonsAccountingUnits !== null && (
+          <div>
+            <dt>Commons accounting units</dt>
+            <dd>{agreement.commonsAccountingUnits}</dd>
+          </div>
+        )}
+      </dl>
+      {agreement.requestedContributions.length > 0 && (
+        <section aria-labelledby="agreement-contributions-heading">
+          <h2 id="agreement-contributions-heading" className="offer-terms-heading">
+            Requested contributions
+          </h2>
+          <ul className="offer-contribution-list">
+            {agreement.requestedContributions.map(contribution => (
+              <li key={contribution.capabilityId}>
+                <strong>{contribution.capabilityTextSnapshot}</strong>
+                <p>{contribution.description}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+      <div className="request-actions">
+        {participantId === agreement.request.creator.participantId && (
+          <a className="text-link" href={`#/requests/${agreement.request.id}`}>
+            View matched Request
+          </a>
+        )}
+        {participantId === agreement.acceptedOffer.creator.participantId && (
+          <a className="text-link" href={`#/offers/${agreement.acceptedOffer.id}`}>
+            View accepted Offer
+          </a>
+        )}
+      </div>
     </section>
   );
 }

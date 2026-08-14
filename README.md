@@ -160,7 +160,7 @@ Defines the protocol for cooperation between autonomous Commons, including Cross
 protocol/security.md
 ```
 
-Reserved for future protocol specifications covering identity, verification, abuse prevention, and related security concerns.
+Defines cross cutting protocol security principles including trusted Participant identity, resource ownership, Membership boundaries, server side authorization, IDOR protection, and Ledger integrity.
 
 ---
 

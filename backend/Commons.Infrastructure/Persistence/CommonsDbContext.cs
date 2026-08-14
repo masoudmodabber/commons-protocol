@@ -1,3 +1,4 @@
+using Commons.Domain.Agreements;
 using Commons.Domain.Participants;
 using Commons.Domain.Requests;
 using Commons.Domain.Offers;
@@ -20,6 +21,11 @@ public sealed class CommonsDbContext(DbContextOptions<CommonsDbContext> options)
     public DbSet<Offer> Offers => Set<Offer>();
 
     public DbSet<RequestedContribution> RequestedContributions => Set<RequestedContribution>();
+
+    public DbSet<Agreement> Agreements => Set<Agreement>();
+
+    public DbSet<AgreementRequestedContribution> AgreementRequestedContributions =>
+        Set<AgreementRequestedContribution>();
 
     public DbSet<CommonsEntity> Commons => Set<CommonsEntity>();
 

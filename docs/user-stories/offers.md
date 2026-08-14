@@ -247,4 +247,92 @@ Offers may differ in Commons accounting units, requested Capability contribution
 
 ## US 012 Accept an Offer
 
-...
+## US 012 Accept an Offer
+
+As a participant
+
+I want to accept one of the Active Offers made on my Request
+
+So that the selected proposal becomes a mutual Agreement between me and the Offer creator.
+
+### Acceptance Criteria
+
+1. Only an authenticated Participant can accept an Offer.
+
+2. Only the Participant who created the Request associated with the Offer can accept that Offer.
+
+3. Only an Active Offer can be accepted.
+
+4. A Withdrawn Offer cannot be accepted.
+
+5. A Closed Offer cannot be accepted.
+
+6. A Participant cannot accept an Offer belonging to another Participant's Request by changing an Offer identifier, Request identifier, or other client supplied value.
+
+7. Accepting an Offer changes the selected Offer status from Active to Accepted.
+
+8. Accepting an Offer changes every other Active Offer on the same Request to Closed.
+
+9. Offers that are already Withdrawn remain Withdrawn.
+
+10. Closed Offers remain stored and are not deleted.
+
+11. The Request is no longer available for new Offers after an Offer has been accepted.
+
+12. The Request status changes from Open to Matched when an Offer is accepted.
+
+13. Only one Offer may be Accepted for a Request.
+
+14. Once a Request has an Accepted Offer, another Offer for that Request cannot also be accepted.
+
+15. Accepting an Offer creates an Agreement between:
+    * the Participant who created the Request
+    * the Participant who created the accepted Offer
+
+16. The Agreement identifies:
+    * the Request
+    * the accepted Offer
+    * the Request creator
+    * the Offer creator
+
+17. The Agreement records the terms that were accepted.
+
+18. The Agreement includes the accepted Commons accounting units when the Offer contains them.
+
+19. The Agreement includes every accepted non unit contribution when the Offer contains them.
+
+20. Each accepted non unit contribution preserves the Capability text snapshot and description stored in the accepted Offer.
+
+21. The Agreement must not derive historical terms from the current live Capability.
+
+22. Accepting an Offer does not immediately change either Participant's Commons Balance.
+
+23. Accepting an Offer does not create a Ledger Entry.
+
+24. Accepting an Offer does not create a Completed Exchange.
+
+25. Accepting an Offer does not mean that the agreed work, goods, services, or other contributions have already been delivered.
+
+26. The Request creator can view the resulting Agreement after acceptance.
+
+27. The Offer creator can view the resulting Agreement after acceptance.
+
+28. A Participant who is not part of the Agreement cannot view it by changing an Agreement identifier or other client supplied value.
+
+29. Request ownership, Offer ownership, Offer status, and Participant identity must be obtained from trusted server side state.
+
+30. The client must not be able to choose the accepted Offer status, Request status, Agreement participants, or authoritative Agreement terms.
+
+31. Accepting an Offer must be performed as one consistent operation. The system must not leave the Request Matched while the Offer remains Active, or create an Agreement while the corresponding status transitions fail.
+
+32. Negotiating or modifying Agreement terms after acceptance is not part of this story.
+
+33. Completing the Exchange is not part of this story.
+
+34. Cancelling or terminating an Agreement is not part of this story.
+
+35. Dispute handling is not part of this story.
+
+36. The complete acceptance flow must be usable through the React frontend.
+
+37. The story is not complete if an Offer can only be accepted through API calls, Postman, curl, or direct database access.

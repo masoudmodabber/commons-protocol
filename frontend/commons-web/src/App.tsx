@@ -5,6 +5,7 @@ import { Authentication, JoinCommonsPage } from "./entry-pages";
 import { navigate, useHashPath } from "./navigation";
 import { CapabilitiesPage, ProfilePage } from "./participant-pages";
 import {
+  AgreementDetailPage,
   MyOffersPage,
   OfferDetailPage,
   RequestOffersPage,
@@ -89,6 +90,7 @@ function ParticipantApplication({
   const submitOfferMatch = /^\/available-requests\/([^/]+)\/offer$/.exec(path);
   const availableRequestMatch = /^\/available-requests\/([^/]+)$/.exec(path);
   const offerMatch = /^\/offers\/([^/]+)$/.exec(path);
+  const agreementMatch = /^\/agreements\/([^/]+)$/.exec(path);
   const requestOffersMatch = /^\/requests\/([^/]+)\/offers$/.exec(path);
   const requestMatch = /^\/requests\/([^/]+)$/.exec(path);
 
@@ -115,6 +117,14 @@ function ParticipantApplication({
     );
   } else if (offerMatch) {
     page = <OfferDetailPage accessToken={accessToken} offerId={offerMatch[1]} />;
+  } else if (agreementMatch) {
+    page = (
+      <AgreementDetailPage
+        accessToken={accessToken}
+        agreementId={agreementMatch[1]}
+        participantId={profile.id}
+      />
+    );
   } else if (requestOffersMatch) {
     page = <RequestOffersPage accessToken={accessToken} requestId={requestOffersMatch[1]} />;
   } else if (requestMatch) {

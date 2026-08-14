@@ -18,6 +18,11 @@ internal sealed class OfferConfiguration : IEntityTypeConfiguration<Offer>
             .HasConversion<string>()
             .IsRequired();
 
+        builder.HasIndex(offer => offer.RequestId)
+            .IsUnique()
+            .HasDatabaseName("IX_Offers_RequestId_Accepted")
+            .HasFilter("\"Status\" = 'Accepted'");
+
         builder.HasOne<Request>()
             .WithMany()
             .HasForeignKey(offer => offer.RequestId)

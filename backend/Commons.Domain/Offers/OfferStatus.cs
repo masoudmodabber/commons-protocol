@@ -3,5 +3,7 @@ namespace Commons.Domain.Offers;
 public enum OfferStatus
 {
     Active,
-    Withdrawn
+    Withdrawn,
+    Accepted,
+    Closed
 }

@@ -32,12 +32,13 @@ export interface RequestDetails {
   id: string;
   title: string;
   description: string;
-  status: "Open" | "Cancelled";
+  status: "Open" | "Cancelled" | "Matched";
   creator: {
     participantId: string;
     displayName: string;
   };
   homeCommons: CommonsSummary;
+  agreementId?: string | null;
 }
 
 export interface OfferSubmissionOptions {
@@ -53,7 +54,7 @@ export interface OfferSubmissionOptions {
 
 export interface OfferDetails {
   id: string;
-  status: "Active" | "Withdrawn";
+  status: "Active" | "Withdrawn" | "Accepted" | "Closed";
   commonsAccountingUnits: number | null;
   creator: { participantId: string; displayName: string };
   request: OfferSubmissionOptions["request"];
@@ -62,11 +63,30 @@ export interface OfferDetails {
     capabilityTextSnapshot: string;
     description: string;
   }>;
+  agreementId?: string | null;
 }
 
 export interface RequestOfferComparison {
   request: OfferSubmissionOptions["request"];
   offers: OfferDetails[];
+}
+
+export interface AgreementDetails {
+  id: string;
+  request: {
+    id: string;
+    title: string;
+    description: string;
+    status: "Matched";
+    creator: { participantId: string; displayName: string };
+  };
+  acceptedOffer: {
+    id: string;
+    status: "Accepted";
+    creator: { participantId: string; displayName: string };
+  };
+  commonsAccountingUnits: number | null;
+  requestedContributions: OfferDetails["requestedContributions"];
 }
 
 interface AccessTokenResponse {
@@ -251,6 +271,21 @@ export function getRequestOffers(
     {},
     accessToken,
   );
+}
+
+export function acceptOffer(accessToken: string, offerId: string): Promise<AgreementDetails> {
+  return request<AgreementDetails>(
+    `/api/offers/${offerId}/accept`,
+    { method: "POST" },
+    accessToken,
+  );
+}
+
+export function getAgreement(
+  accessToken: string,
+  agreementId: string,
+): Promise<AgreementDetails> {
+  return request<AgreementDetails>(`/api/agreements/${agreementId}`, {}, accessToken);
 }
 
 export function editRequest(

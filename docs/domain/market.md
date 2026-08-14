@@ -55,17 +55,23 @@ Creating a Request does not create an obligation for anyone to respond.
 
 ## Request Lifecycle
 
-A Request may move through states such as:
+A Request begins as Open.
 
-* Open.
-* Under negotiation.
-* Agreed.
-* Completed.
-* Cancelled.
-* Expired.
-* Disputed.
+While a Request is Open:
 
-The exact technical representation of these states belongs in the implementation design rather than this document.
+* Other Participants in the same Commons may submit Offers.
+* The Request creator may edit or cancel the Request according to the applicable Request rules.
+* The Request creator may choose whether to accept any Active Offer.
+
+When the Request creator accepts an Active Offer, the Request becomes Matched.
+
+A Matched Request is no longer available for new Offers.
+
+A Matched Request does not mean that the agreed Exchange has been completed.
+
+Later protocol stages may introduce additional lifecycle behaviour related to completion, cancellation, dispute, or other outcomes.
+
+The exact lifecycle beyond the currently defined states remains subject to further protocol design.
 
 ---
 
@@ -121,7 +127,21 @@ The lowest numerical value does not automatically win, and an Offer does not nee
 
 The requester chooses which Offer best suits their needs.
 
-An Offer may be accepted, rejected, withdrawn, replaced, or left unanswered.
+An Offer begins as Active.
+
+The Participant who created an Active Offer may withdraw it.
+
+When the Request creator accepts one Active Offer:
+
+* The selected Offer becomes Accepted.
+* Other Active Offers on the same Request become Closed.
+* Offers that were already Withdrawn remain Withdrawn.
+
+Withdrawn and Closed Offers remain part of the historical record rather than being deleted.
+
+Accepted, Closed, and Withdrawn Offers do not return to Active.
+
+Future Offer revision, counteroffer, rejection, and negotiation behaviour remains to be designed.
 
 Submitting an Offer does not change either Participant's Commons Balance.
 
@@ -129,9 +149,9 @@ Submitting an Offer does not change either Participant's Commons Balance.
 
 # Negotiation
 
-Negotiation is the voluntary process through which Participants determine the terms of an exchange.
+Negotiation is the voluntary process through which Participants may clarify or revise proposed exchange terms.
 
-Participants may negotiate:
+Negotiation may involve:
 
 * What each Participant will provide.
 * Commons accounting value when it is part of the exchange.
@@ -145,19 +165,34 @@ Participants may negotiate:
 
 The protocol does not calculate or enforce a correct price or exchange value.
 
-The application should not currently suggest exchange values based on historical exchanges.
+The application should not currently suggest exchange values based on historical Exchanges.
 
-Whether historical exchange information should ever be shown as negotiation context remains an open question.
+Whether historical Exchange information should ever be shown as negotiation context remains an open question.
 
-Negotiation ends when both Participants accept the same terms or decide not to proceed.
+The exact negotiation model remains to be designed.
+
+In particular, future protocol design must distinguish between:
+
+* Clarifying an Offer without changing its terms.
+* Revising an Offer before acceptance.
+* Counteroffers or replacement Offers.
+* Renegotiating or amending terms after an Agreement has already been created.
+
+These behaviours should not be treated as equivalent unless explicitly defined by a later protocol decision.
 
 ---
 
 # Agreement
 
-An Agreement is created when a requester accepts an Offer and both Participants accept the final terms.
+An Agreement is created when the creator of a Request accepts an Active Offer.
 
-An Agreement records the mutual commitment between the Participants.
+Submitting the Offer represents the Offer creator's proposal of those terms.
+
+Accepting the Offer represents the Request creator's acceptance of the same terms.
+
+At that point the proposal becomes a mutual Agreement between the two Participants.
+
+An Agreement records the terms that were accepted at the time the Offer was accepted.
 
 An Agreement should identify:
 
@@ -171,15 +206,17 @@ An Agreement should identify:
 * Any agreed conditions.
 * The Commons in which the Agreement exists.
 
+Terms copied into the Agreement must preserve the accepted terms rather than depend on later changes to related Participant data such as Capabilities.
+
 An Agreement does not immediately update Commons Balances.
 
 If the Agreement uses Commons accounting units, balances change only after the Exchange is recognised as completed or after a Dispute produces a final outcome.
 
 If the Agreement is a direct exchange between the Participants, completion does not automatically create a Commons Balance change.
 
-An Agreement may be cancelled only according to terms accepted by both Participants or through a Dispute process.
+Creating an Agreement does not mean that the agreed work, goods, services, resources, or other contributions have already been delivered.
 
-The exact cancellation rules remain unresolved.
+Agreement modification, renegotiation, cancellation, and termination rules remain unresolved and must be defined separately before implementation.
 
 ---
 

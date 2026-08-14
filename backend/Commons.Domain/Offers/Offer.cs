@@ -79,6 +79,24 @@ public sealed class Offer
 
         Status = OfferStatus.Withdrawn;
     }
+
+    internal void Accept()
+    {
+        if (Status != OfferStatus.Active)
+        {
+            throw new OfferNotActiveException("Only an Active Offer can be accepted.");
+        }
+
+        Status = OfferStatus.Accepted;
+    }
+
+    internal void CloseBecauseAnotherOfferWasAccepted()
+    {
+        if (Status == OfferStatus.Active)
+        {
+            Status = OfferStatus.Closed;
+        }
+    }
 }
 
 public sealed record RequestedContributionSelection(

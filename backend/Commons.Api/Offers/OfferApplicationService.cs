@@ -300,7 +300,11 @@ public sealed class OfferApplicationService(CommonsDbContext dbContext)
                     contribution.CapabilityId,
                     contribution.CapabilityTextSnapshot,
                     contribution.Description))
-                .ToList()));
+                .ToList(),
+            dbContext.Agreements
+                .Where(agreement => agreement.AcceptedOfferId == offer.Id)
+                .Select(agreement => (Guid?)agreement.Id)
+                .SingleOrDefault()));
     }
 
     private sealed record AvailableRequestContext(
@@ -326,7 +330,8 @@ public sealed record OfferDetails(
     long? CommonsAccountingUnits,
     OfferCreatorSummary Creator,
     OfferRequestSummary Request,
-    IReadOnlyList<RequestedContributionDetails> RequestedContributions);
+    IReadOnlyList<RequestedContributionDetails> RequestedContributions,
+    Guid? AgreementId);
 
 public sealed record OfferCreatorSummary(Guid ParticipantId, string DisplayName);
 

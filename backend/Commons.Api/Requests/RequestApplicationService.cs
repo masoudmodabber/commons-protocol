@@ -169,7 +169,11 @@ public sealed class RequestApplicationService(CommonsDbContext dbContext)
                     dbContext.Commons
                         .Where(commons => commons.Id == request.HomeCommonsId)
                         .Select(commons => commons.Name)
-                        .Single())));
+                        .Single()),
+                dbContext.Agreements
+                    .Where(agreement => agreement.RequestId == request.Id)
+                    .Select(agreement => (Guid?)agreement.Id)
+                    .SingleOrDefault()));
     }
 
     public async Task<EditRequestResult> EditAsync(
@@ -255,7 +259,8 @@ public sealed record RequestDetails(
     string Description,
     string Status,
     RequestCreatorSummary Creator,
-    RequestCommonsSummary HomeCommons);
+    RequestCommonsSummary HomeCommons,
+    Guid? AgreementId);
 
 public sealed record RequestCreatorSummary(Guid ParticipantId, string DisplayName);
 

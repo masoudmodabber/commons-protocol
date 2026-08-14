@@ -2,18 +2,20 @@
 
 > Working Draft
 
-## US 012 View active Agreements
-
-...
-
----
-
-## US 013 Negotiate an Agreement
+## US 013 View my Agreements
 
 As a participant
 
-I want to negotiate the terms of an Agreement
+I want to view the Agreements I am part of
 
-So that both participants can voluntarily agree on what each will provide.
+So that I can see the mutual commitments created from accepted Offers.
 
-Negotiation may include Commons accounting units, direct exchange terms, scope, timing, materials, delivery, and other conditions.
+---
+
+## Future Agreement Behaviour
+
+Agreement modification, renegotiation, cancellation, termination, and other lifecycle behaviour remain to be designed.
+
+Clarification messaging and Offer negotiation before acceptance are tracked separately as deferred Offer behaviour.
+
+When these behaviours are selected for implementation, they should first be discussed and converted into explicit user stories with acceptance criteria.
