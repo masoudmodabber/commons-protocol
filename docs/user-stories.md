@@ -44,15 +44,31 @@ So that I am no longer an active participant.
 
 ---
 
+## US-023 Manage what I can provide
+
+As a participant
+
+I want to describe the goods, services, skills, resources, or assistance I may be able to provide
+
+So that other participants can discover what is available within the Commons.
+
+Listing something I can provide does not create a standing Offer, price, statement of current availability, or obligation to trade.
+
+---
+
 # Epic: Requests
 
 ## US-004 Create a Request
 
 As a participant
 
-I want to create a Request
+I want to create a Request describing what I need
 
 So that others can offer to help.
+
+A Request does not need to state what I will provide in return.
+
+Participants responding to the Request propose their own terms through Offers.
 
 ---
 
@@ -84,7 +100,15 @@ So that others can offer to help.
 
 ## US-009 Submit an Offer
 
-...
+As a participant
+
+I want to submit an Offer in response to a Request
+
+So that I can propose what I will provide and what I want in return.
+
+An Offer may ask for Commons accounting units or a direct contribution such as goods, services, resources, or other mutually accepted assistance.
+
+The application does not determine or suggest the correct value.
 
 ---
 
@@ -96,7 +120,13 @@ So that others can offer to help.
 
 ## US-011 Compare Offers
 
-...
+As a participant
+
+I want to compare the different Offers made on my Request
+
+So that I can choose the terms that best suit me.
+
+Offers may differ in what is requested in return and do not need to be directly comparable by a single numerical value.
 
 ---
 
@@ -116,7 +146,13 @@ So that others can offer to help.
 
 ## US-014 Negotiate an Agreement
 
-...
+As a participant
+
+I want to negotiate the terms of an Agreement
+
+So that both participants can voluntarily agree on what each will provide.
+
+Negotiation may include Commons accounting units, direct exchange terms, scope, timing, materials, delivery, and other conditions.
 
 ---
 
@@ -130,7 +166,13 @@ So that others can offer to help.
 
 ## US-016 Confirm completion
 
-...
+As a participant
+
+I want to confirm that the agreed Exchange has been completed
+
+So that the completed activity becomes part of our participation history and any required Commons Balance changes can be recorded.
+
+A direct Exchange does not automatically change Commons Balances.
 
 ---
 
@@ -150,7 +192,11 @@ So that others can offer to help.
 
 ## US-019 View completed Exchanges
 
-...
+As a participant
+
+I want to view my completed Exchanges
+
+So that I can see my factual participation history, including Exchanges that did not change my Commons Balance.
 
 ---
 

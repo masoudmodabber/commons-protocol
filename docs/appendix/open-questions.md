@@ -13,6 +13,17 @@ The following questions remain unresolved and should guide future iterations of 
 * Should balances have practical or protocol limits?
 * How should long term innovation be rewarded?
 * How can capital intensive projects operate without central funding or accumulated investment power?
+* Should historical Completed Exchanges ever be shown as context during negotiation?
+* If historical exchange information is shown, how can the protocol avoid creating price anchoring?
+* When is there enough historical data for comparisons to be meaningful?
+* How should the system determine whether two Exchanges are genuinely comparable?
+* Could historical exchange information gradually behave like protocol determined pricing even if it is presented only as context?
+
+---
+
+# Ledger and Exchange History
+
+* Should direct Exchanges that produce no Commons Balance change appear in the Commons Ledger, or only in factual participation history?
 
 ---
 
@@ -51,3 +62,4 @@ The following questions remain unresolved and should guide future iterations of 
 # Terminology
 
 * What should the accounting unit be called?
+* Is Capability the right protocol term for something a Participant may be able to provide?

@@ -56,15 +56,15 @@ The Commons Protocol is **not**:
 Participants remain free to:
 
 * Own their tools.
-* Offer any service.
+* Offer any service, good, skill, resource, or other voluntary contribution.
 * Refuse any trade.
-* Negotiate any mutually acceptable value.
+* Negotiate any mutually acceptable exchange.
 * Compete with other providers.
 * Choose whom they trade with.
 
 The protocol never assigns work.
 
-The protocol never fixes prices.
+The protocol never fixes prices or exchange values.
 
 People do.
 
@@ -83,9 +83,9 @@ Money acts as:
 * A unit of accounting.
 * A store of power.
 
-The Commons Protocol keeps the accounting.
+The Commons Protocol keeps the ability to account for reciprocal contribution.
 
-It replaces the store of power with a living record of reciprocal contribution.
+It replaces the store of power with a living record of a Participant's reciprocal relationship with their Commons.
 
 Instead of asking:
 
@@ -94,6 +94,54 @@ Instead of asking:
 the system asks:
 
 > "What is your current relationship with your Commons?"
+
+The Commons Balance is not intended to mediate every exchange.
+
+Participants remain free to exchange directly whenever they can agree on something each wants.
+
+The reciprocal Ledger exists to make exchange possible when direct reciprocity does not align.
+
+---
+
+# Direct Reciprocity and Commons Reciprocity
+
+The protocol supports two complementary forms of local exchange.
+
+## Direct Reciprocity
+
+Participants may exchange directly with one another.
+
+For example:
+
+> Alice needs carpentry work.
+
+> Bob needs eggs.
+
+If Alice has eggs and Bob can provide carpentry, they may agree directly:
+
+> Bob provides the carpentry and Alice provides the eggs.
+
+No Commons Balance change is required simply because the Exchange occurred.
+
+The terms belong entirely to the Participants.
+
+## Commons Reciprocity
+
+Direct reciprocity does not always work.
+
+Alice may need carpentry while Bob wants something Alice cannot provide.
+
+In that situation, Bob can still help Alice in return for an agreed Commons accounting value.
+
+Bob's Commons Balance increases and Alice's decreases when the Exchange is completed and recognised.
+
+Bob can later receive something he needs from another Participant in the Commons.
+
+The Commons Balance therefore breaks the requirement that the person receiving help must personally possess whatever the provider currently wants.
+
+Direct reciprocity and Commons reciprocity are both voluntary.
+
+The protocol does not require or prefer one over the other.
 
 ---
 
@@ -107,10 +155,10 @@ A Home Commons is the community responsible for maintaining a participant's memb
 
 Each Commons decides its own:
 
-* Membership
-* Culture
-* Governance
-* Priorities
+* Membership.
+* Culture.
+* Governance.
+* Priorities.
 
 No central authority governs all Commons.
 
@@ -168,21 +216,21 @@ Cross Commons cooperation therefore emerges through voluntary trust rather than 
 
 The Commons Balance is intentionally **not** called:
 
-* Money
-* Currency
-* Credits
-* Points
-* Reputation
+* Money.
+* Currency.
+* Credits.
+* Points.
+* Reputation.
 
 It represents the reciprocal relationship between a participant and their Home Commons.
 
 A positive balance means:
 
-> The community has received more from you than you have received from it.
+> The community has received more from you than you have received from it through Commons reciprocity.
 
 A negative balance means:
 
-> You have received more from the community than you have contributed back.
+> You have received more from the community than you have contributed back through Commons reciprocity.
 
 One defining sentence is:
 
@@ -200,7 +248,9 @@ It cannot earn interest.
 
 It grants no authority.
 
-It is simply a record of contribution.
+It is simply a record of reciprocal contribution.
+
+Direct Exchanges do not need to change the Commons Balance.
 
 ---
 
@@ -210,35 +260,60 @@ Nobody is obligated to help anyone.
 
 Every exchange is voluntary.
 
-Alice posts a request.
+Alice posts a Request.
 
 Bob may ignore it.
 
-Charlie may offer to do it.
+Charlie may Offer to do it for 30 Commons units.
 
-David may undercut Charlie.
+David may Offer to do it for eggs.
 
-Alice chooses whichever offer she prefers.
+Another Participant may propose a different service or contribution in return.
+
+Alice chooses whichever Offer she prefers.
 
 Exactly as in any free market.
 
-Once both parties voluntarily agree, the Commons records the resulting reciprocal relationship.
+The market determines the terms.
 
-The market determines value.
-
-The protocol records it.
+The protocol records the parts of those terms that belong to the Commons Protocol.
 
 ---
 
-# Prices
+# Discovering What a Commons Can Provide
 
-Prices are never fixed.
+Participants may describe what they can potentially provide.
+
+For example:
+
+* Carpentry.
+* Eggs.
+* Computer hardware repair.
+* Gardening.
+* Transport.
+* Teaching.
+
+This information makes the productive capacity of the Commons easier to discover, especially while a Commons is still small.
+
+Listing something does not mean the Participant is currently available.
+
+It does not establish a price.
+
+It does not create a standing Offer.
+
+It does not create an obligation to trade.
+
+Specific exchange terms arise only when Participants make and negotiate Offers.
+
+---
+
+# Prices and Exchange Values
+
+Prices and exchange values are never fixed by the protocol.
 
 Each Commons develops its own economy naturally.
 
-Supply and demand determine value.
-
-Historical trades may help participants estimate reasonable values, but they never determine future prices.
+Supply, demand, preferences, scarcity, and negotiation determine what Participants accept.
 
 Two neighboring Commons may value the same work differently.
 
@@ -248,22 +323,26 @@ That is not a flaw.
 
 It is a natural consequence of free markets operating under different local conditions.
 
+The application should not currently suggest exchange values based on historical exchanges.
+
+Whether historical exchange information should ever be presented as negotiation context remains an open question.
+
 ---
 
 # What the Balance Does Not Give You
 
 A high Commons Balance provides none of the following:
 
-* Political power
-* Voting rights
-* Ownership
-* Authority
-* Interest
-* Profit
-* Investment
-* Conversion into dollars
+* Political power.
+* Voting rights.
+* Ownership.
+* Authority.
+* Interest.
+* Profit.
+* Investment.
+* Conversion into dollars.
 
-It simply represents a stronger history of contribution.
+It simply represents a stronger history of reciprocal contribution through the Commons Ledger.
 
 Nothing more.
 
@@ -291,12 +370,14 @@ The first implementation should remain intentionally simple.
 Members can:
 
 1. Establish or join a geographic Commons.
-2. Post requests.
-3. Offer services.
-4. Negotiate value.
-5. Complete work.
-6. Confirm completion.
-7. Update their Home Commons balances.
+2. Describe what they can provide.
+3. Post Requests.
+4. Submit Offers proposing Commons reciprocity or direct reciprocity.
+5. Negotiate exchange terms.
+6. Complete Exchanges.
+7. Confirm completion.
+8. Record Commons Balance changes when an Exchange uses Commons reciprocity.
+9. Build factual participation history.
 
 Future versions will support Cross Commons exchanges between participants whose Commons have established Reciprocity Agreements.
 
@@ -343,7 +424,7 @@ The long term goal is a world of small, autonomous geographic Commons.
 
 The protocol aims to make political and economic structures progressively smaller, bringing decision making closer to the people affected by it.
 
-During the early stages of adoption, a Commons may cover a relatively large geographic area. This helps create enough activity for people to find requests, offers, and trading partners.
+During the early stages of adoption, a Commons may cover a relatively large geographic area. This helps create enough activity for people to find requests, offers, capabilities, and trading partners.
 
 As participation grows, larger Commons should naturally divide into smaller autonomous Commons.
 
@@ -396,6 +477,8 @@ The protocol encourages strong local economies while allowing wider cooperation 
 * Preserve free markets.
 * Remove concentrated economic power.
 * Voluntary exchange.
+* Direct reciprocity where Participants choose it.
+* Commons reciprocity when direct needs do not align.
 * Decentralization.
 * Transparency.
 * Reciprocity.

@@ -19,18 +19,36 @@ The MVP should include:
 * Participants.
 * Commons.
 * Memberships.
+* Participant Capabilities describing what a Participant can provide.
 * Commons Balances.
 * Requests.
 * Offers.
+* Direct exchange Offers.
+* Commons Balance Offers.
 * Negotiation.
 * Agreements.
 * Completion confirmation.
 * Completed Exchanges.
-* Ledger Entries.
+* Ledger Entries for recognised Commons Balance changes.
 * Basic Profiles.
+
+The MVP should allow a Participant to list goods, services, skills, resources, or other contributions they may be able to provide.
+
+These Capabilities are discoverable information only.
+
+They are not standing Offers, prices, statements of current availability, or obligations to trade.
+
+When responding to a Request, a Participant may propose what they want in return.
+
+For example, an Offer may request Commons accounting units or a direct contribution such as goods or services.
+
+The requester remains free to accept, reject, or negotiate any Offer.
+
+The application should not currently suggest exchange values based on historical exchanges.
 
 The MVP may initially exclude:
 
+* Historical value suggestions or pricing guidance.
 * Disputes.
 * Juries.
 * Reciprocity Agreements.
@@ -48,4 +66,4 @@ Excluding these concepts from the MVP does not mean they are rejected.
 
 It means they are not required to test the first core hypothesis:
 
-> Can a community coordinate everyday voluntary exchange through a reciprocal Ledger instead of conventional money?
+> Can a community coordinate everyday voluntary exchange through direct reciprocity and a shared reciprocal Ledger instead of relying entirely on conventional money?

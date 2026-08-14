@@ -6,7 +6,7 @@
 
 This document defines how the Commons Protocol records reciprocal relationships.
 
-It describes the Ledger, the events recorded within it, how completed exchanges become part of permanent history, and how factual participation history allows Participants to form trust without relying on reputation scores.
+It describes the Ledger, the events recorded within it, how Commons Balance changes become part of permanent history, and how factual participation history allows Participants to form trust without relying on reputation scores.
 
 It intentionally avoids implementation details such as databases, APIs, programming languages, authentication providers, and user interface design.
 
@@ -22,9 +22,9 @@ It provides a transparent history of the events that explain every Commons Balan
 
 The Ledger may record events such as:
 
-* A Completed Exchange.
-* A reversed Exchange.
-* A Dispute outcome.
+* A Completed Exchange that uses Commons accounting units.
+* A reversed Exchange that previously affected Commons Balances.
+* A Dispute outcome that affects Commons Balances.
 * A correction approved through a valid process.
 * Recognition of a Cross Commons Exchange under a Reciprocity Agreement.
 
@@ -38,6 +38,10 @@ Past entries should never be silently changed or deleted.
 
 When a correction is necessary, a new Ledger Entry records the correction while preserving the original history.
 
+Direct Exchanges that do not affect Commons Balances still form part of factual participation history.
+
+Whether those direct Exchanges should also appear in the Commons Ledger remains unresolved.
+
 The exact level of public visibility remains unresolved because transparency must be balanced against personal privacy.
 
 ---
@@ -46,7 +50,7 @@ The exact level of public visibility remains unresolved because transparency mus
 
 A Ledger Entry is a recognised event that changes or explains one or more Commons Balances.
 
-For a local Exchange:
+For a local Exchange using Commons accounting units:
 
 > Alice receives help worth 20 units from Bob.
 
@@ -71,6 +75,8 @@ A Ledger Entry is not a payment moving between stored accounts.
 
 It is a change in recorded reciprocal relationships.
 
+A direct Exchange does not need a Ledger Entry merely because it has been completed.
+
 ---
 
 # Completed Exchange
@@ -83,11 +89,16 @@ It links together:
 * The accepted Offer.
 * The final Agreement.
 * The Participants.
-* The agreed value.
+* What each Participant agreed to provide.
+* Any Commons accounting value included in the Agreement.
 * Completion confirmations.
-* The resulting Ledger Entries.
+* Any resulting Ledger Entries.
 
 A Completed Exchange becomes part of the factual participation history of both Participants.
+
+A Completed Exchange may exist without changing either Participant's Commons Balance.
+
+For example, if Bob performs plumbing work for Alice in direct exchange for eggs, the Exchange can be recorded as completed participation history without creating a Commons Balance adjustment.
 
 It should not create stars, ratings, badges, or popularity scores.
 
@@ -101,7 +112,7 @@ A Profile may show:
 
 * The Participant's chosen name.
 * A description.
-* Relevant skills or interests.
+* What the Participant can provide.
 * Home Commons.
 * Completed Exchanges.
 * Current Requests.
@@ -109,6 +120,12 @@ A Profile may show:
 * Participation history.
 * Dispute outcomes where appropriate.
 * Verification information where appropriate.
+
+What a Participant can provide may include goods, services, skills, resources, knowledge, transport, or other useful contributions.
+
+This information does not represent a standing Offer, a price, current availability, or an obligation to trade.
+
+Specific exchange terms belong to Offers and Agreements.
 
 A Profile should not contain:
 
@@ -133,7 +150,7 @@ Trust is not represented by one calculated score.
 Participants form trust through factual information such as:
 
 * Previous completed Exchanges.
-* The type of work previously performed.
+* The type of work, goods, services, or other contributions previously provided.
 * Whether Agreements were completed.
 * Whether Disputes occurred.
 * How Disputes were resolved.
