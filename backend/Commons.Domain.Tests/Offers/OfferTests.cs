@@ -8,9 +8,9 @@ public sealed class OfferTests
     [Fact]
     public void Participant_can_submit_offer_requesting_positive_whole_units_only()
     {
-        var (creator, request) = CreateAvailableRequest();
+        var (creator, request, requestCreator) = CreateAvailableRequest();
 
-        var offer = creator.SubmitOffer(request, 30, []);
+        var offer = creator.SubmitOffer(request, requestCreator, 30, []);
 
         offer.RequestId.Should().Be(request.Id);
         offer.CreatorParticipantId.Should().Be(creator.Id);
@@ -26,10 +26,10 @@ public sealed class OfferTests
         var capability = requester.AddCapability("Fresh Eggs");
         var offer = creator.SubmitOffer(
             request,
+            requester,
             12,
-            [new RequestedContributionTerms(
+            [new RequestedContributionSelection(
                 capability.Id,
-                capability.Text,
                 "Two dozen eggs")]);
 
         offer.Withdraw();
@@ -51,8 +51,8 @@ public sealed class OfferTests
     [Fact]
     public void Withdrawn_offer_cannot_be_withdrawn_again_or_return_to_active()
     {
-        var (creator, request) = CreateAvailableRequest();
-        var offer = creator.SubmitOffer(request, 10, []);
+        var (creator, request, requestCreator) = CreateAvailableRequest();
+        var offer = creator.SubmitOffer(request, requestCreator, 10, []);
         offer.Withdraw();
 
         var act = offer.Withdraw;
@@ -71,12 +71,12 @@ public sealed class OfferTests
 
         var offer = creator.SubmitOffer(
             request,
+            requester,
             15,
             [
-                new RequestedContributionTerms(eggs.Id, eggs.Text, "  20 eggs  "),
-                new RequestedContributionTerms(
+                new RequestedContributionSelection(eggs.Id, "  20 eggs  "),
+                new RequestedContributionSelection(
                     transport.Id,
-                    transport.Text,
                     "  Airport transport on Saturday  ")
             ]);
 
@@ -107,10 +107,10 @@ public sealed class OfferTests
 
         var offer = creator.SubmitOffer(
             request,
+            requester,
             null,
-            [new RequestedContributionTerms(
+            [new RequestedContributionSelection(
                 capability.Id,
-                capability.Text,
                 "Two hours clearing weeds")]);
 
         offer.CommonsAccountingUnits.Should().BeNull();
@@ -118,11 +118,110 @@ public sealed class OfferTests
     }
 
     [Fact]
+    public void Offer_snapshots_the_trusted_request_creator_capability_text()
+    {
+        var (creator, request, requester) = CreateAvailableRequestWithRequester();
+        var capability = requester.AddCapability("  Fresh Eggs  ");
+
+        var offer = creator.SubmitOffer(
+            request,
+            requester,
+            null,
+            [new RequestedContributionSelection(capability.Id, "Two dozen eggs")]);
+
+        offer.CreatorParticipantId.Should().Be(creator.Id);
+        offer.CreatorParticipantId.Should().NotBe(requester.Id);
+        offer.RequestedContributions.Should().ContainSingle().Which.Should().BeEquivalentTo(
+            new
+            {
+                CapabilityId = capability.Id,
+                CapabilityTextSnapshot = "Fresh Eggs",
+                Description = "Two dozen eggs"
+            },
+            options => options.ExcludingMissingMembers());
+    }
+
+    [Fact]
+    public void Offer_rejects_capability_belonging_to_another_participant()
+    {
+        var (creator, request, requester) = CreateAvailableRequestWithRequester();
+        var otherParticipant = CreateParticipant("user-3", requester.Membership.HomeCommonsId);
+        var otherCapability = otherParticipant.AddCapability("Transport");
+
+        var act = () => creator.SubmitOffer(
+            request,
+            requester,
+            null,
+            [new RequestedContributionSelection(otherCapability.Id, "Airport trip")]);
+
+        act.Should().Throw<DomainRuleViolationException>()
+            .WithMessage("A requested Capability must be currently listed by the Request creator.");
+    }
+
+    [Fact]
+    public void Offer_rejects_capability_that_is_no_longer_current()
+    {
+        var (creator, request, requester) = CreateAvailableRequestWithRequester();
+        var removedCapability = requester.AddCapability("Fresh Eggs");
+        requester.RemoveCapability(removedCapability.Id).Should().BeTrue();
+
+        var act = () => creator.SubmitOffer(
+            request,
+            requester,
+            null,
+            [new RequestedContributionSelection(removedCapability.Id, "Two dozen eggs")]);
+
+        act.Should().Throw<DomainRuleViolationException>()
+            .WithMessage("A requested Capability must be currently listed by the Request creator.");
+    }
+
+    [Fact]
+    public void Offer_rejects_missing_capability()
+    {
+        var (creator, request, requester) = CreateAvailableRequestWithRequester();
+
+        var act = () => creator.SubmitOffer(
+            request,
+            requester,
+            null,
+            [new RequestedContributionSelection(Guid.NewGuid(), "Requested terms")]);
+
+        act.Should().Throw<DomainRuleViolationException>()
+            .WithMessage("A requested Capability must be currently listed by the Request creator.");
+    }
+
+    [Fact]
+    public void Offer_rejects_participant_who_did_not_create_the_request_as_request_creator()
+    {
+        var (creator, request, requester) = CreateAvailableRequestWithRequester();
+        var otherParticipant = CreateParticipant("user-3", requester.Membership.HomeCommonsId);
+
+        var act = () => creator.SubmitOffer(request, otherParticipant, 10, []);
+
+        act.Should().Throw<DomainRuleViolationException>()
+            .WithMessage(
+                "Requested contributions must come from the Participant who created the Request.");
+    }
+
+    [Fact]
+    public void Contribution_selection_cannot_supply_a_capability_snapshot()
+    {
+        typeof(RequestedContributionSelection)
+            .GetProperties()
+            .Select(property => property.Name)
+            .Should().Equal(
+                nameof(RequestedContributionSelection.CapabilityId),
+                nameof(RequestedContributionSelection.Description));
+        typeof(Offer).Assembly.GetExportedTypes()
+            .Should().NotContain(type => type.Name == "RequestedContributionTerms");
+    }
+
+    [Fact]
     public void Offer_rejects_no_requested_return()
     {
-        var (creator, request) = CreateAvailableRequest();
+        var (creator, request, requestCreator) = CreateAvailableRequest();
 
-        var act = () => creator.SubmitOffer(request, null, []);
+        var act = () => creator.SubmitOffer(request, requestCreator, null, []);
 
         act.Should().Throw<DomainRuleViolationException>()
             .WithMessage("An Offer must request Commons accounting units or at least one contribution.");
@@ -133,9 +232,9 @@ public sealed class OfferTests
     [InlineData(-1)]
     public void Offer_rejects_non_positive_units(long units)
     {
-        var (creator, request) = CreateAvailableRequest();
+        var (creator, request, requestCreator) = CreateAvailableRequest();
 
-        var act = () => creator.SubmitOffer(request, units, []);
+        var act = () => creator.SubmitOffer(request, requestCreator, units, []);
 
         act.Should().Throw<DomainRuleViolationException>()
             .WithMessage("Commons accounting units must be a positive whole number.");
@@ -146,12 +245,13 @@ public sealed class OfferTests
     {
         var (creator, request, requester) = CreateAvailableRequestWithRequester();
         var capability = requester.AddCapability("Eggs");
-        var terms = new RequestedContributionTerms(
-            capability.Id,
-            capability.Text,
-            "20 eggs");
+        var selection = new RequestedContributionSelection(capability.Id, "20 eggs");
 
-        var act = () => creator.SubmitOffer(request, null, [terms, terms]);
+        var act = () => creator.SubmitOffer(
+            request,
+            requester,
+            null,
+            [selection, selection]);
 
         act.Should().Throw<DomainRuleViolationException>()
             .WithMessage("The same Capability cannot appear more than once in an Offer.");
@@ -167,8 +267,9 @@ public sealed class OfferTests
 
         var act = () => creator.SubmitOffer(
             request,
+            requester,
             null,
-            [new RequestedContributionTerms(capability.Id, capability.Text, description)]);
+            [new RequestedContributionSelection(capability.Id, description)]);
 
         act.Should().Throw<DomainRuleViolationException>()
             .WithMessage("A requested contribution requires a description.");
@@ -180,7 +281,7 @@ public sealed class OfferTests
         var participant = CreateParticipant("user-1", Guid.NewGuid());
         var request = participant.CreateRequest("A need", "A description");
 
-        var act = () => participant.SubmitOffer(request, 10, []);
+        var act = () => participant.SubmitOffer(request, participant, 10, []);
 
         act.Should().Throw<DomainRuleViolationException>()
             .WithMessage("A Participant cannot submit an Offer on their own Request.");
@@ -193,7 +294,7 @@ public sealed class OfferTests
         var requester = CreateParticipant("user-2", Guid.NewGuid());
         var request = requester.CreateRequest("A need", "A description");
 
-        var act = () => creator.SubmitOffer(request, 10, []);
+        var act = () => creator.SubmitOffer(request, requester, 10, []);
 
         act.Should().Throw<DomainRuleViolationException>()
             .WithMessage("An Offer can only be submitted for a Request in the Participant's Home Commons.");
@@ -202,20 +303,22 @@ public sealed class OfferTests
     [Fact]
     public void Participant_cannot_submit_offer_on_cancelled_request()
     {
-        var (creator, request) = CreateAvailableRequest();
+        var (creator, request, requestCreator) = CreateAvailableRequest();
         request.Cancel();
 
-        var act = () => creator.SubmitOffer(request, 10, []);
+        var act = () => creator.SubmitOffer(request, requestCreator, 10, []);
 
         act.Should().Throw<DomainRuleViolationException>()
             .WithMessage("An Offer can only be submitted for an Open Request.");
     }
 
-    private static (Participant Creator, Commons.Domain.Requests.Request Request)
+    private static (
+        Participant Creator,
+        Commons.Domain.Requests.Request Request,
+        Participant RequestCreator)
         CreateAvailableRequest()
     {
-        var (creator, request, _) = CreateAvailableRequestWithRequester();
-        return (creator, request);
+        return CreateAvailableRequestWithRequester();
     }
 
     private static (

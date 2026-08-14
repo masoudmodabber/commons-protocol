@@ -38,6 +38,14 @@ Deferred from US 011:
 
 * Do not introduce automated Offer ranking, scoring, recommended prices, or preferred Offers without a separate product decision.
 
+* Add participant messaging for clarifying an Offer before acceptance.
+
+* Decide whether Offer discussion is informational only or whether it can result in revised Offer terms.
+
+* If Offer terms can be revised, define whether revisions replace the existing Offer, create a new Offer version, or use a separate counteroffer model.
+
+* Keep clarification messaging separate from Offer term changes unless a later product decision explicitly combines them.
+
 ## Requests
 
 Deferred from US 003:

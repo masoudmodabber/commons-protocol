@@ -54,33 +54,15 @@ public sealed class OfferApplicationService(CommonsDbContext dbContext)
             return SubmitOfferResult.RequestNotAvailable();
         }
 
-        var capabilityIds = requestedContributions
-            .Select(contribution => contribution.CapabilityId)
-            .Distinct()
-            .ToList();
-        var capabilities = await dbContext.Capabilities
-            .AsNoTracking()
-            .Where(capability =>
-                capability.ParticipantId == context.Request.CreatorParticipantId
-                && capabilityIds.Contains(capability.Id))
-            .ToDictionaryAsync(capability => capability.Id, cancellationToken);
-
-        if (requestedContributions.Any(contribution =>
-                !capabilities.ContainsKey(contribution.CapabilityId)))
-        {
-            return SubmitOfferResult.Invalid(
-                "One or more selected Capabilities are not currently available on the Request creator's profile.");
-        }
-
-        var terms = requestedContributions
-            .Select(contribution =>
-            {
-                var capability = capabilities[contribution.CapabilityId];
-                return new RequestedContributionTerms(
-                    capability.Id,
-                    capability.Text,
-                    contribution.Description);
-            })
+        var requestCreator = await dbContext.Participants
+            .Include(participant => participant.Capabilities)
+            .SingleAsync(
+                participant => participant.Id == context.Request.CreatorParticipantId,
+                cancellationToken);
+        var selections = requestedContributions
+            .Select(contribution => new RequestedContributionSelection(
+                contribution.CapabilityId,
+                contribution.Description))
             .ToList();
 
         Offer offer;
@@ -89,8 +71,9 @@ public sealed class OfferApplicationService(CommonsDbContext dbContext)
         {
             offer = context.Participant.SubmitOffer(
                 context.Request,
+                requestCreator,
                 commonsAccountingUnits,
-                terms);
+                selections);
         }
         catch (DomainRuleViolationException exception)
         {

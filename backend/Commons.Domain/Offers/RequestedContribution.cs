@@ -10,16 +10,9 @@ public sealed class RequestedContribution
 
     internal RequestedContribution(
         Guid offerId,
-        Guid capabilityId,
-        string capabilityTextSnapshot,
+        Capability capability,
         string description)
     {
-        if (string.IsNullOrWhiteSpace(capabilityTextSnapshot))
-        {
-            throw new DomainRuleViolationException(
-                "A requested contribution requires a Capability text snapshot.");
-        }
-
         if (string.IsNullOrWhiteSpace(description))
         {
             throw new DomainRuleViolationException(
@@ -28,8 +21,8 @@ public sealed class RequestedContribution
 
         Id = Guid.NewGuid();
         OfferId = offerId;
-        CapabilityId = capabilityId;
-        CapabilityTextSnapshot = capabilityTextSnapshot;
+        CapabilityId = capability.Id;
+        CapabilityTextSnapshot = capability.Text;
         Description = description.Trim();
     }
 

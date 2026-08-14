@@ -82,8 +82,9 @@ public sealed class Participant
 
     public Offer SubmitOffer(
         Request request,
+        Participant requestCreator,
         long? commonsAccountingUnits,
-        IReadOnlyCollection<RequestedContributionTerms> requestedContributions)
+        IReadOnlyCollection<RequestedContributionSelection> requestedContributions)
     {
         if (request.CreatorParticipantId == Id)
         {
@@ -103,6 +104,30 @@ public sealed class Participant
                 "An Offer can only be submitted for an Open Request.");
         }
 
-        return new Offer(Id, request.Id, commonsAccountingUnits, requestedContributions);
+        if (requestCreator.Id != request.CreatorParticipantId)
+        {
+            throw new DomainRuleViolationException(
+                "Requested contributions must come from the Participant who created the Request.");
+        }
+
+        if (requestedContributions is null)
+        {
+            throw new DomainRuleViolationException(
+                "Requested contributions are required when Commons accounting units are not included.");
+        }
+
+        var resolvedContributions = requestedContributions
+            .Select(selection =>
+            {
+                var capability = requestCreator.capabilities
+                    .SingleOrDefault(existing => existing.Id == selection.CapabilityId)
+                    ?? throw new DomainRuleViolationException(
+                        "A requested Capability must be currently listed by the Request creator.");
+
+                return new ResolvedRequestedContribution(capability, selection.Description);
+            })
+            .ToList();
+
+        return new Offer(Id, request.Id, commonsAccountingUnits, resolvedContributions);
     }
 }

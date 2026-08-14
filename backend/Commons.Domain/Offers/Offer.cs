@@ -14,7 +14,7 @@ public sealed class Offer
         Guid creatorParticipantId,
         Guid requestId,
         long? commonsAccountingUnits,
-        IReadOnlyCollection<RequestedContributionTerms> contributionTerms)
+        IReadOnlyCollection<ResolvedRequestedContribution> resolvedContributions)
     {
         if (commonsAccountingUnits is <= 0)
         {
@@ -22,20 +22,20 @@ public sealed class Offer
                 "Commons accounting units must be a positive whole number.");
         }
 
-        if (contributionTerms is null)
+        if (resolvedContributions is null)
         {
             throw new DomainRuleViolationException(
                 "Requested contributions are required when Commons accounting units are not included.");
         }
 
-        if (commonsAccountingUnits is null && contributionTerms.Count == 0)
+        if (commonsAccountingUnits is null && resolvedContributions.Count == 0)
         {
             throw new DomainRuleViolationException(
                 "An Offer must request Commons accounting units or at least one contribution.");
         }
 
-        if (contributionTerms
-            .GroupBy(contribution => contribution.CapabilityId)
+        if (resolvedContributions
+            .GroupBy(contribution => contribution.Capability.Id)
             .Any(group => group.Count() > 1))
         {
             throw new DomainRuleViolationException(
@@ -48,13 +48,12 @@ public sealed class Offer
         CommonsAccountingUnits = commonsAccountingUnits;
         Status = OfferStatus.Active;
 
-        foreach (var terms in contributionTerms)
+        foreach (var contribution in resolvedContributions)
         {
             requestedContributions.Add(new RequestedContribution(
                 Id,
-                terms.CapabilityId,
-                terms.CapabilityTextSnapshot,
-                terms.Description));
+                contribution.Capability,
+                contribution.Description));
         }
     }
 
@@ -82,7 +81,10 @@ public sealed class Offer
     }
 }
 
-public sealed record RequestedContributionTerms(
+public sealed record RequestedContributionSelection(
     Guid CapabilityId,
-    string CapabilityTextSnapshot,
+    string Description);
+
+internal sealed record ResolvedRequestedContribution(
+    Capability Capability,
     string Description);
