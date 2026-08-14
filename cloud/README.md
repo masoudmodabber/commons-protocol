@@ -22,6 +22,11 @@ registry and read its versionless PostgreSQL connection-string reference from
 Key Vault. The GitHub deployment identity uses workload identity federation;
 no long-lived Azure credential is created.
 
+The development API applies the idempotent `seed-dev.sql` embedded in the
+backend after creating its database schema. This supplies the sample Commons
+needed to exercise the participant join flow. The production environment does
+not run development seed data.
+
 ## Network topology
 
 The default address plan is:

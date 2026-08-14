@@ -171,3 +171,15 @@ Tracks unresolved design questions and future research topics.
 The Commons Protocol is an active working draft.
 
 Concepts, terminology, and protocol rules may change as the project evolves and practical experimentation provides new insights.
+
+---
+
+## Local Development Data
+
+Running the application with `ASPNETCORE_ENVIRONMENT=Development`, including
+through `docker compose up`, automatically applies the idempotent development
+seed at `backend/Commons.Infrastructure/Persistence/Seeding/seed-dev.sql` after
+the database schema is created.
+
+The seed provides a small set of existing Commons for testing the participant
+join flow. It is not applied in production.

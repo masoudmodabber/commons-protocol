@@ -1,0 +1,24 @@
+using Commons.Infrastructure.Persistence.Seeding;
+
+namespace Commons.Infrastructure.Tests.Persistence;
+
+public sealed class DevelopmentDataSeederTests
+{
+    [Fact]
+    public async Task Development_commons_seed_is_embedded_and_idempotent()
+    {
+        const string resourceName =
+            "Commons.Infrastructure.Persistence.Seeding.seed-dev.sql";
+        await using var stream = typeof(DevelopmentDataSeeder).Assembly
+            .GetManifestResourceStream(resourceName);
+
+        stream.Should().NotBeNull();
+        using var reader = new StreamReader(stream!);
+        var sql = await reader.ReadToEndAsync();
+
+        sql.Should().Contain("Brisbane Commons");
+        sql.Should().Contain("Gold Coast Commons");
+        sql.Should().Contain("Sunshine Coast Commons");
+        sql.Should().Contain("ON CONFLICT (\"Id\") DO NOTHING;");
+    }
+}
