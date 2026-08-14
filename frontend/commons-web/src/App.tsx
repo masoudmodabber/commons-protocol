@@ -3,11 +3,13 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   addCapability,
   ApiError,
+  createRequest,
   getCommons,
   getProfile,
   joinCommons,
   login,
   ParticipantProfile,
+  RequestDetails,
   removeCapability,
   register,
 } from "./api";
@@ -217,6 +219,7 @@ function Profile({
           <div><dt>Joined</dt><dd>{new Intl.DateTimeFormat(undefined, { dateStyle: "long" }).format(new Date(profile.joinedAt))}</dd></div>
         </dl>
         <CapabilityManager profile={profile} accessToken={accessToken} />
+        <RequestManager profile={profile} accessToken={accessToken} />
       </section>
     </main>
   );
@@ -253,8 +256,10 @@ function CapabilityManager({
         <span className="capability-count">{profile.capabilities.length}</span>
       </div>
       <p className="capability-guidance">
-        These descriptions help your Commons understand what you may be able to contribute.
-        They do not indicate availability, price, quantity, or an obligation to trade.
+        These descriptions help your Commons understand what you may be able to provide,
+        whether that is a skill, service, good, resource, or something you have available,
+        such as carpentry, eggs, tools, or transport. They do not indicate availability,
+        price, quantity, or an obligation to trade.
       </p>
 
       {profile.capabilities.length === 0 ? (
@@ -308,6 +313,105 @@ function CapabilityManager({
       {removeMutation.isError && (
         <p className="error-message" role="alert">{removeMutation.error.message}</p>
       )}
+    </section>
+  );
+}
+
+function RequestManager({
+  profile,
+  accessToken,
+}: {
+  profile: ParticipantProfile;
+  accessToken: string;
+}) {
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [createdRequest, setCreatedRequest] = useState<RequestDetails | null>(null);
+  const createMutation = useMutation({
+    mutationFn: () => createRequest(accessToken, { title, description }),
+    onSuccess: (request) => setCreatedRequest(request),
+  });
+
+  if (createdRequest) {
+    return (
+      <section className="requests" aria-labelledby="request-heading">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Request created</p>
+            <h2 id="request-heading">{createdRequest.title}</h2>
+          </div>
+          <span className="request-status">{createdRequest.status}</span>
+        </div>
+        <p className="request-description">{createdRequest.description}</p>
+        <dl className="request-details">
+          <div><dt>Requested by</dt><dd>{createdRequest.creator.displayName}</dd></div>
+          <div><dt>Home Commons</dt><dd>{createdRequest.homeCommons.name}</dd></div>
+        </dl>
+        <button
+          type="button"
+          className="text-button"
+          onClick={() => {
+            setCreatedRequest(null);
+            setTitle("");
+            setDescription("");
+          }}
+        >
+          Create another Request
+        </button>
+      </section>
+    );
+  }
+
+  return (
+    <section className="requests" aria-labelledby="requests-heading">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">Something you need</p>
+          <h2 id="requests-heading">Create a Request</h2>
+        </div>
+      </div>
+      <p className="request-guidance">
+        Describe what you need from {profile.homeCommons.name}. You do not need to say what
+        you will provide in return; any terms can emerge voluntarily later.
+      </p>
+      <form
+        className="form-stack"
+        onSubmit={(event) => {
+          event.preventDefault();
+          createMutation.mutate();
+        }}
+      >
+        <Field label="Request title" htmlFor="request-title">
+          <input
+            id="request-title"
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
+            placeholder="For example, help repairing a fence"
+            required
+          />
+        </Field>
+        <Field label="Description" htmlFor="request-description">
+          <textarea
+            id="request-description"
+            rows={5}
+            value={description}
+            onChange={(event) => setDescription(event.target.value)}
+            required
+          />
+        </Field>
+        {createMutation.isError && (
+          <p className="error-message" role="alert">{createMutation.error.message}</p>
+        )}
+        <button
+          className="primary-button"
+          type="submit"
+          disabled={createMutation.isPending
+            || title.trim().length === 0
+            || description.trim().length === 0}
+        >
+          {createMutation.isPending ? "Creating…" : "Create Request"}
+        </button>
+      </form>
     </section>
   );
 }

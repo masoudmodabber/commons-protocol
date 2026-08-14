@@ -1,4 +1,5 @@
 using Commons.Domain.Participants;
+using Commons.Domain.Requests;
 using Commons.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using CommonsEntity = Commons.Domain.Participants.Commons;
@@ -58,6 +59,24 @@ public sealed class ParticipantPersistenceTests
             foreignKey.IsRequired
             && foreignKey.DeleteBehavior == DeleteBehavior.Cascade
             && foreignKey.PrincipalEntityType.ClrType == typeof(Participant));
+    }
+
+    [Fact]
+    public void Request_requires_a_creator_and_home_commons_and_persists_status_as_text()
+    {
+        using var dbContext = CreateDbContext();
+        var request = dbContext.Model.FindEntityType(typeof(Request));
+
+        request.Should().NotBeNull();
+        request!.GetForeignKeys().Should().Contain(foreignKey =>
+            foreignKey.IsRequired
+            && foreignKey.PrincipalEntityType.ClrType == typeof(Participant));
+        request.GetForeignKeys().Should().Contain(foreignKey =>
+            foreignKey.IsRequired
+            && foreignKey.PrincipalEntityType.ClrType == typeof(CommonsEntity));
+        request.FindProperty(nameof(Request.Title))!.IsNullable.Should().BeFalse();
+        request.FindProperty(nameof(Request.Description))!.IsNullable.Should().BeFalse();
+        request.FindProperty(nameof(Request.Status))!.GetProviderClrType().Should().Be<string>();
     }
 
     private static CommonsDbContext CreateDbContext()

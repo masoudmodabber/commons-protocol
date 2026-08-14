@@ -159,6 +159,8 @@ describe("US 002 Capability management", () => {
     renderApp();
 
     expect(await screen.findByRole("heading", { name: "Capabilities" })).toBeInTheDocument();
+    expect(screen.getByText(/whether that is a skill, service, good, resource/i))
+      .toBeInTheDocument();
     expect(screen.getByText(/do not indicate availability, price, quantity, or an obligation/i))
       .toBeInTheDocument();
     expect(screen.getByText("You have not listed any Capabilities yet.")).toBeInTheDocument();
@@ -213,5 +215,108 @@ describe("US 002 Capability management", () => {
 
     expect(await screen.findByRole("alert"))
       .toHaveTextContent("already listed on the Participant's profile");
+  });
+});
+
+describe("US 003 Request creation", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("lets a Participant create and immediately view an Open Request", async () => {
+    sessionStorage.setItem("commons-access-token", "access-token");
+
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
+      const path = input.toString();
+
+      if (path.endsWith("/api/requests") && init?.method === "POST") {
+        return jsonResponse({
+          id: "request-1",
+          title: "Help repairing a fence",
+          description: "One garden fence panel needs replacing.",
+          status: "Open",
+          creator: { participantId: "participant-1", displayName: "Alice" },
+          homeCommons: { id: "commons-1", name: "Brisbane Commons" },
+        }, 201);
+      }
+
+      if (path.endsWith("/api/participants/me")) {
+        return jsonResponse({
+          id: "participant-1",
+          displayName: "Alice",
+          bio: null,
+          joinedAt: "2026-08-14T00:00:00Z",
+          homeCommons: { id: "commons-1", name: "Brisbane Commons" },
+          capabilities: [],
+        });
+      }
+
+      throw new Error(`Unexpected request: ${path}`);
+    });
+
+    renderApp();
+
+    expect(await screen.findByRole("heading", { name: "Create a Request" })).toBeInTheDocument();
+    expect(screen.getByText(/You do not need to say what you will provide in return/i))
+      .toBeInTheDocument();
+    expect(screen.queryByLabelText(/Commons/i)).not.toBeInTheDocument();
+
+    const submit = screen.getByRole("button", { name: "Create Request" });
+    expect(submit).toBeDisabled();
+    fireEvent.change(screen.getByLabelText("Request title"), {
+      target: { value: "  Help repairing a fence  " },
+    });
+    fireEvent.change(screen.getByLabelText("Description"), {
+      target: { value: "  One garden fence panel needs replacing.  " },
+    });
+    fireEvent.click(submit);
+
+    expect(await screen.findByRole("heading", { name: "Help repairing a fence" }))
+      .toBeInTheDocument();
+    expect(screen.getByText("One garden fence panel needs replacing.")).toBeInTheDocument();
+    expect(screen.getByText("Open")).toBeInTheDocument();
+    expect(screen.getAllByText("Alice")).not.toHaveLength(0);
+    expect(screen.getAllByText("Brisbane Commons")).not.toHaveLength(0);
+
+    const createCall = vi.mocked(fetch).mock.calls.find(([, options]) =>
+      options?.method === "POST");
+    expect(createCall?.[1]?.body).toBe(JSON.stringify({
+      title: "  Help repairing a fence  ",
+      description: "  One garden fence panel needs replacing.  ",
+    }));
+  });
+
+  it("shows Request validation errors returned by the domain-backed API", async () => {
+    sessionStorage.setItem("commons-access-token", "access-token");
+
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
+      const path = input.toString();
+
+      if (path.endsWith("/api/requests") && init?.method === "POST") {
+        return jsonResponse({ title: "A Request requires a description." }, 400);
+      }
+
+      if (path.endsWith("/api/participants/me")) {
+        return jsonResponse({
+          id: "participant-1",
+          displayName: "Alice",
+          bio: null,
+          joinedAt: "2026-08-14T00:00:00Z",
+          homeCommons: { id: "commons-1", name: "Brisbane Commons" },
+          capabilities: [],
+        });
+      }
+
+      throw new Error(`Unexpected request: ${path}`);
+    });
+
+    renderApp();
+    await screen.findByRole("heading", { name: "Create a Request" });
+    fireEvent.change(screen.getByLabelText("Request title"), { target: { value: "A title" } });
+    fireEvent.change(screen.getByLabelText("Description"), { target: { value: "Description" } });
+    fireEvent.click(screen.getByRole("button", { name: "Create Request" }));
+
+    expect(await screen.findByRole("alert"))
+      .toHaveTextContent("A Request requires a description.");
   });
 });

@@ -1,5 +1,7 @@
 namespace Commons.Domain.Participants;
 
+using global::Commons.Domain.Requests;
+
 public sealed class Participant
 {
     private readonly List<Capability> capabilities = [];
@@ -73,4 +75,7 @@ public sealed class Participant
 
         return capability is not null && capabilities.Remove(capability);
     }
+
+    public Request CreateRequest(string title, string description) =>
+        new(Id, Membership.HomeCommonsId, title, description);
 }

@@ -1,4 +1,5 @@
 using Commons.Api.Participants;
+using Commons.Api.Requests;
 using Commons.Infrastructure.Persistence;
 using Commons.Infrastructure.Persistence.Schema;
 using Commons.Infrastructure.Persistence.Seeding;
@@ -30,6 +31,7 @@ if (!builder.Environment.IsEnvironment("Testing"))
 }
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<ParticipantApplicationService>();
+builder.Services.AddScoped<RequestApplicationService>();
 
 var app = builder.Build();
 

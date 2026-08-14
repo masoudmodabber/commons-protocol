@@ -36,3 +36,9 @@ Codex should not mark a story complete while any acceptance criterion remains un
 * Exchanges
 * Ledger
 * Notifications
+
+## Deferred Work
+
+Functionality intentionally postponed from current stories is tracked in `backlog.md`.
+
+When the current implementation scope is reviewed, this backlog should be checked before defining additional stories.

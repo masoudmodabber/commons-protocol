@@ -5,3 +5,4 @@ commons-protocol-docs.zip
 **/dist/
 *.tsbuildinfo
 **/Others/
+docs/00_READ_FIRST_CHATGPT_CODEX_WORKFLOW.md

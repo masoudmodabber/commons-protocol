@@ -39,4 +39,22 @@ public sealed class DevelopmentDataSeederTests
         sql.Should().Contain("CREATE UNIQUE INDEX IF NOT EXISTS");
         sql.Should().Contain("\"ParticipantId\", \"NormalizedText\"");
     }
+
+    [Fact]
+    public async Task Request_schema_update_is_embedded_and_idempotent()
+    {
+        const string resourceName =
+            "Commons.Infrastructure.Persistence.Schema.schema-v003-requests.sql";
+        await using var stream = typeof(RelationalSchemaInitializer).Assembly
+            .GetManifestResourceStream(resourceName);
+
+        stream.Should().NotBeNull();
+        using var reader = new StreamReader(stream!);
+        var sql = await reader.ReadToEndAsync();
+
+        sql.Should().Contain("CREATE TABLE IF NOT EXISTS \"Requests\"");
+        sql.Should().Contain("\"CreatorParticipantId\" uuid NOT NULL");
+        sql.Should().Contain("\"HomeCommonsId\" uuid NOT NULL");
+        sql.Should().Contain("\"Status\" text NOT NULL");
+    }
 }

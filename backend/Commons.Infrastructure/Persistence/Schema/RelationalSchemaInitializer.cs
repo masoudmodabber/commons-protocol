@@ -4,20 +4,26 @@ namespace Commons.Infrastructure.Persistence.Schema;
 
 public static class RelationalSchemaInitializer
 {
-    private const string CapabilitySchemaResourceName =
-        "Commons.Infrastructure.Persistence.Schema.schema-v002-capabilities.sql";
+    private static readonly string[] SchemaResourceNames =
+    [
+        "Commons.Infrastructure.Persistence.Schema.schema-v002-capabilities.sql",
+        "Commons.Infrastructure.Persistence.Schema.schema-v003-requests.sql"
+    ];
 
     public static async Task InitializeAsync(
         CommonsDbContext dbContext,
         CancellationToken cancellationToken = default)
     {
-        await using var stream = typeof(RelationalSchemaInitializer).Assembly
-            .GetManifestResourceStream(CapabilitySchemaResourceName)
-            ?? throw new InvalidOperationException(
-                $"The embedded schema script '{CapabilitySchemaResourceName}' was not found.");
-        using var reader = new StreamReader(stream);
-        var sql = await reader.ReadToEndAsync(cancellationToken);
+        foreach (var resourceName in SchemaResourceNames)
+        {
+            await using var stream = typeof(RelationalSchemaInitializer).Assembly
+                .GetManifestResourceStream(resourceName)
+                ?? throw new InvalidOperationException(
+                    $"The embedded schema script '{resourceName}' was not found.");
+            using var reader = new StreamReader(stream);
+            var sql = await reader.ReadToEndAsync(cancellationToken);
 
-        await dbContext.Database.ExecuteSqlRawAsync(sql, cancellationToken);
+            await dbContext.Database.ExecuteSqlRawAsync(sql, cancellationToken);
+        }
     }
 }

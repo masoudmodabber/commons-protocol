@@ -8,11 +8,43 @@ As a participant
 
 I want to create a Request describing what I need
 
-So that others can offer to help.
+So that other participants in my Home Commons can offer to help.
 
-A Request does not need to state what I will provide in return.
+### Acceptance Criteria
 
-Participants responding to the Request propose their own terms through Offers.
+1. Only a Participant can create a Request.
+
+2. A Request is created within the Participant's Home Commons.
+
+3. The Participant does not choose a Commons when creating the Request.
+
+4. A Request requires a title.
+
+5. A Request requires a description.
+
+6. Title and description are trimmed before being saved.
+
+7. Empty or whitespace only titles are rejected.
+
+8. Empty or whitespace only descriptions are rejected.
+
+9. A newly created Request has an Open status.
+
+10. The Request identifies the Participant who created it.
+
+11. The Request does not require the requester to state what they will provide in return.
+
+12. Creating a Request does not create an Offer, Agreement, Exchange, Ledger Entry, or Commons Balance change.
+
+13. Creating a Request does not create an obligation for another Participant to respond.
+
+14. After creation, the Participant can view the Request they created.
+
+15. Browsing or discovering Requests created by other Participants is not part of this story.
+
+16. The complete flow must be usable through the React frontend.
+
+17. The story is not complete if Requests can only be created through API calls, Postman, curl, or direct database access.
 
 ---
 

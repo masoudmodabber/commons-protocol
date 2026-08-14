@@ -28,6 +28,18 @@ export interface CapabilitySummary {
   text: string;
 }
 
+export interface RequestDetails {
+  id: string;
+  title: string;
+  description: string;
+  status: "Open";
+  creator: {
+    participantId: string;
+    displayName: string;
+  };
+  homeCommons: CommonsSummary;
+}
+
 interface AccessTokenResponse {
   accessToken: string;
 }
@@ -118,6 +130,17 @@ export function removeCapability(accessToken: string, capabilityId: string): Pro
   return request<void>(
     `/api/participants/me/capabilities/${capabilityId}`,
     { method: "DELETE" },
+    accessToken,
+  );
+}
+
+export function createRequest(
+  accessToken: string,
+  input: { title: string; description: string },
+): Promise<RequestDetails> {
+  return request<RequestDetails>(
+    "/api/requests",
+    { method: "POST", body: JSON.stringify(input) },
     accessToken,
   );
 }
