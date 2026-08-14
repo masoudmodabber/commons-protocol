@@ -48,12 +48,14 @@ Both forms of exchange preserve voluntary participation while keeping every Comm
 
 # Participant
 
-A Participant is an individual who belongs to one Home Commons.
+A Participant is an individual who belongs to exactly one Home Commons.
+
+A person becomes a Participant by joining an existing Commons.
+
+A Participant cannot exist without an active Home Commons.
 
 A Participant may:
 
-* Join a Home Commons.
-* Help establish a new Commons when one is created.
 * Describe goods, services, skills, resources, or assistance they may be able to provide.
 * Create Requests.
 * Submit Offers.
@@ -71,6 +73,12 @@ A Participant has one Commons Balance representing their current reciprocal rela
 Participants remain free to exchange with Participants from other Commons through Cross Commons Exchanges.
 
 Belonging to one Home Commons does not restrict participation in the wider market.
+
+A Participant cannot leave their Home Commons and remain without one.
+
+Future versions of the protocol may allow a Participant to move directly from one Home Commons to another.
+
+The rules governing that migration remain unresolved.
 
 ---
 
@@ -197,9 +205,11 @@ Commons divide geographically rather than according to ideology, profession, or 
 
 Migration into a newly established Commons should always be voluntary.
 
+A Participant moving to a newly established Commons would move directly from their existing Home Commons to the new Home Commons rather than exist without one.
+
 No central authority determines when a Commons must divide.
 
-The exact protocol governing Commons subdivision remains a future area of design.
+The exact protocol governing Commons subdivision and Participant migration remains a future area of design.
 
 ---
 
@@ -207,7 +217,9 @@ The exact protocol governing Commons subdivision remains a future area of design
 
 Membership represents the relationship between a Participant and their Home Commons.
 
-Every Participant has exactly one active Membership at a time.
+Every Participant must always have exactly one active Membership.
+
+A Participant cannot exist without an active Membership.
 
 Membership allows a Participant to participate in the Commons economy and governance.
 
@@ -222,14 +234,16 @@ A Membership may contain factual information such as:
 
 Membership does not grant additional political authority based upon wealth, contribution history, popularity, or Commons Balance.
 
-Each Commons determines its own rules for:
+For the current protocol design:
 
-* Joining.
-* Leaving.
-* Suspension.
-* Removal.
+* A person becomes a Participant by joining an existing Commons.
+* A Participant cannot leave a Commons without joining another Commons.
+* Moving directly between Commons is not part of the MVP.
+* The rules for migration between Commons remain unresolved.
 
-Future versions of the protocol may support voluntary migration between Commons as new geographic Commons are established.
+Each Commons may define its own rules for joining, suspension, and removal, subject to the protocol requirement that a Participant must always have exactly one Home Commons.
+
+The implications of suspension or removal for this requirement remain unresolved.
 
 ---
 
@@ -320,3 +334,5 @@ A Commons Balance:
 * Cannot be transferred independently of the Participant.
 
 Whether balances can expire, decay, or have practical limits remains unresolved.
+
+What happens to a Commons Balance when a Participant moves to another Home Commons also remains unresolved.

@@ -14,37 +14,47 @@ The stories are organized into epics that can be independently implemented and t
 
 # Epic: Participant Management
 
-## US-001 Create a profile
+## US 001 Join a Commons and create my participant profile
 
-As a participant
+As a person
 
-I want to create my profile
+I want to join an existing local Commons and create my participant profile
 
-So that other participants know who I am.
+So that I can participate in the Commons Market.
+
+### Acceptance Criteria
+
+1. The person must be authenticated before joining a Commons.
+
+2. The person selects one Commons from the available Commons.
+
+3. Joining the Commons creates their Participant, Profile, and Membership.
+
+4. A Participant cannot exist without a Home Commons.
+
+5. A Participant requires a display name.
+
+6. A Participant may include an optional short bio.
+
+7. One authenticated user can have only one Participant identity.
+
+8. A Participant must always have exactly one active Home Commons.
+
+9. Creating a new Commons is not part of this story.
+
+10. Capabilities are not part of this story.
+
+11. After joining, the Participant can view their profile and Home Commons.
+
+### Current MVP Constraint
+
+A Participant cannot leave their Home Commons without joining another Commons.
+
+Moving between Commons is not part of the MVP and will be designed later.
 
 ---
 
-## US-002 Join a Commons
-
-As a participant
-
-I want to join my local Commons
-
-So that I can participate in its economy.
-
----
-
-## US-003 Leave a Commons
-
-As a participant
-
-I want to leave my Commons
-
-So that I am no longer an active participant.
-
----
-
-## US-023 Manage what I can provide
+## US 002 Manage what I can provide
 
 As a participant
 
@@ -58,7 +68,7 @@ Listing something I can provide does not create a standing Offer, price, stateme
 
 # Epic: Requests
 
-## US-004 Create a Request
+## US 003 Create a Request
 
 As a participant
 
@@ -72,25 +82,25 @@ Participants responding to the Request propose their own terms through Offers.
 
 ---
 
-## US-005 Edit a Request
+## US 004 Edit a Request
 
 ...
 
 ---
 
-## US-006 Cancel a Request
+## US 005 Cancel a Request
 
 ...
 
 ---
 
-## US-007 Browse Requests
+## US 006 Browse Requests
 
 ...
 
 ---
 
-## US-008 Search Requests
+## US 007 Search Requests
 
 ...
 
@@ -98,7 +108,7 @@ Participants responding to the Request propose their own terms through Offers.
 
 # Epic: Offers
 
-## US-009 Submit an Offer
+## US 008 Submit an Offer
 
 As a participant
 
@@ -112,13 +122,13 @@ The application does not determine or suggest the correct value.
 
 ---
 
-## US-010 Withdraw an Offer
+## US 009 Withdraw an Offer
 
 ...
 
 ---
 
-## US-011 Compare Offers
+## US 010 Compare Offers
 
 As a participant
 
@@ -130,7 +140,7 @@ Offers may differ in what is requested in return and do not need to be directly 
 
 ---
 
-## US-012 Accept an Offer
+## US 011 Accept an Offer
 
 ...
 
@@ -138,13 +148,13 @@ Offers may differ in what is requested in return and do not need to be directly 
 
 # Epic: Agreements
 
-## US-013 View active Agreements
+## US 012 View active Agreements
 
 ...
 
 ---
 
-## US-014 Negotiate an Agreement
+## US 013 Negotiate an Agreement
 
 As a participant
 
@@ -158,13 +168,13 @@ Negotiation may include Commons accounting units, direct exchange terms, scope, 
 
 # Epic: Exchanges
 
-## US-015 Mark work complete
+## US 014 Mark work complete
 
 ...
 
 ---
 
-## US-016 Confirm completion
+## US 015 Confirm completion
 
 As a participant
 
@@ -178,19 +188,19 @@ A direct Exchange does not automatically change Commons Balances.
 
 # Epic: Ledger
 
-## US-017 View Commons Balance
+## US 016 View Commons Balance
 
 ...
 
 ---
 
-## US-018 View Ledger history
+## US 017 View Ledger history
 
 ...
 
 ---
 
-## US-019 View completed Exchanges
+## US 018 View completed Exchanges
 
 As a participant
 
@@ -202,18 +212,18 @@ So that I can see my factual participation history, including Exchanges that did
 
 # Epic: Notifications
 
-## US-020 Receive Offer notifications
+## US 019 Receive Offer notifications
 
 ...
 
 ---
 
-## US-021 Receive Agreement notifications
+## US 020 Receive Agreement notifications
 
 ...
 
 ---
 
-## US-022 Receive completion notifications
+## US 021 Receive completion notifications
 
 ...

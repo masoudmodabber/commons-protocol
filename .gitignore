@@ -4,5 +4,4 @@ commons-protocol-docs.zip
 **/node_modules/
 **/dist/
 *.tsbuildinfo
-secrets
-chatgpt
+**/Others/
