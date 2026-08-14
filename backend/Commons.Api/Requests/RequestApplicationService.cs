@@ -69,6 +69,7 @@ public sealed class RequestApplicationService(CommonsDbContext dbContext)
 
     public async Task<List<RequestDetails>?> BrowseAsync(
         string authenticatedUserId,
+        string? searchTerm,
         CancellationToken cancellationToken)
     {
         var browseScope = await GetBrowseScopeAsync(
@@ -86,6 +87,15 @@ public sealed class RequestApplicationService(CommonsDbContext dbContext)
                 request.HomeCommonsId == browseScope.HomeCommonsId
                 && request.CreatorParticipantId != browseScope.ParticipantId
                 && request.Status == RequestStatus.Open);
+
+        var normalizedSearchTerm = searchTerm?.Trim().ToLower();
+
+        if (!string.IsNullOrEmpty(normalizedSearchTerm))
+        {
+            requests = requests.Where(request =>
+                request.Title.ToLower().Contains(normalizedSearchTerm)
+                || request.Description.ToLower().Contains(normalizedSearchTerm));
+        }
 
         return await ProjectDetails(requests)
             .ToListAsync(cancellationToken);

@@ -180,4 +180,45 @@ So that I can discover ways I may be able to help.
 
 ## US 007 Search Requests
 
+As a participant
+
+I want to search Available Requests in my Home Commons
+
+So that I can more easily find Requests I may be able to help with.
+
+### Acceptance Criteria
+
+1. Only an authenticated Participant can search Available Requests.
+
+2. Search operates only on Requests that are visible through the Available Requests flow.
+
+3. Search includes only Open Requests in the Participant's Home Commons.
+
+4. Requests created by the current Participant are excluded from search results.
+
+5. Search matches against the Request title and description.
+
+6. A Request is included when the search term appears anywhere within either the title or description. A full title or description match is not required.
+
+7. Search is case insensitive.
+
+8. Leading and trailing whitespace in the search term is ignored.
+
+9. An empty or whitespace only search term returns the normal Available Requests result set.
+
+10. Search must not expose Requests from another Commons.
+
+11. Search must not expose Cancelled or otherwise non Open Requests.
+
+12. Search must not expose Requests created by the authenticated Participant.
+
+13. A Participant can open a search result and view the same read only Request detail available through Available Requests.
+
+14. Searching does not create an Offer, Agreement, Exchange, Ledger Entry, or Commons Balance change.
+
+15. Search does not implement categories, tags, semantic matching, fuzzy matching, Capability matching, recommendations, or ranking based on historical behaviour.
+
+16. The complete flow must be usable through the React frontend.
+
+17. The story is not complete if search can only be performed through API calls, Postman, curl, or direct database access.
 ...

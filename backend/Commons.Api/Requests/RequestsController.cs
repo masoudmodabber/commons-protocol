@@ -62,10 +62,12 @@ public sealed class RequestsController(RequestApplicationService requestService)
 
     [HttpGet("browse")]
     public async Task<ActionResult<IReadOnlyList<RequestDetails>>> Browse(
+        [FromQuery] string? search,
         CancellationToken cancellationToken)
     {
         var requests = await requestService.BrowseAsync(
             GetAuthenticatedUserId(),
+            search,
             cancellationToken);
 
         return requests is null

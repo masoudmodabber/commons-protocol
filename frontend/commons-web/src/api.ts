@@ -153,8 +153,15 @@ export function getRequest(accessToken: string, requestId: string): Promise<Requ
   return request<RequestDetails>(`/api/requests/${requestId}`, {}, accessToken);
 }
 
-export function browseRequests(accessToken: string): Promise<RequestDetails[]> {
-  return request<RequestDetails[]>("/api/requests/browse", {}, accessToken);
+export function browseRequests(
+  accessToken: string,
+  searchTerm?: string,
+): Promise<RequestDetails[]> {
+  const search = searchTerm === undefined
+    ? ""
+    : `?${new URLSearchParams({ search: searchTerm })}`;
+
+  return request<RequestDetails[]>(`/api/requests/browse${search}`, {}, accessToken);
 }
 
 export function getBrowseRequest(

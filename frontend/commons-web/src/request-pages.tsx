@@ -52,9 +52,11 @@ export function MyRequestsPage({ accessToken }: { accessToken: string }) {
 }
 
 export function BrowseRequestsPage({ accessToken }: { accessToken: string }) {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [appliedSearchTerm, setAppliedSearchTerm] = useState<string>();
   const requestsQuery = useQuery({
-    queryKey: ["browse-requests", accessToken],
-    queryFn: () => browseRequests(accessToken),
+    queryKey: ["browse-requests", accessToken, appliedSearchTerm],
+    queryFn: () => browseRequests(accessToken, appliedSearchTerm),
   });
 
   return (
@@ -66,13 +68,30 @@ export function BrowseRequestsPage({ accessToken }: { accessToken: string }) {
         </div>
       </div>
 
+      <form className="request-search-form" onSubmit={(event) => {
+        event.preventDefault();
+        setAppliedSearchTerm(searchTerm);
+      }}>
+        <Field label="Search Available Requests" htmlFor="request-search">
+          <input
+            id="request-search"
+            type="search"
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+          />
+        </Field>
+        <button className="primary-button" type="submit">Search</button>
+      </form>
+
       {requestsQuery.isPending && <p className="status-message">Loading Requests…</p>}
       {requestsQuery.isError && (
         <p className="error-message" role="alert">{requestsQuery.error.message}</p>
       )}
       {requestsQuery.isSuccess && requestsQuery.data.length === 0 && (
         <p className="empty-state">
-          There are no Open Requests from other Participants in your Home Commons.
+          {appliedSearchTerm?.trim()
+            ? "No Available Requests match your search."
+            : "There are no Open Requests from other Participants in your Home Commons."}
         </p>
       )}
       {requestsQuery.isSuccess && requestsQuery.data.length > 0 && (
