@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS restore
 WORKDIR /src
 
 COPY backend/Commons.sln backend/
@@ -10,6 +10,14 @@ COPY backend/Commons.Infrastructure.Tests/Commons.Infrastructure.Tests.csproj ba
 COPY backend/Commons.Api.Tests/Commons.Api.Tests.csproj backend/Commons.Api.Tests/
 RUN dotnet restore backend/Commons.sln
 
+FROM restore AS development
+COPY backend/ backend/
+WORKDIR /src/backend
+ENV DOTNET_USE_POLLING_FILE_WATCHER=1
+EXPOSE 8080
+CMD ["dotnet", "watch", "--project", "Commons.Api/Commons.Api.csproj", "run", "--no-launch-profile", "--urls", "http://0.0.0.0:8080"]
+
+FROM restore AS build
 COPY backend/ backend/
 RUN dotnet publish backend/Commons.Api/Commons.Api.csproj \
     --configuration Release \

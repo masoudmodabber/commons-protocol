@@ -146,6 +146,12 @@ jobs:
         run: |
           echo "api-url=$(pulumi stack output apiUrl)" >> "$GITHUB_OUTPUT"
 
+      - name: Build frontend for development API
+        working-directory: frontend/commons-web
+        env:
+          VITE_API_BASE_URL: ${{ steps.deployment.outputs.api-url }}
+        run: npm run build
+
       - name: Get Static Web App deployment token
         id: static-web-app-token
         shell: bash

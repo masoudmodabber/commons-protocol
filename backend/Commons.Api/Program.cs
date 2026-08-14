@@ -5,9 +5,19 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
 
 builder.Services.AddControllers();
 builder.Services.AddHealthChecks();
+builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
+{
+    if (allowedOrigins.Length > 0)
+    {
+        policy.WithOrigins(allowedOrigins)
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    }
+}));
 builder.Services.AddAuthorization();
 builder.Services.AddAuthentication();
 builder.Services.AddIdentityApiEndpoints<IdentityUser>()
@@ -22,6 +32,7 @@ builder.Services.AddScoped<ParticipantApplicationService>();
 
 var app = builder.Build();
 
+app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 

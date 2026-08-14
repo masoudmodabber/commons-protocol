@@ -18,6 +18,20 @@ internal sealed class ApplicationHostingResources
         RoleAssignments roleAssignments,
         InputMap<string> tags)
     {
+        Frontend = new StaticSite("frontend", new StaticSiteArgs
+        {
+            ResourceGroupName = foundation.ResourceGroup.Name,
+            Location = settings.StaticWebAppLocation,
+            Sku = new Pulumi.AzureNative.Web.Inputs.SkuDescriptionArgs
+            {
+                Name = "Free",
+                Tier = "Free",
+            },
+            StagingEnvironmentPolicy = StagingEnvironmentPolicy.Disabled,
+            PublicNetworkAccess = "Enabled",
+            Tags = tags,
+        });
+
         ContainerAppEnvironment = new ManagedEnvironment("container-app-environment", new ManagedEnvironmentArgs
         {
             ResourceGroupName = foundation.ResourceGroup.Name,
@@ -112,6 +126,11 @@ internal sealed class ApplicationHostingResources
                                 Name = "APPLICATIONINSIGHTS_CONNECTION_STRING",
                                 Value = foundation.ApplicationInsights.ConnectionString,
                             },
+                            new Pulumi.AzureNative.App.Inputs.EnvironmentVarArgs
+                            {
+                                Name = "Cors__AllowedOrigins__0",
+                                Value = Frontend.DefaultHostname.Apply(hostname => $"https://{hostname}"),
+                            },
                         ],
                         Resources = new Pulumi.AzureNative.App.Inputs.ContainerResourcesArgs
                         {
@@ -138,19 +157,6 @@ internal sealed class ApplicationHostingResources
             ],
         });
 
-        Frontend = new StaticSite("frontend", new StaticSiteArgs
-        {
-            ResourceGroupName = foundation.ResourceGroup.Name,
-            Location = settings.StaticWebAppLocation,
-            Sku = new Pulumi.AzureNative.Web.Inputs.SkuDescriptionArgs
-            {
-                Name = "Free",
-                Tier = "Free",
-            },
-            StagingEnvironmentPolicy = StagingEnvironmentPolicy.Disabled,
-            PublicNetworkAccess = "Enabled",
-            Tags = tags,
-        });
     }
 
     public ManagedEnvironment ContainerAppEnvironment { get; }

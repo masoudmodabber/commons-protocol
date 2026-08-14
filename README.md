@@ -183,3 +183,15 @@ the database schema is created.
 
 The seed provides a small set of existing Commons for testing the participant
 join flow. It is not applied in production.
+
+Start the local development stack with:
+
+```bash
+docker compose up --build
+```
+
+The backend runs with `dotnet watch`, and the frontend runs through the Vite
+development server using Node.js 24. Source directories are bind-mounted into
+their containers, so backend changes automatically restart the API and
+frontend changes are applied through hot module replacement. Rebuild the
+containers only after changing dependencies, Dockerfiles, or Compose settings.
