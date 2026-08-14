@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getOffer,
+  getMyOffers,
   getOfferSubmissionOptions,
   submitOffer,
 } from "./api";
@@ -39,8 +40,9 @@ export function SubmitOfferPage({
       commonsAccountingUnits: parsedUnits,
       requestedContributions: selectedContributions,
     }),
-    onSuccess: (offer) => {
+    onSuccess: async (offer) => {
       queryClient.setQueryData(["offer", accessToken, offer.id], offer);
+      await queryClient.invalidateQueries({ queryKey: ["my-offers", accessToken] });
       navigate(`/offers/${offer.id}`);
     },
   });
@@ -170,6 +172,60 @@ export function SubmitOfferPage({
   );
 }
 
+export function MyOffersPage({ accessToken }: { accessToken: string }) {
+  const offersQuery = useQuery({
+    queryKey: ["my-offers", accessToken],
+    queryFn: () => getMyOffers(accessToken),
+  });
+
+  return (
+    <section className="feature-page requests" aria-labelledby="my-offers-heading">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">Proposals you submitted</p>
+          <h1 id="my-offers-heading">My Offers</h1>
+        </div>
+      </div>
+
+      {offersQuery.isPending && <p className="status-message">Loading your Offers…</p>}
+      {offersQuery.isError && (
+        <p className="error-message" role="alert">{offersQuery.error.message}</p>
+      )}
+      {offersQuery.isSuccess && offersQuery.data.length === 0 && (
+        <p className="empty-state">You have not submitted any Offers yet.</p>
+      )}
+      {offersQuery.isSuccess && offersQuery.data.length > 0 && (
+        <ul className="request-list offer-list">
+          {offersQuery.data.map(offer => (
+            <li key={offer.id}>
+              <a href={`#/offers/${offer.id}`}>{offer.request.title}</a>
+              <p className="request-creator">
+                Request created by {offer.request.creator.displayName}
+              </p>
+              {offer.commonsAccountingUnits !== null && (
+                <p>
+                  <strong>Commons accounting units requested:</strong>{" "}
+                  {offer.commonsAccountingUnits}
+                </p>
+              )}
+              {offer.requestedContributions.length > 0 && (
+                <ul className="offer-summary-contributions">
+                  {offer.requestedContributions.map(contribution => (
+                    <li key={contribution.capabilityId}>
+                      <strong>{contribution.capabilityTextSnapshot}:</strong>{" "}
+                      {contribution.description}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
 export function OfferDetailPage({
   accessToken,
   offerId,
@@ -226,9 +282,12 @@ export function OfferDetailPage({
           </ul>
         </section>
       )}
-      <a className="text-link" href={`#/available-requests/${offer.request.id}`}>
-        Back to Request
-      </a>
+      <div className="request-actions">
+        <a className="text-link" href="#/offers">Back to My Offers</a>
+        <a className="text-link" href={`#/available-requests/${offer.request.id}`}>
+          View Request
+        </a>
+      </div>
     </section>
   );
 }

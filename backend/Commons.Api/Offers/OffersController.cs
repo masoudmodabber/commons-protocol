@@ -71,6 +71,17 @@ public sealed class OffersController(OfferApplicationService offerService) : Con
         return offer is null ? NotFound() : Ok(offer);
     }
 
+    [HttpGet("offers")]
+    public async Task<ActionResult<IReadOnlyList<OfferDetails>>> List(
+        CancellationToken cancellationToken)
+    {
+        var offers = await offerService.ListForCreatorAsync(
+            GetAuthenticatedUserId(),
+            cancellationToken);
+
+        return offers is null ? NotFound() : Ok(offers);
+    }
+
     private string GetAuthenticatedUserId() =>
         User.FindFirstValue(ClaimTypes.NameIdentifier)
         ?? throw new InvalidOperationException("The authenticated user has no identifier claim.");

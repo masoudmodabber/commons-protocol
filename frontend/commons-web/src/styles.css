@@ -370,6 +370,17 @@ button { cursor: pointer; }
 
 .offer-contribution-list p { margin: 0.4rem 0 0; color: #5b6e65; }
 
+.offer-list > li { display: grid; gap: 0.55rem; }
+.offer-list > li > p { margin: 0; }
+
+.offer-summary-contributions {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding-left: 1.25rem;
+  color: #5b6e65;
+}
+
 .request-status {
   border-radius: 999px;
   padding: 0.4rem 0.75rem;

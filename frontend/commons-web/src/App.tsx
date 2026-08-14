@@ -4,7 +4,7 @@ import { ApiError, getProfile, ParticipantProfile } from "./api";
 import { Authentication, JoinCommonsPage } from "./entry-pages";
 import { navigate, useHashPath } from "./navigation";
 import { CapabilitiesPage, ProfilePage } from "./participant-pages";
-import { OfferDetailPage, SubmitOfferPage } from "./offer-pages";
+import { MyOffersPage, OfferDetailPage, SubmitOfferPage } from "./offer-pages";
 import {
   BrowseRequestDetailPage,
   BrowseRequestsPage,
@@ -96,6 +96,8 @@ function ParticipantApplication({
     page = <CreateRequestPage profile={profile} accessToken={accessToken} />;
   } else if (path === "/available-requests") {
     page = <BrowseRequestsPage accessToken={accessToken} />;
+  } else if (path === "/offers") {
+    page = <MyOffersPage accessToken={accessToken} />;
   } else if (submitOfferMatch) {
     page = <SubmitOfferPage accessToken={accessToken} requestId={submitOfferMatch[1]} />;
   } else if (availableRequestMatch) {

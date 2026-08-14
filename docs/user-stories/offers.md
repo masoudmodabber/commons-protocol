@@ -99,24 +99,66 @@ For example:
 
 ---
 
-## US 009 Withdraw an Offer
+## US 009 View my Offers
+
+As a participant
+
+I want to view the Offers I have submitted
+
+So that I can keep track of the proposals I have made.
+
+### Acceptance Criteria
+
+1. Only an authenticated Participant can view their submitted Offers.
+
+2. The Participant can view a list of Offers they have created.
+
+3. The list contains only Offers created by the authenticated Participant.
+
+4. Offers created by other Participants are not included.
+
+5. Each listed Offer shows enough information to identify the Request it belongs to.
+
+6. Each listed Offer shows the Commons accounting units requested, when included.
+
+7. Each listed Offer shows the requested Capability contributions, when included.
+
+8. Each requested Capability contribution shows the stored Capability text snapshot and description.
+
+9. The Participant can open an Offer from the list and view its existing Offer detail.
+
+10. A Participant cannot view another Participant's Offer by changing an Offer identifier or other client supplied value.
+
+11. The Offer creator identity must be resolved from trusted server side state.
+
+12. Viewing submitted Offers does not modify the Offer.
+
+13. Viewing submitted Offers does not create an Agreement, Exchange, Ledger Entry, Completed Exchange, or Commons Balance change.
+
+14. The complete flow must be usable through the React frontend.
+
+15. The story is not complete if submitted Offers can only be viewed through API calls, Postman, curl, or direct database access.
+
+---
+
+## US 010 Withdraw an Offer
 
 ...
 
 ---
 
-## US 010 Compare Offers
+## US 011 View and Compare Offers
 
 As a participant
 
-I want to compare the different Offers made on my Request
+I want to view and compare the different Offers made on my Request
 
-So that I can choose the terms that best suit me.
+So that I can understand the proposed terms and choose the Offer that best suits me.
 
-Offers may differ in what is requested in return and do not need to be directly comparable by a single numerical value.
+Offers may differ in Commons accounting units, requested Capability contributions, or combinations of both, and do not need to be directly comparable by a single numerical value.
 
 ---
 
-## US 011 Accept an Offer
+## US 012 Accept an Offer
 
 ...

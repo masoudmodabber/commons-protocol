@@ -124,6 +124,28 @@ public sealed class OfferApplicationService(CommonsDbContext dbContext)
             .SingleOrDefaultAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyList<OfferDetails>?> ListForCreatorAsync(
+        string authenticatedUserId,
+        CancellationToken cancellationToken)
+    {
+        var participantId = await dbContext.Participants
+            .AsNoTracking()
+            .Where(participant => participant.AuthenticatedUserId == authenticatedUserId)
+            .Select(participant => (Guid?)participant.Id)
+            .SingleOrDefaultAsync(cancellationToken);
+
+        if (participantId is null)
+        {
+            return null;
+        }
+
+        return await ProjectOfferDetails(dbContext.Offers
+                .AsNoTracking()
+                .Where(offer => offer.CreatorParticipantId == participantId.Value)
+                .OrderBy(offer => offer.Id))
+            .ToListAsync(cancellationToken);
+    }
+
     private async Task<AvailableRequestContext?> GetAvailableRequestContextAsync(
         string authenticatedUserId,
         Guid requestId,

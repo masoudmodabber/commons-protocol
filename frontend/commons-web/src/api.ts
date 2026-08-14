@@ -224,6 +224,10 @@ export function getOffer(accessToken: string, offerId: string): Promise<OfferDet
   return request<OfferDetails>(`/api/offers/${offerId}`, {}, accessToken);
 }
 
+export function getMyOffers(accessToken: string): Promise<OfferDetails[]> {
+  return request<OfferDetails[]>("/api/offers", {}, accessToken);
+}
+
 export function editRequest(
   accessToken: string,
   requestId: string,
