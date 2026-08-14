@@ -45,6 +45,28 @@ It answers questions such as:
 
 ---
 
+## User Stories
+
+The `user-stories` directory defines the functional requirements for the first implementation, organized by epic.
+
+```
+user-stories/README.md
+```
+
+Provides the user story guide and definition of done.
+
+The epic files are:
+
+* `user-stories/participant-management.md`
+* `user-stories/requests.md`
+* `user-stories/offers.md`
+* `user-stories/agreements.md`
+* `user-stories/exchanges.md`
+* `user-stories/ledger.md`
+* `user-stories/notifications.md`
+
+---
+
 ## Domain
 
 The `domain` directory defines the concepts that make up the protocol.
