@@ -145,6 +145,14 @@ export function createRequest(
   );
 }
 
+export function getMyRequests(accessToken: string): Promise<RequestDetails[]> {
+  return request<RequestDetails[]>("/api/requests", {}, accessToken);
+}
+
+export function getRequest(accessToken: string, requestId: string): Promise<RequestDetails> {
+  return request<RequestDetails>(`/api/requests/${requestId}`, {}, accessToken);
+}
+
 export function editRequest(
   accessToken: string,
   requestId: string,

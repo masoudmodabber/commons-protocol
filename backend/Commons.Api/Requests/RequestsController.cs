@@ -51,6 +51,15 @@ public sealed class RequestsController(RequestApplicationService requestService)
         return request is null ? NotFound() : Ok(request);
     }
 
+    [HttpGet]
+    public async Task<ActionResult<IReadOnlyList<RequestDetails>>> GetMine(
+        CancellationToken cancellationToken)
+    {
+        return Ok(await requestService.GetAllForCreatorAsync(
+            GetAuthenticatedUserId(),
+            cancellationToken));
+    }
+
     [HttpPut("{requestId:guid}")]
     public async Task<IActionResult> Edit(
         Guid requestId,

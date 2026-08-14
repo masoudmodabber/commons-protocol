@@ -107,6 +107,25 @@ public sealed class CreateRequestTests
     }
 
     [Fact]
+    public async Task Participant_can_list_only_their_own_requests()
+    {
+        await using var application = new CommonsApiApplication();
+        var firstClient = await application.CreateSeededClientAsync("user-1");
+        await JoinParticipantAsync(firstClient, "Alice");
+        var firstRequest = await CreateRequestAsync(firstClient);
+
+        var secondClient = application.CreateClient();
+        secondClient.DefaultRequestHeaders.Add(TestAuthenticationHandler.UserHeader, "user-2");
+        await JoinParticipantAsync(secondClient, "Bob");
+        await CreateRequestAsync(secondClient);
+
+        var requests = await firstClient.GetFromJsonAsync<List<RequestDetails>>("/api/requests");
+
+        requests.Should().ContainSingle()
+            .Which.Should().BeEquivalentTo(firstRequest);
+    }
+
+    [Fact]
     public async Task Creator_can_edit_open_request_and_view_updated_details()
     {
         await using var application = new CommonsApiApplication();
@@ -237,11 +256,13 @@ public sealed class CreateRequestTests
         var anonymousClient = await application.CreateSeededClientAsync();
         var requestId = Guid.NewGuid();
 
+        var listResponse = await anonymousClient.GetAsync("/api/requests");
         var readResponse = await anonymousClient.GetAsync($"/api/requests/{requestId}");
         var editResponse = await anonymousClient.PutAsJsonAsync(
             $"/api/requests/{requestId}",
             new EditRequestRequest("A title", "A description"));
 
+        listResponse.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
         readResponse.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
         editResponse.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }

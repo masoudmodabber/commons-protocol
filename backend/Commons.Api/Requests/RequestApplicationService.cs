@@ -49,9 +49,25 @@ public sealed class RequestApplicationService(CommonsDbContext dbContext)
         Guid requestId,
         CancellationToken cancellationToken)
     {
+        return GetForCreator(authenticatedUserId)
+            .Where(request => request.Id == requestId)
+            .SingleOrDefaultAsync(cancellationToken);
+    }
+
+    public Task<List<RequestDetails>> GetAllForCreatorAsync(
+        string authenticatedUserId,
+        CancellationToken cancellationToken)
+    {
+        return GetForCreator(authenticatedUserId)
+            .OrderBy(request => request.Title)
+            .ThenBy(request => request.Id)
+            .ToListAsync(cancellationToken);
+    }
+
+    private IQueryable<RequestDetails> GetForCreator(string authenticatedUserId)
+    {
         return dbContext.Requests
             .AsNoTracking()
-            .Where(request => request.Id == requestId)
             .Where(request => dbContext.Participants.Any(participant =>
                 participant.Id == request.CreatorParticipantId
                 && participant.AuthenticatedUserId == authenticatedUserId))
@@ -71,8 +87,7 @@ public sealed class RequestApplicationService(CommonsDbContext dbContext)
                     dbContext.Commons
                         .Where(commons => commons.Id == request.HomeCommonsId)
                         .Select(commons => commons.Name)
-                        .Single())))
-            .SingleOrDefaultAsync(cancellationToken);
+                        .Single())));
     }
 
     public async Task<EditRequestResult> EditAsync(

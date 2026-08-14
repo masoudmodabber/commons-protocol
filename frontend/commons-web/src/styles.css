@@ -142,6 +142,25 @@ button { cursor: pointer; }
 
 .app-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
 
+.main-navigation {
+  display: flex;
+  gap: 0.4rem;
+  margin: 1.5rem 0 0;
+  border-bottom: 1px solid #dce4db;
+}
+
+.main-navigation a {
+  border-bottom: 3px solid transparent;
+  padding: 0.7rem 0.85rem;
+  color: #5b6e65;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.main-navigation a[aria-current="page"] { border-bottom-color: #d57a42; color: #285f4e; }
+
+.feature-page { margin-top: 2.5rem; }
+
 .profile-heading {
   display: flex;
   align-items: center;
@@ -184,11 +203,7 @@ button { cursor: pointer; }
 
 .profile-details dd { margin: 0.4rem 0 0; color: #244b3f; font-weight: 750; }
 
-.capabilities, .requests {
-  margin-top: 2.5rem;
-  border-top: 1px solid #dce4db;
-  padding-top: 2rem;
-}
+.capabilities, .requests { margin-top: 2.5rem; }
 
 .section-heading {
   display: flex;
@@ -197,7 +212,7 @@ button { cursor: pointer; }
   gap: 1rem;
 }
 
-.section-heading h2 {
+.section-heading h1, .section-heading h2 {
   margin: 0.25rem 0 0;
   color: #17352d;
   font-family: Georgia, "Times New Roman", serif;
@@ -306,6 +321,38 @@ button { cursor: pointer; }
 
 .request-actions { display: flex; align-items: center; gap: 1rem; }
 
+.primary-link {
+  border-radius: 0.75rem;
+  padding: 0.7rem 1rem;
+  color: #fff;
+  background: #285f4e;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.text-link { color: #36705c; font-weight: 700; text-decoration: none; }
+
+.request-list {
+  display: grid;
+  gap: 0.75rem;
+  margin: 1.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.request-list li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.5rem 1rem;
+  border: 1px solid #dce4db;
+  border-radius: 0.8rem;
+  padding: 1rem;
+  background: #fff;
+}
+
+.request-list a { color: #285f4e; font-weight: 800; text-decoration: none; }
+.request-list p { grid-column: 1 / -1; margin: 0; color: #5b6e65; }
+
 .message-card { max-width: 28rem; text-align: center; }
 .message-card .brand { justify-content: center; margin-bottom: 2rem; }
 .message-card .primary-button { margin-top: 1.5rem; }
@@ -316,4 +363,6 @@ button { cursor: pointer; }
   .profile-details { grid-template-columns: 1fr; }
   .capability-form { grid-template-columns: 1fr; }
   .request-details { grid-template-columns: 1fr; }
+  .main-navigation { overflow-x: auto; }
+  .section-heading { align-items: flex-start; }
 }

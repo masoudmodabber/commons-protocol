@@ -158,6 +158,7 @@ describe("US 002 Capability management", () => {
 
     renderApp();
 
+    fireEvent.click(await screen.findByRole("link", { name: "Capabilities" }));
     expect(await screen.findByRole("heading", { name: "Capabilities" })).toBeInTheDocument();
     expect(screen.getByText(/whether that is a skill, service, good, resource/i))
       .toBeInTheDocument();
@@ -207,6 +208,7 @@ describe("US 002 Capability management", () => {
     });
 
     renderApp();
+    fireEvent.click(await screen.findByRole("link", { name: "Capabilities" }));
     await screen.findByText("Carpentry");
     fireEvent.change(screen.getByLabelText("Add a Capability"), {
       target: { value: "  cArPeNtRy  " },
@@ -225,30 +227,41 @@ describe("US 003 Request creation", () => {
 
   it("lets a Participant create, edit, and view an Open Request", async () => {
     sessionStorage.setItem("commons-access-token", "access-token");
+    let savedRequest: Record<string, unknown> | null = null;
 
     vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
       const path = input.toString();
 
       if (path.endsWith("/api/requests") && init?.method === "POST") {
-        return jsonResponse({
+        savedRequest = {
           id: "request-1",
           title: "Help repairing a fence",
           description: "One garden fence panel needs replacing.",
           status: "Open",
           creator: { participantId: "participant-1", displayName: "Alice" },
           homeCommons: { id: "commons-1", name: "Brisbane Commons" },
-        }, 201);
+        };
+        return jsonResponse(savedRequest, 201);
       }
 
       if (path.endsWith("/api/requests/request-1") && init?.method === "PUT") {
-        return jsonResponse({
+        savedRequest = {
           id: "request-1",
           title: "Help repairing two fence panels",
           description: "Two garden fence panels need replacing.",
           status: "Open",
           creator: { participantId: "participant-1", displayName: "Alice" },
           homeCommons: { id: "commons-1", name: "Brisbane Commons" },
-        });
+        };
+        return jsonResponse(savedRequest);
+      }
+
+      if (path.endsWith("/api/requests") && !init?.method) {
+        return jsonResponse(savedRequest ? [savedRequest] : []);
+      }
+
+      if (path.endsWith("/api/requests/request-1") && !init?.method) {
+        return jsonResponse(savedRequest);
       }
 
       if (path.endsWith("/api/participants/me")) {
@@ -267,6 +280,10 @@ describe("US 003 Request creation", () => {
 
     renderApp();
 
+    fireEvent.click(await screen.findByRole("link", { name: "Requests" }));
+    expect(await screen.findByRole("heading", { name: "My Requests" })).toBeInTheDocument();
+    expect(await screen.findByText("You have not created any Requests yet.")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("link", { name: "Create Request" }));
     expect(await screen.findByRole("heading", { name: "Create a Request" })).toBeInTheDocument();
     expect(screen.getByText(/You do not need to say what you will provide in return/i))
       .toBeInTheDocument();
@@ -322,6 +339,11 @@ describe("US 003 Request creation", () => {
       title: "  Help repairing two fence panels  ",
       description: "  Two garden fence panels need replacing.  ",
     }));
+
+    fireEvent.click(screen.getByRole("link", { name: "Back to My Requests" }));
+    expect(await screen.findByRole("heading", { name: "My Requests" })).toBeInTheDocument();
+    expect(await screen.findByRole("link", { name: "Help repairing two fence panels" }))
+      .toBeInTheDocument();
   });
 
   it("shows Request validation errors returned by the domain-backed API", async () => {
@@ -332,6 +354,10 @@ describe("US 003 Request creation", () => {
 
       if (path.endsWith("/api/requests") && init?.method === "POST") {
         return jsonResponse({ title: "A Request requires a description." }, 400);
+      }
+
+      if (path.endsWith("/api/requests") && !init?.method) {
+        return jsonResponse([]);
       }
 
       if (path.endsWith("/api/participants/me")) {
@@ -349,6 +375,9 @@ describe("US 003 Request creation", () => {
     });
 
     renderApp();
+    fireEvent.click(await screen.findByRole("link", { name: "Requests" }));
+    await screen.findByRole("heading", { name: "My Requests" });
+    fireEvent.click(screen.getByRole("link", { name: "Create Request" }));
     await screen.findByRole("heading", { name: "Create a Request" });
     fireEvent.change(screen.getByLabelText("Request title"), { target: { value: "A title" } });
     fireEvent.change(screen.getByLabelText("Description"), { target: { value: "Description" } });
@@ -356,5 +385,45 @@ describe("US 003 Request creation", () => {
 
     expect(await screen.findByRole("alert"))
       .toHaveTextContent("A Request requires a description.");
+  });
+
+  it("loads a creator-owned Request directly from its route", async () => {
+    sessionStorage.setItem("commons-access-token", "access-token");
+    window.location.hash = "/requests/request-1";
+
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+      const path = input.toString();
+
+      if (path.endsWith("/api/requests/request-1")) {
+        return jsonResponse({
+          id: "request-1",
+          title: "Help repairing a fence",
+          description: "One garden fence panel needs replacing.",
+          status: "Open",
+          creator: { participantId: "participant-1", displayName: "Alice" },
+          homeCommons: { id: "commons-1", name: "Brisbane Commons" },
+        });
+      }
+
+      if (path.endsWith("/api/participants/me")) {
+        return jsonResponse({
+          id: "participant-1",
+          displayName: "Alice",
+          bio: null,
+          joinedAt: "2026-08-14T00:00:00Z",
+          homeCommons: { id: "commons-1", name: "Brisbane Commons" },
+          capabilities: [],
+        });
+      }
+
+      throw new Error(`Unexpected request: ${path}`);
+    });
+
+    renderApp();
+
+    expect(await screen.findByRole("heading", { name: "Help repairing a fence" }))
+      .toBeInTheDocument();
+    expect(screen.getByText("One garden fence panel needs replacing.")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Back to My Requests" })).toBeInTheDocument();
   });
 });
