@@ -118,9 +118,15 @@ public sealed class CreateRequestTests
 
         var response = await client.PutAsJsonAsync(
             $"/api/requests/{original.Id}",
-            new EditRequestRequest(
-                "  Corrected fence repair  ",
-                "  Two garden fence panels need replacing.  "));
+            new
+            {
+                RequestId = Guid.NewGuid(),
+                CreatorParticipantId = Guid.NewGuid(),
+                HomeCommonsId = Guid.NewGuid(),
+                Status = nameof(RequestStatus.Cancelled),
+                Title = "  Corrected fence repair  ",
+                Description = "  Two garden fence panels need replacing.  "
+            });
         var updated = await response.Content.ReadFromJsonAsync<RequestDetails>();
         var viewed = await client.GetFromJsonAsync<RequestDetails>(
             $"/api/requests/{original.Id}");
@@ -173,10 +179,20 @@ public sealed class CreateRequestTests
         var secondClient = application.CreateClient();
         secondClient.DefaultRequestHeaders.Add(TestAuthenticationHandler.UserHeader, "user-2");
         await JoinParticipantAsync(secondClient, "Bob");
+        var secondParticipant = await secondClient.GetFromJsonAsync<ParticipantProfile>(
+            "/api/participants/me");
 
         var response = await secondClient.PutAsJsonAsync(
             $"/api/requests/{original.Id}",
-            new EditRequestRequest("Changed title", "Changed description"));
+            new
+            {
+                RequestId = original.Id,
+                CreatorParticipantId = secondParticipant!.Id,
+                HomeCommonsId = secondParticipant.HomeCommons.Id,
+                Status = nameof(RequestStatus.Open),
+                Title = "Changed title",
+                Description = "Changed description"
+            });
         var viewed = await firstClient.GetFromJsonAsync<RequestDetails>(
             $"/api/requests/{original.Id}");
 
@@ -215,16 +231,39 @@ public sealed class CreateRequestTests
     }
 
     [Fact]
-    public async Task Editing_requires_authentication()
+    public async Task Reading_and_editing_require_authentication()
     {
         await using var application = new CommonsApiApplication();
         var anonymousClient = await application.CreateSeededClientAsync();
+        var requestId = Guid.NewGuid();
 
-        var response = await anonymousClient.PutAsJsonAsync(
-            $"/api/requests/{Guid.NewGuid()}",
+        var readResponse = await anonymousClient.GetAsync($"/api/requests/{requestId}");
+        var editResponse = await anonymousClient.PutAsJsonAsync(
+            $"/api/requests/{requestId}",
             new EditRequestRequest("A title", "A description"));
 
-        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        readResponse.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        editResponse.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
+    public async Task Authenticated_account_without_participant_cannot_edit_request()
+    {
+        await using var application = new CommonsApiApplication();
+        var participantlessClient = await application.CreateSeededClientAsync("user-1");
+        var participantClient = application.CreateClient();
+        participantClient.DefaultRequestHeaders.Add(TestAuthenticationHandler.UserHeader, "user-2");
+        await JoinParticipantAsync(participantClient, "Bob");
+        var original = await CreateRequestAsync(participantClient);
+
+        var response = await participantlessClient.PutAsJsonAsync(
+            $"/api/requests/{original.Id}",
+            new EditRequestRequest("A title", "A description"));
+        var viewed = await participantClient.GetFromJsonAsync<RequestDetails>(
+            $"/api/requests/{original.Id}");
+
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        viewed.Should().BeEquivalentTo(original);
     }
 
     private static async Task<RequestDetails> CreateRequestAsync(HttpClient client)
