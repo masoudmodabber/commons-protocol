@@ -2,6 +2,7 @@ using Commons.Domain.Participants;
 using Commons.Domain.Requests;
 using Commons.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using RequestEntity = Commons.Domain.Requests.Request;
 
 namespace Commons.Api.Requests;
 
@@ -49,8 +50,8 @@ public sealed class RequestApplicationService(CommonsDbContext dbContext)
         Guid requestId,
         CancellationToken cancellationToken)
     {
-        return GetForCreator(authenticatedUserId)
-            .Where(request => request.Id == requestId)
+        return ProjectDetails(GetRequestsForCreator(authenticatedUserId)
+                .Where(request => request.Id == requestId))
             .SingleOrDefaultAsync(cancellationToken);
     }
 
@@ -58,20 +59,26 @@ public sealed class RequestApplicationService(CommonsDbContext dbContext)
         string authenticatedUserId,
         CancellationToken cancellationToken)
     {
-        return GetForCreator(authenticatedUserId)
+        var requests = GetRequestsForCreator(authenticatedUserId)
             .OrderBy(request => request.Title)
-            .ThenBy(request => request.Id)
+            .ThenBy(request => request.Id);
+
+        return ProjectDetails(requests)
             .ToListAsync(cancellationToken);
     }
 
-    private IQueryable<RequestDetails> GetForCreator(string authenticatedUserId)
+    private IQueryable<RequestEntity> GetRequestsForCreator(string authenticatedUserId)
     {
         return dbContext.Requests
             .AsNoTracking()
             .Where(request => dbContext.Participants.Any(participant =>
                 participant.Id == request.CreatorParticipantId
-                && participant.AuthenticatedUserId == authenticatedUserId))
-            .Select(request => new RequestDetails(
+                && participant.AuthenticatedUserId == authenticatedUserId));
+    }
+
+    private IQueryable<RequestDetails> ProjectDetails(IQueryable<RequestEntity> requests)
+    {
+        return requests.Select(request => new RequestDetails(
                 request.Id,
                 request.Title,
                 request.Description,

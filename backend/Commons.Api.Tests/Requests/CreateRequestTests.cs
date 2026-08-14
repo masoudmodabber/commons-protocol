@@ -112,7 +112,8 @@ public sealed class CreateRequestTests
         await using var application = new CommonsApiApplication();
         var firstClient = await application.CreateSeededClientAsync("user-1");
         await JoinParticipantAsync(firstClient, "Alice");
-        var firstRequest = await CreateRequestAsync(firstClient);
+        var firstRequest = await CreateRequestAsync(firstClient, "Zebra transport");
+        var secondRequest = await CreateRequestAsync(firstClient, "Apple picking");
 
         var secondClient = application.CreateClient();
         secondClient.DefaultRequestHeaders.Add(TestAuthenticationHandler.UserHeader, "user-2");
@@ -121,8 +122,8 @@ public sealed class CreateRequestTests
 
         var requests = await firstClient.GetFromJsonAsync<List<RequestDetails>>("/api/requests");
 
-        requests.Should().ContainSingle()
-            .Which.Should().BeEquivalentTo(firstRequest);
+        requests.Should().HaveCount(2);
+        requests!.Select(request => request.Id).Should().Equal(secondRequest.Id, firstRequest.Id);
     }
 
     [Fact]
@@ -287,11 +288,13 @@ public sealed class CreateRequestTests
         viewed.Should().BeEquivalentTo(original);
     }
 
-    private static async Task<RequestDetails> CreateRequestAsync(HttpClient client)
+    private static async Task<RequestDetails> CreateRequestAsync(
+        HttpClient client,
+        string title = "Original title")
     {
         var response = await client.PostAsJsonAsync(
             "/api/requests",
-            new CreateRequestRequest("Original title", "Original description"));
+            new CreateRequestRequest(title, "Original description"));
         response.EnsureSuccessStatusCode();
 
         return (await response.Content.ReadFromJsonAsync<RequestDetails>())!;
