@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  browseRequests,
   cancelRequest,
   createRequest,
   editRequest,
+  getBrowseRequest,
   getMyRequests,
   getRequest,
   ParticipantProfile,
@@ -24,7 +26,10 @@ export function MyRequestsPage({ accessToken }: { accessToken: string }) {
           <p className="eyebrow">Requests you created</p>
           <h1 id="requests-heading">My Requests</h1>
         </div>
-        <a className="primary-link" href="#/requests/new">Create Request</a>
+        <div className="request-actions">
+          <a className="text-link" href="#/requests/browse">Browse Requests</a>
+          <a className="primary-link" href="#/requests/new">Create Request</a>
+        </div>
       </div>
 
       {requestsQuery.isPending && <p className="status-message">Loading your Requests…</p>}
@@ -49,6 +54,45 @@ export function MyRequestsPage({ accessToken }: { accessToken: string }) {
   );
 }
 
+export function BrowseRequestsPage({ accessToken }: { accessToken: string }) {
+  const requestsQuery = useQuery({
+    queryKey: ["browse-requests", accessToken],
+    queryFn: () => browseRequests(accessToken),
+  });
+
+  return (
+    <section className="feature-page requests" aria-labelledby="browse-requests-heading">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">Open needs in your Home Commons</p>
+          <h1 id="browse-requests-heading">Browse Requests</h1>
+        </div>
+        <a className="text-link" href="#/requests">My Requests</a>
+      </div>
+
+      {requestsQuery.isPending && <p className="status-message">Loading Requests…</p>}
+      {requestsQuery.isError && (
+        <p className="error-message" role="alert">{requestsQuery.error.message}</p>
+      )}
+      {requestsQuery.isSuccess && requestsQuery.data.length === 0 && (
+        <p className="empty-state">There are no Open Requests in your Home Commons.</p>
+      )}
+      {requestsQuery.isSuccess && requestsQuery.data.length > 0 && (
+        <ul className="request-list">
+          {requestsQuery.data.map((request) => (
+            <li key={request.id}>
+              <a href={`#/requests/browse/${request.id}`}>{request.title}</a>
+              <span className="request-status">{request.status}</span>
+              <p>{request.description}</p>
+              <p className="request-creator">Requested by {request.creator.displayName}</p>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
 export function CreateRequestPage({
   profile,
   accessToken,
@@ -64,6 +108,7 @@ export function CreateRequestPage({
     onSuccess: async (request) => {
       queryClient.setQueryData(["request", accessToken, request.id], request);
       await queryClient.invalidateQueries({ queryKey: ["my-requests", accessToken] });
+      await queryClient.invalidateQueries({ queryKey: ["browse-requests", accessToken] });
       navigate(`/requests/${request.id}`);
     },
   });
@@ -114,6 +159,10 @@ export function RequestDetailPage({
     onSuccess: async (request) => {
       queryClient.setQueryData(["request", accessToken, request.id], request);
       await queryClient.invalidateQueries({ queryKey: ["my-requests", accessToken] });
+      await queryClient.invalidateQueries({ queryKey: ["browse-requests", accessToken] });
+      await queryClient.invalidateQueries({
+        queryKey: ["browse-request", accessToken, request.id],
+      });
       setEditing(false);
     },
   });
@@ -122,6 +171,10 @@ export function RequestDetailPage({
     onSuccess: async (request) => {
       queryClient.setQueryData(["request", accessToken, request.id], request);
       await queryClient.invalidateQueries({ queryKey: ["my-requests", accessToken] });
+      await queryClient.invalidateQueries({ queryKey: ["browse-requests", accessToken] });
+      await queryClient.invalidateQueries({
+        queryKey: ["browse-request", accessToken, request.id],
+      });
     },
   });
 
@@ -195,6 +248,49 @@ export function RequestDetailPage({
       {cancelMutation.isError && (
         <p className="error-message" role="alert">{cancelMutation.error.message}</p>
       )}
+    </section>
+  );
+}
+
+export function BrowseRequestDetailPage({
+  accessToken,
+  requestId,
+}: {
+  accessToken: string;
+  requestId: string;
+}) {
+  const requestQuery = useQuery({
+    queryKey: ["browse-request", accessToken, requestId],
+    queryFn: () => getBrowseRequest(accessToken, requestId),
+  });
+
+  if (requestQuery.isPending) {
+    return <p className="status-message feature-page">Loading Request…</p>;
+  }
+
+  if (requestQuery.isError) {
+    return <p className="error-message feature-page" role="alert">{requestQuery.error.message}</p>;
+  }
+
+  const request = requestQuery.data;
+
+  return (
+    <section className="feature-page requests" aria-labelledby="browse-request-heading">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">Request in your Home Commons</p>
+          <h1 id="browse-request-heading">{request.title}</h1>
+        </div>
+        <span className="request-status">{request.status}</span>
+      </div>
+      <p className="request-description">{request.description}</p>
+      <dl className="request-details">
+        <div><dt>Requested by</dt><dd>{request.creator.displayName}</dd></div>
+        <div><dt>Home Commons</dt><dd>{request.homeCommons.name}</dd></div>
+      </dl>
+      <div className="request-actions">
+        <a className="text-link" href="#/requests/browse">Back to Browse Requests</a>
+      </div>
     </section>
   );
 }

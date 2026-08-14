@@ -60,6 +60,35 @@ public sealed class RequestsController(RequestApplicationService requestService)
             cancellationToken));
     }
 
+    [HttpGet("browse")]
+    public async Task<ActionResult<IReadOnlyList<RequestDetails>>> Browse(
+        CancellationToken cancellationToken)
+    {
+        var requests = await requestService.BrowseAsync(
+            GetAuthenticatedUserId(),
+            cancellationToken);
+
+        return requests is null
+            ? NotFound(new ProblemDetails
+            {
+                Title = "The authenticated user does not have a Participant profile."
+            })
+            : Ok(requests);
+    }
+
+    [HttpGet("browse/{requestId:guid}")]
+    public async Task<ActionResult<RequestDetails>> GetBrowseRequest(
+        Guid requestId,
+        CancellationToken cancellationToken)
+    {
+        var request = await requestService.GetBrowseRequestAsync(
+            GetAuthenticatedUserId(),
+            requestId,
+            cancellationToken);
+
+        return request is null ? NotFound() : Ok(request);
+    }
+
     [HttpPut("{requestId:guid}")]
     public async Task<IActionResult> Edit(
         Guid requestId,

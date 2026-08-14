@@ -132,7 +132,49 @@ So that other participants know I no longer need help with it.
 
 ## US 006 Browse Requests
 
-...
+As a participant
+
+I want to browse Open Requests created by other participants in my Home Commons
+
+So that I can discover ways I may be able to help.
+
+### Acceptance Criteria
+
+1. Only an authenticated Participant can browse Requests.
+
+2. A Participant can browse Requests belonging to their Home Commons.
+
+3. Requests from other Commons are not included.
+
+4. Only Open Requests are shown in the browse list.
+
+5. The Participant's own Requests may also appear in the list.
+
+6. Each Request in the list shows enough information to understand the need, including at least:
+   * Title.
+   * Description.
+   * Creator display name.
+   * Request status.
+
+7. A Participant can open a Request from the browse list and view its details.
+
+8. Viewing another Participant's Open Request does not allow the viewer to edit or cancel it.
+
+9. Browsing or viewing a Request does not create an Offer, Agreement, Exchange, Ledger Entry, or Commons Balance change.
+
+10. The Home Commons used for browsing is derived from the authenticated Participant's active Membership.
+
+11. A Participant cannot browse another Commons by supplying a different Commons identifier.
+
+12. Client supplied resource identifiers must be treated as untrusted.
+
+13. A Participant may view another Participant's Open Request only when that Request belongs to the same Home Commons.
+
+14. Cancelled or otherwise non Open Requests created by other Participants are not visible through the browse flow.
+
+15. The complete flow must be usable through the React frontend.
+
+16. The story is not complete if Requests can only be browsed through API calls, Postman, curl, or direct database access.
 
 ---
 

@@ -153,6 +153,17 @@ export function getRequest(accessToken: string, requestId: string): Promise<Requ
   return request<RequestDetails>(`/api/requests/${requestId}`, {}, accessToken);
 }
 
+export function browseRequests(accessToken: string): Promise<RequestDetails[]> {
+  return request<RequestDetails[]>("/api/requests/browse", {}, accessToken);
+}
+
+export function getBrowseRequest(
+  accessToken: string,
+  requestId: string,
+): Promise<RequestDetails> {
+  return request<RequestDetails>(`/api/requests/browse/${requestId}`, {}, accessToken);
+}
+
 export function editRequest(
   accessToken: string,
   requestId: string,

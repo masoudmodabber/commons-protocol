@@ -5,6 +5,8 @@ import { Authentication, JoinCommonsPage } from "./entry-pages";
 import { navigate, useHashPath } from "./navigation";
 import { CapabilitiesPage, ProfilePage } from "./participant-pages";
 import {
+  BrowseRequestDetailPage,
+  BrowseRequestsPage,
   CreateRequestPage,
   MyRequestsPage,
   RequestDetailPage,
@@ -78,6 +80,7 @@ function ParticipantApplication({
   onSignOut: () => void;
 }) {
   const path = useHashPath();
+  const browseRequestMatch = /^\/requests\/browse\/([^/]+)$/.exec(path);
   const requestMatch = /^\/requests\/([^/]+)$/.exec(path);
 
   let page = <ProfilePage profile={profile} />;
@@ -88,6 +91,15 @@ function ParticipantApplication({
     page = <MyRequestsPage accessToken={accessToken} />;
   } else if (path === "/requests/new") {
     page = <CreateRequestPage profile={profile} accessToken={accessToken} />;
+  } else if (path === "/requests/browse") {
+    page = <BrowseRequestsPage accessToken={accessToken} />;
+  } else if (browseRequestMatch) {
+    page = (
+      <BrowseRequestDetailPage
+        accessToken={accessToken}
+        requestId={browseRequestMatch[1]}
+      />
+    );
   } else if (requestMatch) {
     page = <RequestDetailPage accessToken={accessToken} requestId={requestMatch[1]} />;
   }

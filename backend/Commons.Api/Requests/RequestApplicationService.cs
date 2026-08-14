@@ -67,6 +67,54 @@ public sealed class RequestApplicationService(CommonsDbContext dbContext)
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<List<RequestDetails>?> BrowseAsync(
+        string authenticatedUserId,
+        CancellationToken cancellationToken)
+    {
+        var homeCommonsId = await GetHomeCommonsIdAsync(
+            authenticatedUserId,
+            cancellationToken);
+
+        if (homeCommonsId is null)
+        {
+            return null;
+        }
+
+        var requests = dbContext.Requests
+            .AsNoTracking()
+            .Where(request =>
+                request.HomeCommonsId == homeCommonsId.Value
+                && request.Status == RequestStatus.Open);
+
+        return await ProjectDetails(requests)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<RequestDetails?> GetBrowseRequestAsync(
+        string authenticatedUserId,
+        Guid requestId,
+        CancellationToken cancellationToken)
+    {
+        var homeCommonsId = await GetHomeCommonsIdAsync(
+            authenticatedUserId,
+            cancellationToken);
+
+        if (homeCommonsId is null)
+        {
+            return null;
+        }
+
+        var requests = dbContext.Requests
+            .AsNoTracking()
+            .Where(request =>
+                request.Id == requestId
+                && request.HomeCommonsId == homeCommonsId.Value
+                && request.Status == RequestStatus.Open);
+
+        return await ProjectDetails(requests)
+            .SingleOrDefaultAsync(cancellationToken);
+    }
+
     private IQueryable<RequestEntity> GetRequestsForCreator(string authenticatedUserId)
     {
         return dbContext.Requests
@@ -74,6 +122,17 @@ public sealed class RequestApplicationService(CommonsDbContext dbContext)
             .Where(request => dbContext.Participants.Any(participant =>
                 participant.Id == request.CreatorParticipantId
                 && participant.AuthenticatedUserId == authenticatedUserId));
+    }
+
+    private Task<Guid?> GetHomeCommonsIdAsync(
+        string authenticatedUserId,
+        CancellationToken cancellationToken)
+    {
+        return dbContext.Participants
+            .AsNoTracking()
+            .Where(participant => participant.AuthenticatedUserId == authenticatedUserId)
+            .Select(participant => (Guid?)participant.Membership.HomeCommonsId)
+            .SingleOrDefaultAsync(cancellationToken);
     }
 
     private IQueryable<RequestDetails> ProjectDetails(IQueryable<RequestEntity> requests)

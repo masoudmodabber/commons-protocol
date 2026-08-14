@@ -26,6 +26,15 @@ Deferred from US 005:
 
 * Decide how cancelling an Open Request should behave once Offers already exist, including whether Offer creators should be notified and what happens to outstanding Offers.
 
+Deferred from US 006:
+
+* Request sorting and filtering.
+* Pagination or infinite scrolling.
+* Request categories.
+* Location based filtering.
+* Highlighting Requests that match a Participant's Capabilities.
+* More advanced discovery and recommendation behaviour.
+
 ## Capabilities
 
 Deferred from US 002:

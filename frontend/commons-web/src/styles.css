@@ -363,6 +363,7 @@ button { cursor: pointer; }
 
 .request-list a { color: #285f4e; font-weight: 800; text-decoration: none; }
 .request-list p { grid-column: 1 / -1; margin: 0; color: #5b6e65; }
+.request-list .request-creator { color: #728078; font-size: 0.85rem; font-weight: 700; }
 
 .message-card { max-width: 28rem; text-align: center; }
 .message-card .brand { justify-content: center; margin-bottom: 2rem; }
