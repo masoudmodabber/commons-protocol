@@ -43,6 +43,23 @@ public sealed class ParticipantPersistenceTests
             && foreignKey.PrincipalEntityType.ClrType == typeof(CommonsEntity));
     }
 
+    [Fact]
+    public void Capability_has_participant_scoped_normalized_uniqueness_and_cascade_ownership()
+    {
+        using var dbContext = CreateDbContext();
+        var capability = dbContext.Model.FindEntityType(typeof(Capability));
+
+        capability.Should().NotBeNull();
+        capability!.GetIndexes().Should().ContainSingle(index =>
+            index.IsUnique
+            && index.Properties.Select(property => property.Name)
+                .SequenceEqual(new[] { nameof(Capability.ParticipantId), "NormalizedText" }));
+        capability.GetForeignKeys().Should().ContainSingle(foreignKey =>
+            foreignKey.IsRequired
+            && foreignKey.DeleteBehavior == DeleteBehavior.Cascade
+            && foreignKey.PrincipalEntityType.ClrType == typeof(Participant));
+    }
+
     private static CommonsDbContext CreateDbContext()
     {
         var options = new DbContextOptionsBuilder<CommonsDbContext>()

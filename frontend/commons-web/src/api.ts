@@ -20,6 +20,12 @@ export interface ParticipantProfile {
   bio: string | null;
   joinedAt: string;
   homeCommons: CommonsSummary;
+  capabilities: CapabilitySummary[];
+}
+
+export interface CapabilitySummary {
+  id: string;
+  text: string;
 }
 
 interface AccessTokenResponse {
@@ -96,6 +102,22 @@ export function joinCommons(
   return request<void>(
     "/api/participants/me",
     { method: "POST", body: JSON.stringify(input) },
+    accessToken,
+  );
+}
+
+export function addCapability(accessToken: string, text: string): Promise<CapabilitySummary> {
+  return request<CapabilitySummary>(
+    "/api/participants/me/capabilities",
+    { method: "POST", body: JSON.stringify({ text }) },
+    accessToken,
+  );
+}
+
+export function removeCapability(accessToken: string, capabilityId: string): Promise<void> {
+  return request<void>(
+    `/api/participants/me/capabilities/${capabilityId}`,
+    { method: "DELETE" },
     accessToken,
   );
 }

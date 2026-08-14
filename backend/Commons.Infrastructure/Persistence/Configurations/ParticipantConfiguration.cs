@@ -35,7 +35,15 @@ internal sealed class ParticipantConfiguration : IEntityTypeConfiguration<Partic
             .IsRequired()
             .OnDelete(DeleteBehavior.Cascade);
 
+        builder.HasMany(participant => participant.Capabilities)
+            .WithOne()
+            .HasForeignKey(capability => capability.ParticipantId)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Cascade);
+
         builder.Navigation(participant => participant.Profile).IsRequired();
         builder.Navigation(participant => participant.Membership).IsRequired();
+        builder.Navigation(participant => participant.Capabilities)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
     }
 }

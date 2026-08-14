@@ -14,6 +14,7 @@ FROM restore AS development
 COPY backend/ backend/
 WORKDIR /src/backend
 ENV DOTNET_USE_POLLING_FILE_WATCHER=1
+ENV DOTNET_WATCH_RESTART_ON_RUDE_EDIT=1
 EXPOSE 8080
 CMD ["dotnet", "watch", "--project", "Commons.Api/Commons.Api.csproj", "run", "--no-launch-profile", "--urls", "http://0.0.0.0:8080"]
 

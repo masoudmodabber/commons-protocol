@@ -11,6 +11,8 @@ public sealed class CommonsDbContext(DbContextOptions<CommonsDbContext> options)
 {
     public DbSet<Participant> Participants => Set<Participant>();
 
+    public DbSet<Capability> Capabilities => Set<Capability>();
+
     public DbSet<CommonsEntity> Commons => Set<CommonsEntity>();
 
     protected override void OnModelCreating(ModelBuilder builder)

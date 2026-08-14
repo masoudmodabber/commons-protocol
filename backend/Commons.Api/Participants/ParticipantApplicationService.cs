@@ -73,8 +73,96 @@ public sealed class ParticipantApplicationService(
                 participant.Membership.JoinedAt,
                 new CommonsSummary(
                     participant.Membership.HomeCommons.Id,
-                    participant.Membership.HomeCommons.Name)))
+                    participant.Membership.HomeCommons.Name),
+                participant.Capabilities
+                    .OrderBy(capability => capability.Text)
+                    .Select(capability => new CapabilitySummary(capability.Id, capability.Text))
+                    .ToList()))
             .SingleOrDefaultAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<CapabilitySummary>?> GetCapabilitiesAsync(
+        string authenticatedUserId,
+        CancellationToken cancellationToken)
+    {
+        var participantExists = await dbContext.Participants.AnyAsync(
+            participant => participant.AuthenticatedUserId == authenticatedUserId,
+            cancellationToken);
+
+        if (!participantExists)
+        {
+            return null;
+        }
+
+        return await dbContext.Capabilities
+            .AsNoTracking()
+            .Where(capability => dbContext.Participants.Any(participant =>
+                participant.Id == capability.ParticipantId
+                && participant.AuthenticatedUserId == authenticatedUserId))
+            .OrderBy(capability => capability.Text)
+            .Select(capability => new CapabilitySummary(capability.Id, capability.Text))
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<AddCapabilityResult> AddCapabilityAsync(
+        string authenticatedUserId,
+        string text,
+        CancellationToken cancellationToken)
+    {
+        var participant = await dbContext.Participants
+            .Include(existing => existing.Capabilities)
+            .SingleOrDefaultAsync(
+                existing => existing.AuthenticatedUserId == authenticatedUserId,
+                cancellationToken);
+
+        if (participant is null)
+        {
+            return AddCapabilityResult.NotParticipant();
+        }
+
+        Capability capability;
+
+        try
+        {
+            capability = participant.AddCapability(text);
+        }
+        catch (CapabilityAlreadyExistsException exception)
+        {
+            return AddCapabilityResult.Duplicate(exception.Message);
+        }
+        catch (DomainRuleViolationException exception)
+        {
+            return AddCapabilityResult.Invalid(exception.Message);
+        }
+
+        dbContext.Capabilities.Add(capability);
+        await dbContext.SaveChangesAsync(cancellationToken);
+        return AddCapabilityResult.Added(new CapabilitySummary(capability.Id, capability.Text));
+    }
+
+    public async Task<RemoveCapabilityOutcome> RemoveCapabilityAsync(
+        string authenticatedUserId,
+        Guid capabilityId,
+        CancellationToken cancellationToken)
+    {
+        var participant = await dbContext.Participants
+            .Include(existing => existing.Capabilities)
+            .SingleOrDefaultAsync(
+                existing => existing.AuthenticatedUserId == authenticatedUserId,
+                cancellationToken);
+
+        if (participant is null)
+        {
+            return RemoveCapabilityOutcome.NotParticipant;
+        }
+
+        if (!participant.RemoveCapability(capabilityId))
+        {
+            return RemoveCapabilityOutcome.CapabilityNotFound;
+        }
+
+        await dbContext.SaveChangesAsync(cancellationToken);
+        return RemoveCapabilityOutcome.Removed;
     }
 }
 
@@ -82,12 +170,48 @@ public sealed record JoinParticipantCommand(Guid HomeCommonsId, string DisplayNa
 
 public sealed record CommonsSummary(Guid Id, string Name);
 
+public sealed record CapabilitySummary(Guid Id, string Text);
+
 public sealed record ParticipantProfile(
     Guid Id,
     string DisplayName,
     string? Bio,
     DateTimeOffset JoinedAt,
-    CommonsSummary HomeCommons);
+    CommonsSummary HomeCommons,
+    IReadOnlyList<CapabilitySummary> Capabilities);
+
+public enum AddCapabilityOutcome
+{
+    Added,
+    NotParticipant,
+    Duplicate,
+    Invalid
+}
+
+public sealed record AddCapabilityResult(
+    AddCapabilityOutcome Outcome,
+    CapabilitySummary? Capability = null,
+    string? Error = null)
+{
+    public static AddCapabilityResult Added(CapabilitySummary capability) =>
+        new(AddCapabilityOutcome.Added, capability);
+
+    public static AddCapabilityResult NotParticipant() =>
+        new(AddCapabilityOutcome.NotParticipant);
+
+    public static AddCapabilityResult Duplicate(string error) =>
+        new(AddCapabilityOutcome.Duplicate, Error: error);
+
+    public static AddCapabilityResult Invalid(string error) =>
+        new(AddCapabilityOutcome.Invalid, Error: error);
+}
+
+public enum RemoveCapabilityOutcome
+{
+    Removed,
+    NotParticipant,
+    CapabilityNotFound
+}
 
 public enum JoinParticipantOutcome
 {

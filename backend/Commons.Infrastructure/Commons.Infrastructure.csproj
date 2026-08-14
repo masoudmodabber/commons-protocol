@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Persistence/Schema/schema-v002-capabilities.sql" />
     <EmbeddedResource Include="Persistence/Seeding/seed-dev.sql" />
   </ItemGroup>
 

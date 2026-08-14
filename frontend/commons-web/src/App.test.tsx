@@ -47,6 +47,7 @@ describe("US 001 participant join flow", () => {
               bio: "Neighbourhood gardener",
               joinedAt: "2026-08-14T00:00:00Z",
               homeCommons: { id: "commons-1", name: "Brisbane Commons" },
+              capabilities: [],
             })
           : jsonResponse({ title: "Not found" }, 404);
       }
@@ -115,5 +116,102 @@ describe("US 001 participant join flow", () => {
     expect(sessionStorage.getItem("commons-access-token")).toBe("new-access-token");
     expect(vi.mocked(fetch).mock.calls[0][0].toString()).toContain("/api/auth/register");
     expect(vi.mocked(fetch).mock.calls[1][0].toString()).toContain("/api/auth/login");
+  });
+});
+
+describe("US 002 Capability management", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("lets a Participant add, view, and remove free-text Capabilities", async () => {
+    sessionStorage.setItem("commons-access-token", "access-token");
+    let capabilities: Array<{ id: string; text: string }> = [];
+
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
+      const path = input.toString();
+
+      if (path.endsWith("/api/participants/me/capabilities") && init?.method === "POST") {
+        capabilities = [{ id: "capability-1", text: "Computer Hardware Repair" }];
+        return jsonResponse(capabilities[0], 201);
+      }
+
+      if (path.endsWith("/api/participants/me/capabilities/capability-1")
+          && init?.method === "DELETE") {
+        capabilities = [];
+        return new Response(null, { status: 204 });
+      }
+
+      if (path.endsWith("/api/participants/me")) {
+        return jsonResponse({
+          id: "participant-1",
+          displayName: "Alice",
+          bio: null,
+          joinedAt: "2026-08-14T00:00:00Z",
+          homeCommons: { id: "commons-1", name: "Brisbane Commons" },
+          capabilities,
+        });
+      }
+
+      throw new Error(`Unexpected request: ${path}`);
+    });
+
+    renderApp();
+
+    expect(await screen.findByRole("heading", { name: "Capabilities" })).toBeInTheDocument();
+    expect(screen.getByText(/do not indicate availability, price, quantity, or an obligation/i))
+      .toBeInTheDocument();
+    expect(screen.getByText("You have not listed any Capabilities yet.")).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("Add a Capability"), {
+      target: { value: "  Computer Hardware Repair  " },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Add Capability" }));
+
+    expect(await screen.findByText("Computer Hardware Repair")).toBeInTheDocument();
+    const addRequest = vi.mocked(fetch).mock.calls.find(([, options]) => options?.method === "POST");
+    expect(addRequest?.[1]?.body).toBe(JSON.stringify({ text: "  Computer Hardware Repair  " }));
+
+    fireEvent.click(screen.getByRole("button", { name: "Remove Computer Hardware Repair" }));
+
+    expect(await screen.findByText("You have not listed any Capabilities yet.")).toBeInTheDocument();
+    expect(screen.queryByText("Computer Hardware Repair")).not.toBeInTheDocument();
+  });
+
+  it("shows duplicate Capability rejection from the domain-backed API", async () => {
+    sessionStorage.setItem("commons-access-token", "access-token");
+
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
+      const path = input.toString();
+
+      if (path.endsWith("/api/participants/me/capabilities") && init?.method === "POST") {
+        return jsonResponse({
+          title: "This Capability is already listed on the Participant's profile.",
+        }, 409);
+      }
+
+      if (path.endsWith("/api/participants/me")) {
+        return jsonResponse({
+          id: "participant-1",
+          displayName: "Alice",
+          bio: null,
+          joinedAt: "2026-08-14T00:00:00Z",
+          homeCommons: { id: "commons-1", name: "Brisbane Commons" },
+          capabilities: [{ id: "capability-1", text: "Carpentry" }],
+        });
+      }
+
+      throw new Error(`Unexpected request: ${path}`);
+    });
+
+    renderApp();
+    await screen.findByText("Carpentry");
+    fireEvent.change(screen.getByLabelText("Add a Capability"), {
+      target: { value: "  cArPeNtRy  " },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Add Capability" }));
+
+    expect(await screen.findByRole("alert"))
+      .toHaveTextContent("already listed on the Participant's profile");
   });
 });

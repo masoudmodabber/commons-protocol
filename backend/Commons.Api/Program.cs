@@ -1,5 +1,6 @@
 using Commons.Api.Participants;
 using Commons.Infrastructure.Persistence;
+using Commons.Infrastructure.Persistence.Schema;
 using Commons.Infrastructure.Persistence.Seeding;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -44,6 +45,11 @@ await using (var scope = app.Services.CreateAsyncScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<CommonsDbContext>();
     await dbContext.Database.EnsureCreatedAsync();
+
+    if (dbContext.Database.IsRelational())
+    {
+        await RelationalSchemaInitializer.InitializeAsync(dbContext);
+    }
 
     if (app.Environment.IsDevelopment())
     {

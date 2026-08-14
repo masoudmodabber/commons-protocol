@@ -1,12 +1,14 @@
 import { FormEvent, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  addCapability,
   ApiError,
   getCommons,
   getProfile,
   joinCommons,
   login,
   ParticipantProfile,
+  removeCapability,
   register,
 } from "./api";
 
@@ -44,7 +46,7 @@ export function App() {
   }
 
   if (profileQuery.isSuccess) {
-    return <Profile profile={profileQuery.data} onSignOut={signOut} />;
+    return <Profile profile={profileQuery.data} accessToken={accessToken} onSignOut={signOut} />;
   }
 
   if (profileQuery.error instanceof ApiError && profileQuery.error.status === 404) {
@@ -189,7 +191,15 @@ function JoinCommons({ accessToken, onSignOut }: { accessToken: string; onSignOu
   );
 }
 
-function Profile({ profile, onSignOut }: { profile: ParticipantProfile; onSignOut: () => void }) {
+function Profile({
+  profile,
+  accessToken,
+  onSignOut,
+}: {
+  profile: ParticipantProfile;
+  accessToken: string;
+  onSignOut: () => void;
+}) {
   return (
     <main className="page-shell">
       <section className="card profile-card">
@@ -206,8 +216,99 @@ function Profile({ profile, onSignOut }: { profile: ParticipantProfile; onSignOu
           <div><dt>Home Commons</dt><dd>{profile.homeCommons.name}</dd></div>
           <div><dt>Joined</dt><dd>{new Intl.DateTimeFormat(undefined, { dateStyle: "long" }).format(new Date(profile.joinedAt))}</dd></div>
         </dl>
+        <CapabilityManager profile={profile} accessToken={accessToken} />
       </section>
     </main>
+  );
+}
+
+function CapabilityManager({
+  profile,
+  accessToken,
+}: {
+  profile: ParticipantProfile;
+  accessToken: string;
+}) {
+  const queryClient = useQueryClient();
+  const [text, setText] = useState("");
+  const addMutation = useMutation({
+    mutationFn: () => addCapability(accessToken, text),
+    onSuccess: async () => {
+      setText("");
+      await queryClient.invalidateQueries({ queryKey: ["participant-profile"] });
+    },
+  });
+  const removeMutation = useMutation({
+    mutationFn: (capabilityId: string) => removeCapability(accessToken, capabilityId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["participant-profile"] }),
+  });
+
+  return (
+    <section className="capabilities" aria-labelledby="capabilities-heading">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">What I may be able to provide</p>
+          <h2 id="capabilities-heading">Capabilities</h2>
+        </div>
+        <span className="capability-count">{profile.capabilities.length}</span>
+      </div>
+      <p className="capability-guidance">
+        These descriptions help your Commons understand what you may be able to contribute.
+        They do not indicate availability, price, quantity, or an obligation to trade.
+      </p>
+
+      {profile.capabilities.length === 0 ? (
+        <p className="empty-state">You have not listed any Capabilities yet.</p>
+      ) : (
+        <ul className="capability-list">
+          {profile.capabilities.map((capability) => (
+            <li key={capability.id}>
+              <span>{capability.text}</span>
+              <button
+                type="button"
+                className="remove-button"
+                aria-label={`Remove ${capability.text}`}
+                disabled={removeMutation.isPending}
+                onClick={() => removeMutation.mutate(capability.id)}
+              >
+                Remove
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <form
+        className="capability-form"
+        onSubmit={(event) => {
+          event.preventDefault();
+          addMutation.mutate();
+        }}
+      >
+        <Field label="Add a Capability" htmlFor="capability-text">
+          <input
+            id="capability-text"
+            value={text}
+            onChange={(event) => setText(event.target.value)}
+            placeholder="For example, bicycle repair"
+            required
+          />
+        </Field>
+        <button
+          className="primary-button"
+          type="submit"
+          disabled={addMutation.isPending || text.trim().length === 0}
+        >
+          {addMutation.isPending ? "Adding…" : "Add Capability"}
+        </button>
+      </form>
+      {addMutation.isError && (
+        <p className="error-message" role="alert">{addMutation.error.message}</p>
+      )}
+      {removeMutation.isError && (
+        <p className="error-message" role="alert">{removeMutation.error.message}</p>
+      )}
+    </section>
   );
 }
 

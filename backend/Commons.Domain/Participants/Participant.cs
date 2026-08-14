@@ -2,6 +2,8 @@ namespace Commons.Domain.Participants;
 
 public sealed class Participant
 {
+    private readonly List<Capability> capabilities = [];
+
     private Participant()
     {
     }
@@ -28,6 +30,8 @@ public sealed class Participant
 
     public Membership Membership { get; private set; } = null!;
 
+    public IReadOnlyCollection<Capability> Capabilities => capabilities.AsReadOnly();
+
     public static Participant Join(
         string authenticatedUserId,
         Guid homeCommonsId,
@@ -47,5 +51,26 @@ public sealed class Participant
             bio,
             homeCommonsId,
             joinedAt);
+    }
+
+    public Capability AddCapability(string text)
+    {
+        var capability = new Capability(Id, text);
+
+        if (capabilities.Any(existing => existing.NormalizedText == capability.NormalizedText))
+        {
+            throw new CapabilityAlreadyExistsException(
+                "This Capability is already listed on the Participant's profile.");
+        }
+
+        capabilities.Add(capability);
+        return capability;
+    }
+
+    public bool RemoveCapability(Guid capabilityId)
+    {
+        var capability = capabilities.SingleOrDefault(existing => existing.Id == capabilityId);
+
+        return capability is not null && capabilities.Remove(capability);
     }
 }
