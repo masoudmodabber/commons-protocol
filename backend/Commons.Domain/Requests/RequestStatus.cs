@@ -2,5 +2,6 @@ namespace Commons.Domain.Requests;
 
 public enum RequestStatus
 {
-    Open
+    Open,
+    Cancelled
 }

@@ -18,6 +18,10 @@ Deferred from US 003:
 * Supporting images or files.
 * Additional constraints.
 
+Deferred from US 004:
+
+* Decide how editing an Open Request should behave once Offers already exist, including whether edits should be restricted or Offer creators should be notified.
+
 ## Capabilities
 
 Deferred from US 002:

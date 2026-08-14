@@ -1,4 +1,5 @@
 using Commons.Domain.Participants;
+using Commons.Domain.Requests;
 using Commons.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -73,6 +74,47 @@ public sealed class RequestApplicationService(CommonsDbContext dbContext)
                         .Single())))
             .SingleOrDefaultAsync(cancellationToken);
     }
+
+    public async Task<EditRequestResult> EditAsync(
+        string authenticatedUserId,
+        Guid requestId,
+        string title,
+        string description,
+        CancellationToken cancellationToken)
+    {
+        var request = await dbContext.Requests
+            .SingleOrDefaultAsync(existing =>
+                existing.Id == requestId
+                && dbContext.Participants.Any(participant =>
+                    participant.Id == existing.CreatorParticipantId
+                    && participant.AuthenticatedUserId == authenticatedUserId),
+                cancellationToken);
+
+        if (request is null)
+        {
+            return EditRequestResult.NotFound();
+        }
+
+        try
+        {
+            request.Edit(title, description);
+        }
+        catch (RequestNotOpenException exception)
+        {
+            return EditRequestResult.NotOpen(exception.Message);
+        }
+        catch (DomainRuleViolationException exception)
+        {
+            return EditRequestResult.Invalid(exception.Message);
+        }
+
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        var details = await GetForCreatorAsync(authenticatedUserId, request.Id, cancellationToken)
+            ?? throw new InvalidOperationException("The edited Request could not be loaded.");
+
+        return EditRequestResult.Edited(details);
+    }
 }
 
 public sealed record RequestDetails(
@@ -107,4 +149,30 @@ public sealed record CreateRequestResult(
 
     public static CreateRequestResult Invalid(string error) =>
         new(CreateRequestOutcome.Invalid, Error: error);
+}
+
+public enum EditRequestOutcome
+{
+    Edited,
+    NotFound,
+    NotOpen,
+    Invalid
+}
+
+public sealed record EditRequestResult(
+    EditRequestOutcome Outcome,
+    RequestDetails? Request = null,
+    string? Error = null)
+{
+    public static EditRequestResult Edited(RequestDetails request) =>
+        new(EditRequestOutcome.Edited, request);
+
+    public static EditRequestResult NotFound() =>
+        new(EditRequestOutcome.NotFound);
+
+    public static EditRequestResult NotOpen(string error) =>
+        new(EditRequestOutcome.NotOpen, Error: error);
+
+    public static EditRequestResult Invalid(string error) =>
+        new(EditRequestOutcome.Invalid, Error: error);
 }

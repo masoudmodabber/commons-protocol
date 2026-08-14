@@ -32,7 +32,7 @@ export interface RequestDetails {
   id: string;
   title: string;
   description: string;
-  status: "Open";
+  status: "Open" | "Cancelled";
   creator: {
     participantId: string;
     displayName: string;
@@ -141,6 +141,18 @@ export function createRequest(
   return request<RequestDetails>(
     "/api/requests",
     { method: "POST", body: JSON.stringify(input) },
+    accessToken,
+  );
+}
+
+export function editRequest(
+  accessToken: string,
+  requestId: string,
+  input: { title: string; description: string },
+): Promise<RequestDetails> {
+  return request<RequestDetails>(
+    `/api/requests/${requestId}`,
+    { method: "PUT", body: JSON.stringify(input) },
     accessToken,
   );
 }

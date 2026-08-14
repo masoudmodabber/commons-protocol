@@ -223,7 +223,7 @@ describe("US 003 Request creation", () => {
     vi.restoreAllMocks();
   });
 
-  it("lets a Participant create and immediately view an Open Request", async () => {
+  it("lets a Participant create, edit, and view an Open Request", async () => {
     sessionStorage.setItem("commons-access-token", "access-token");
 
     vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
@@ -238,6 +238,17 @@ describe("US 003 Request creation", () => {
           creator: { participantId: "participant-1", displayName: "Alice" },
           homeCommons: { id: "commons-1", name: "Brisbane Commons" },
         }, 201);
+      }
+
+      if (path.endsWith("/api/requests/request-1") && init?.method === "PUT") {
+        return jsonResponse({
+          id: "request-1",
+          title: "Help repairing two fence panels",
+          description: "Two garden fence panels need replacing.",
+          status: "Open",
+          creator: { participantId: "participant-1", displayName: "Alice" },
+          homeCommons: { id: "commons-1", name: "Brisbane Commons" },
+        });
       }
 
       if (path.endsWith("/api/participants/me")) {
@@ -278,11 +289,38 @@ describe("US 003 Request creation", () => {
     expect(screen.getAllByText("Alice")).not.toHaveLength(0);
     expect(screen.getAllByText("Brisbane Commons")).not.toHaveLength(0);
 
-    const createCall = vi.mocked(fetch).mock.calls.find(([, options]) =>
-      options?.method === "POST");
+    const createCall = vi.mocked(fetch).mock.calls.find(([input, options]) =>
+      input.toString().endsWith("/api/requests") && options?.method === "POST");
     expect(createCall?.[1]?.body).toBe(JSON.stringify({
       title: "  Help repairing a fence  ",
       description: "  One garden fence panel needs replacing.  ",
+    }));
+
+    fireEvent.click(screen.getByRole("button", { name: "Edit Request" }));
+    expect(await screen.findByRole("heading", { name: "Edit Request" })).toBeInTheDocument();
+    expect(screen.queryByLabelText(/Commons/i)).not.toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText("Request title"), { target: { value: "   " } });
+    expect(screen.getByRole("button", { name: "Save changes" })).toBeDisabled();
+    fireEvent.change(screen.getByLabelText("Request title"), {
+      target: { value: "  Help repairing two fence panels  " },
+    });
+    fireEvent.change(screen.getByLabelText("Description"), {
+      target: { value: "  Two garden fence panels need replacing.  " },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
+
+    expect(await screen.findByRole("heading", { name: "Help repairing two fence panels" }))
+      .toBeInTheDocument();
+    expect(screen.getByText("Two garden fence panels need replacing.")).toBeInTheDocument();
+    expect(screen.getByText("Open")).toBeInTheDocument();
+    expect(screen.getAllByText("Alice")).not.toHaveLength(0);
+    expect(screen.getAllByText("Brisbane Commons")).not.toHaveLength(0);
+
+    const editCall = vi.mocked(fetch).mock.calls.find(([input, options]) =>
+      input.toString().endsWith("/api/requests/request-1") && options?.method === "PUT");
+    expect(editCall?.[1]?.body).toBe(JSON.stringify({
+      title: "  Help repairing two fence panels  ",
+      description: "  Two garden fence panels need replacing.  ",
     }));
   });
 

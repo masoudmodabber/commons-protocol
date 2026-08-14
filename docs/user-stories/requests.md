@@ -50,7 +50,45 @@ So that other participants in my Home Commons can offer to help.
 
 ## US 004 Edit a Request
 
-...
+As a participant
+
+I want to edit a Request I created
+
+So that I can correct or clarify what I need while the Request is still Open.
+
+### Acceptance Criteria
+
+1. Only the Participant who created a Request can edit it.
+
+2. Only an Open Request can be edited.
+
+3. The Participant can edit the Request title.
+
+4. The Participant can edit the Request description.
+
+5. Title and description are trimmed before being saved.
+
+6. Empty or whitespace only titles are rejected.
+
+7. Empty or whitespace only descriptions are rejected.
+
+8. Editing a Request does not change its Home Commons.
+
+9. Editing a Request does not change the Participant who created it.
+
+10. Editing a Request does not change its status.
+
+11. Editing a Request does not create an Offer, Agreement, Exchange, Ledger Entry, or Commons Balance change.
+
+12. A Participant cannot edit a Request created by another Participant.
+
+13. Editing Requests that are no longer Open is rejected.
+
+14. After saving changes, the Participant can view the updated Request.
+
+15. The complete flow must be usable through the React frontend.
+
+16. The story is not complete if Requests can only be edited through API calls, Postman, curl, or direct database access.
 
 ---
 

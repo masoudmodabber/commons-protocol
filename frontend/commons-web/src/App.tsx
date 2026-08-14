@@ -4,6 +4,7 @@ import {
   addCapability,
   ApiError,
   createRequest,
+  editRequest,
   getCommons,
   getProfile,
   joinCommons,
@@ -327,12 +328,20 @@ function RequestManager({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [createdRequest, setCreatedRequest] = useState<RequestDetails | null>(null);
+  const [editing, setEditing] = useState(false);
   const createMutation = useMutation({
     mutationFn: () => createRequest(accessToken, { title, description }),
     onSuccess: (request) => setCreatedRequest(request),
   });
+  const editMutation = useMutation({
+    mutationFn: () => editRequest(accessToken, createdRequest!.id, { title, description }),
+    onSuccess: (request) => {
+      setCreatedRequest(request);
+      setEditing(false);
+    },
+  });
 
-  if (createdRequest) {
+  if (createdRequest && !editing) {
     return (
       <section className="requests" aria-labelledby="request-heading">
         <div className="section-heading">
@@ -347,17 +356,92 @@ function RequestManager({
           <div><dt>Requested by</dt><dd>{createdRequest.creator.displayName}</dd></div>
           <div><dt>Home Commons</dt><dd>{createdRequest.homeCommons.name}</dd></div>
         </dl>
-        <button
-          type="button"
-          className="text-button"
-          onClick={() => {
-            setCreatedRequest(null);
-            setTitle("");
-            setDescription("");
+        <div className="request-actions">
+          {createdRequest.status === "Open" && (
+            <button
+              type="button"
+              className="primary-button"
+              onClick={() => {
+                setTitle(createdRequest.title);
+                setDescription(createdRequest.description);
+                setEditing(true);
+              }}
+            >
+              Edit Request
+            </button>
+          )}
+          <button
+            type="button"
+            className="text-button"
+            onClick={() => {
+              setCreatedRequest(null);
+              setTitle("");
+              setDescription("");
+            }}
+          >
+            Create another Request
+          </button>
+        </div>
+      </section>
+    );
+  }
+
+  if (createdRequest && editing) {
+    return (
+      <section className="requests" aria-labelledby="edit-request-heading">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Open Request</p>
+            <h2 id="edit-request-heading">Edit Request</h2>
+          </div>
+        </div>
+        <form
+          className="form-stack"
+          onSubmit={(event) => {
+            event.preventDefault();
+            editMutation.mutate();
           }}
         >
-          Create another Request
-        </button>
+          <Field label="Request title" htmlFor="edit-request-title">
+            <input
+              id="edit-request-title"
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
+              required
+            />
+          </Field>
+          <Field label="Description" htmlFor="edit-request-description">
+            <textarea
+              id="edit-request-description"
+              rows={5}
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              required
+            />
+          </Field>
+          {editMutation.isError && (
+            <p className="error-message" role="alert">{editMutation.error.message}</p>
+          )}
+          <div className="request-actions">
+            <button
+              className="primary-button"
+              type="submit"
+              disabled={editMutation.isPending
+                || title.trim().length === 0
+                || description.trim().length === 0}
+            >
+              {editMutation.isPending ? "Saving…" : "Save changes"}
+            </button>
+            <button
+              className="text-button"
+              type="button"
+              disabled={editMutation.isPending}
+              onClick={() => setEditing(false)}
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
       </section>
     );
   }

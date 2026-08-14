@@ -51,9 +51,43 @@ public sealed class RequestsController(RequestApplicationService requestService)
         return request is null ? NotFound() : Ok(request);
     }
 
+    [HttpPut("{requestId:guid}")]
+    public async Task<IActionResult> Edit(
+        Guid requestId,
+        EditRequestRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await requestService.EditAsync(
+            GetAuthenticatedUserId(),
+            requestId,
+            request.Title,
+            request.Description,
+            cancellationToken);
+
+        return result.Outcome switch
+        {
+            EditRequestOutcome.Edited => Ok(result.Request),
+            EditRequestOutcome.NotFound => NotFound(new ProblemDetails
+            {
+                Title = "The Request does not exist or was not created by this Participant."
+            }),
+            EditRequestOutcome.NotOpen => Conflict(new ProblemDetails
+            {
+                Title = result.Error
+            }),
+            EditRequestOutcome.Invalid => BadRequest(new ProblemDetails
+            {
+                Title = result.Error
+            }),
+            _ => throw new InvalidOperationException("Unknown edit Request outcome.")
+        };
+    }
+
     private string GetAuthenticatedUserId() =>
         User.FindFirstValue(ClaimTypes.NameIdentifier)
         ?? throw new InvalidOperationException("The authenticated user has no identifier claim.");
 }
 
 public sealed record CreateRequestRequest(string Title, string Description);
+
+public sealed record EditRequestRequest(string Title, string Description);

@@ -304,6 +304,8 @@ button { cursor: pointer; }
 .request-details dt { color: #728078; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; }
 .request-details dd { margin: 0.4rem 0 0; color: #244b3f; font-weight: 750; }
 
+.request-actions { display: flex; align-items: center; gap: 1rem; }
+
 .message-card { max-width: 28rem; text-align: center; }
 .message-card .brand { justify-content: center; margin-bottom: 2rem; }
 .message-card .primary-button { margin-top: 1.5rem; }
