@@ -164,3 +164,14 @@ export function editRequest(
     accessToken,
   );
 }
+
+export function cancelRequest(
+  accessToken: string,
+  requestId: string,
+): Promise<RequestDetails> {
+  return request<RequestDetails>(
+    `/api/requests/${requestId}/cancel`,
+    { method: "POST" },
+    accessToken,
+  );
+}

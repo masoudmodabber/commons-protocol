@@ -92,6 +92,31 @@ public sealed class RequestsController(RequestApplicationService requestService)
         };
     }
 
+    [HttpPost("{requestId:guid}/cancel")]
+    public async Task<IActionResult> Cancel(
+        Guid requestId,
+        CancellationToken cancellationToken)
+    {
+        var result = await requestService.CancelAsync(
+            GetAuthenticatedUserId(),
+            requestId,
+            cancellationToken);
+
+        return result.Outcome switch
+        {
+            CancelRequestOutcome.Cancelled => Ok(result.Request),
+            CancelRequestOutcome.NotFound => NotFound(new ProblemDetails
+            {
+                Title = "The Request does not exist or was not created by this Participant."
+            }),
+            CancelRequestOutcome.NotOpen => Conflict(new ProblemDetails
+            {
+                Title = result.Error
+            }),
+            _ => throw new InvalidOperationException("Unknown cancel Request outcome.")
+        };
+    }
+
     private string GetAuthenticatedUserId() =>
         User.FindFirstValue(ClaimTypes.NameIdentifier)
         ?? throw new InvalidOperationException("The authenticated user has no identifier claim.");

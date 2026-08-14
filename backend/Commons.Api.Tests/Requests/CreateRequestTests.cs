@@ -288,6 +288,111 @@ public sealed class CreateRequestTests
         viewed.Should().BeEquivalentTo(original);
     }
 
+    [Fact]
+    public async Task Creator_can_cancel_open_request_and_view_it_without_other_changes()
+    {
+        await using var application = new CommonsApiApplication();
+        var client = await application.CreateSeededClientAsync("user-1");
+        await JoinParticipantAsync(client, "Alice");
+        var original = await CreateRequestAsync(client);
+
+        var response = await client.PostAsJsonAsync(
+            $"/api/requests/{original.Id}/cancel",
+            new
+            {
+                RequestId = Guid.NewGuid(),
+                CreatorParticipantId = Guid.NewGuid(),
+                HomeCommonsId = Guid.NewGuid(),
+                Status = nameof(RequestStatus.Open)
+            });
+        var cancelled = await response.Content.ReadFromJsonAsync<RequestDetails>();
+        var viewed = await client.GetFromJsonAsync<RequestDetails>(
+            $"/api/requests/{original.Id}");
+        var repeatResponse = await client.PostAsync(
+            $"/api/requests/{original.Id}/cancel",
+            null);
+        var editResponse = await client.PutAsJsonAsync(
+            $"/api/requests/{original.Id}",
+            new EditRequestRequest("Changed title", "Changed description"));
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        cancelled!.Id.Should().Be(original.Id);
+        cancelled.Title.Should().Be(original.Title);
+        cancelled.Description.Should().Be(original.Description);
+        cancelled.Creator.Should().Be(original.Creator);
+        cancelled.HomeCommons.Should().Be(original.HomeCommons);
+        cancelled.Status.Should().Be(nameof(RequestStatus.Cancelled));
+        viewed.Should().BeEquivalentTo(cancelled);
+        repeatResponse.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        editResponse.StatusCode.Should().Be(HttpStatusCode.Conflict);
+
+        await using var scope = application.Services.CreateAsyncScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<CommonsDbContext>();
+        var persisted = await dbContext.Requests.SingleAsync();
+        persisted.Id.Should().Be(original.Id);
+        persisted.Status.Should().Be(RequestStatus.Cancelled);
+        (await dbContext.Participants.CountAsync()).Should().Be(1);
+        (await dbContext.Set<Membership>().CountAsync()).Should().Be(1);
+        (await dbContext.Capabilities.CountAsync()).Should().Be(0);
+    }
+
+    [Fact]
+    public async Task Participant_cannot_cancel_another_participants_request_using_valid_id()
+    {
+        await using var application = new CommonsApiApplication();
+        var firstClient = await application.CreateSeededClientAsync("user-1");
+        await JoinParticipantAsync(firstClient, "Alice");
+        var original = await CreateRequestAsync(firstClient);
+
+        var secondClient = application.CreateClient();
+        secondClient.DefaultRequestHeaders.Add(TestAuthenticationHandler.UserHeader, "user-2");
+        await JoinParticipantAsync(secondClient, "Bob");
+        var secondParticipant = await secondClient.GetFromJsonAsync<ParticipantProfile>(
+            "/api/participants/me");
+
+        var response = await secondClient.PostAsJsonAsync(
+            $"/api/requests/{original.Id}/cancel",
+            new
+            {
+                RequestId = original.Id,
+                CreatorParticipantId = secondParticipant!.Id,
+                HomeCommonsId = secondParticipant.HomeCommons.Id,
+                Status = nameof(RequestStatus.Cancelled),
+                IsOwner = true
+            });
+        var viewed = await firstClient.GetFromJsonAsync<RequestDetails>(
+            $"/api/requests/{original.Id}");
+
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        viewed.Should().BeEquivalentTo(original);
+    }
+
+    [Fact]
+    public async Task Cancellation_requires_authentication_and_participation()
+    {
+        await using var application = new CommonsApiApplication();
+        var anonymousClient = await application.CreateSeededClientAsync();
+        var participantlessClient = application.CreateClient();
+        participantlessClient.DefaultRequestHeaders.Add(TestAuthenticationHandler.UserHeader, "user-1");
+        var participantClient = application.CreateClient();
+        participantClient.DefaultRequestHeaders.Add(TestAuthenticationHandler.UserHeader, "user-2");
+        await JoinParticipantAsync(participantClient, "Bob");
+        var original = await CreateRequestAsync(participantClient);
+
+        var anonymousResponse = await anonymousClient.PostAsync(
+            $"/api/requests/{original.Id}/cancel",
+            null);
+        var participantlessResponse = await participantlessClient.PostAsync(
+            $"/api/requests/{original.Id}/cancel",
+            null);
+        var viewed = await participantClient.GetFromJsonAsync<RequestDetails>(
+            $"/api/requests/{original.Id}");
+
+        anonymousResponse.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        participantlessResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        viewed.Should().BeEquivalentTo(original);
+    }
+
     private static async Task<RequestDetails> CreateRequestAsync(
         HttpClient client,
         string title = "Original title")

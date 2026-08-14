@@ -220,12 +220,12 @@ describe("US 002 Capability management", () => {
   });
 });
 
-describe("US 003 Request creation", () => {
+describe("US 003 to US 005 Request flows", () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
-  it("lets a Participant create, edit, and view an Open Request", async () => {
+  it("lets a Participant create, edit, cancel, and view their Request", async () => {
     sessionStorage.setItem("commons-access-token", "access-token");
     let savedRequest: Record<string, unknown> | null = null;
 
@@ -250,6 +250,18 @@ describe("US 003 Request creation", () => {
           title: "Help repairing two fence panels",
           description: "Two garden fence panels need replacing.",
           status: "Open",
+          creator: { participantId: "participant-1", displayName: "Alice" },
+          homeCommons: { id: "commons-1", name: "Brisbane Commons" },
+        };
+        return jsonResponse(savedRequest);
+      }
+
+      if (path.endsWith("/api/requests/request-1/cancel") && init?.method === "POST") {
+        savedRequest = {
+          id: "request-1",
+          title: "Help repairing two fence panels",
+          description: "Two garden fence panels need replacing.",
+          status: "Cancelled",
           creator: { participantId: "participant-1", displayName: "Alice" },
           homeCommons: { id: "commons-1", name: "Brisbane Commons" },
         };
@@ -340,10 +352,27 @@ describe("US 003 Request creation", () => {
       description: "  Two garden fence panels need replacing.  ",
     }));
 
+    fireEvent.click(screen.getByRole("button", { name: "Cancel Request" }));
+
+    expect(await screen.findByText("Cancelled")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Help repairing two fence panels" }))
+      .toBeInTheDocument();
+    expect(screen.getByText("Two garden fence panels need replacing.")).toBeInTheDocument();
+    expect(screen.getAllByText("Alice")).not.toHaveLength(0);
+    expect(screen.getAllByText("Brisbane Commons")).not.toHaveLength(0);
+    expect(screen.queryByRole("button", { name: "Edit Request" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Cancel Request" })).not.toBeInTheDocument();
+
+    const cancelCall = vi.mocked(fetch).mock.calls.find(([input, options]) =>
+      input.toString().endsWith("/api/requests/request-1/cancel")
+      && options?.method === "POST");
+    expect(cancelCall?.[1]?.body).toBeUndefined();
+
     fireEvent.click(screen.getByRole("link", { name: "Back to My Requests" }));
     expect(await screen.findByRole("heading", { name: "My Requests" })).toBeInTheDocument();
     expect(await screen.findByRole("link", { name: "Help repairing two fence panels" }))
       .toBeInTheDocument();
+    expect(screen.getByText("Cancelled")).toBeInTheDocument();
   });
 
   it("shows Request validation errors returned by the domain-backed API", async () => {

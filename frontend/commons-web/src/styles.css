@@ -120,6 +120,17 @@ button { cursor: pointer; }
 .primary-button:hover:not(:disabled) { background: #1f4d3f; transform: translateY(-1px); }
 .primary-button:disabled { cursor: wait; opacity: 0.65; }
 
+.danger-button {
+  border: 1px solid #c86a5b;
+  border-radius: 0.75rem;
+  padding: 0.8rem 1.1rem;
+  color: #963b31;
+  background: #fff;
+  font-weight: 750;
+}
+
+.danger-button:disabled { cursor: wait; opacity: 0.65; }
+
 .text-button {
   border: 0;
   padding: 0.5rem 0;

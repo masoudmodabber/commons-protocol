@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  cancelRequest,
   createRequest,
   editRequest,
   getMyRequests,
@@ -116,6 +117,13 @@ export function RequestDetailPage({
       setEditing(false);
     },
   });
+  const cancelMutation = useMutation({
+    mutationFn: () => cancelRequest(accessToken, requestId),
+    onSuccess: async (request) => {
+      queryClient.setQueryData(["request", accessToken, request.id], request);
+      await queryClient.invalidateQueries({ queryKey: ["my-requests", accessToken] });
+    },
+  });
 
   if (requestQuery.isPending) {
     return <p className="status-message feature-page">Loading your Request…</p>;
@@ -167,16 +175,26 @@ export function RequestDetailPage({
       </dl>
       <div className="request-actions">
         {request.status === "Open" && (
-          <button type="button" className="primary-button" onClick={() => {
-            setTitle(request.title);
-            setDescription(request.description);
-            setEditing(true);
-          }}>
-            Edit Request
-          </button>
+          <>
+            <button type="button" className="primary-button"
+              disabled={cancelMutation.isPending} onClick={() => {
+                setTitle(request.title);
+                setDescription(request.description);
+                setEditing(true);
+              }}>
+              Edit Request
+            </button>
+            <button type="button" className="danger-button"
+              disabled={cancelMutation.isPending} onClick={() => cancelMutation.mutate()}>
+              {cancelMutation.isPending ? "Cancelling…" : "Cancel Request"}
+            </button>
+          </>
         )}
         <a className="text-link" href="#/requests">Back to My Requests</a>
       </div>
+      {cancelMutation.isError && (
+        <p className="error-message" role="alert">{cancelMutation.error.message}</p>
+      )}
     </section>
   );
 }

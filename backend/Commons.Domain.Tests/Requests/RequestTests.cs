@@ -107,6 +107,51 @@ public sealed class RequestTests
         request.Status.Should().Be(RequestStatus.Cancelled);
     }
 
+    [Fact]
+    public void Open_request_can_be_cancelled_without_changing_its_details()
+    {
+        var request = CreateParticipant().CreateRequest("Original title", "Original description");
+        var requestId = request.Id;
+        var creatorParticipantId = request.CreatorParticipantId;
+        var homeCommonsId = request.HomeCommonsId;
+
+        request.Cancel();
+
+        request.Id.Should().Be(requestId);
+        request.Title.Should().Be("Original title");
+        request.Description.Should().Be("Original description");
+        request.CreatorParticipantId.Should().Be(creatorParticipantId);
+        request.HomeCommonsId.Should().Be(homeCommonsId);
+        request.Status.Should().Be(RequestStatus.Cancelled);
+    }
+
+    [Fact]
+    public void Request_that_is_not_open_cannot_be_cancelled_again()
+    {
+        var request = CreateParticipant().CreateRequest("Original title", "Original description");
+        request.Cancel();
+
+        var act = request.Cancel;
+
+        act.Should().Throw<RequestNotOpenException>()
+            .WithMessage("Only an Open Request can be cancelled.");
+        request.Status.Should().Be(RequestStatus.Cancelled);
+    }
+
+    [Fact]
+    public void Cancelled_request_cannot_be_edited()
+    {
+        var request = CreateParticipant().CreateRequest("Original title", "Original description");
+        request.Cancel();
+
+        var act = () => request.Edit("Changed title", "Changed description");
+
+        act.Should().Throw<RequestNotOpenException>();
+        request.Title.Should().Be("Original title");
+        request.Description.Should().Be("Original description");
+        request.Status.Should().Be(RequestStatus.Cancelled);
+    }
+
     private static Participant CreateParticipant() =>
         Participant.Join(
             "user-1",

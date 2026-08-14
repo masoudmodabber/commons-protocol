@@ -137,6 +137,41 @@ public sealed class RequestApplicationService(CommonsDbContext dbContext)
 
         return EditRequestResult.Edited(details);
     }
+
+    public async Task<CancelRequestResult> CancelAsync(
+        string authenticatedUserId,
+        Guid requestId,
+        CancellationToken cancellationToken)
+    {
+        var request = await dbContext.Requests
+            .SingleOrDefaultAsync(existing =>
+                existing.Id == requestId
+                && dbContext.Participants.Any(participant =>
+                    participant.Id == existing.CreatorParticipantId
+                    && participant.AuthenticatedUserId == authenticatedUserId),
+                cancellationToken);
+
+        if (request is null)
+        {
+            return CancelRequestResult.NotFound();
+        }
+
+        try
+        {
+            request.Cancel();
+        }
+        catch (RequestNotOpenException exception)
+        {
+            return CancelRequestResult.NotOpen(exception.Message);
+        }
+
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        var details = await GetForCreatorAsync(authenticatedUserId, request.Id, cancellationToken)
+            ?? throw new InvalidOperationException("The cancelled Request could not be loaded.");
+
+        return CancelRequestResult.Cancelled(details);
+    }
 }
 
 public sealed record RequestDetails(
@@ -197,4 +232,26 @@ public sealed record EditRequestResult(
 
     public static EditRequestResult Invalid(string error) =>
         new(EditRequestOutcome.Invalid, Error: error);
+}
+
+public enum CancelRequestOutcome
+{
+    Cancelled,
+    NotFound,
+    NotOpen
+}
+
+public sealed record CancelRequestResult(
+    CancelRequestOutcome Outcome,
+    RequestDetails? Request = null,
+    string? Error = null)
+{
+    public static CancelRequestResult Cancelled(RequestDetails request) =>
+        new(CancelRequestOutcome.Cancelled, request);
+
+    public static CancelRequestResult NotFound() =>
+        new(CancelRequestOutcome.NotFound);
+
+    public static CancelRequestResult NotOpen(string error) =>
+        new(CancelRequestOutcome.NotOpen, Error: error);
 }

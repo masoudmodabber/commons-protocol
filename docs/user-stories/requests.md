@@ -94,7 +94,39 @@ So that I can correct or clarify what I need while the Request is still Open.
 
 ## US 005 Cancel a Request
 
-...
+As a participant
+
+I want to cancel a Request I created
+
+So that other participants know I no longer need help with it.
+
+### Acceptance Criteria
+
+1. Only the Participant who created a Request can cancel it.
+
+2. Only an Open Request can be cancelled.
+
+3. Cancelling a Request changes its status from Open to Cancelled.
+
+4. Cancelling a Request does not delete the Request.
+
+5. The Request remains viewable by its creator after cancellation.
+
+6. The Request title, description, creator, and Home Commons are not changed by cancellation.
+
+7. Cancelling a Request does not create an Offer, Agreement, Exchange, Ledger Entry, or Commons Balance change.
+
+8. A Participant cannot cancel a Request created by another Participant.
+
+9. Attempting to cancel a Request that is no longer Open is rejected.
+
+10. After cancellation, the Participant can view the Request with its Cancelled status.
+
+11. Editing a Cancelled Request is not allowed.
+
+12. The complete flow must be usable through the React frontend.
+
+13. The story is not complete if Requests can only be cancelled through API calls, Postman, curl, or direct database access.
 
 ---
 

@@ -22,6 +22,10 @@ Deferred from US 004:
 
 * Decide how editing an Open Request should behave once Offers already exist, including whether edits should be restricted or Offer creators should be notified.
 
+Deferred from US 005:
+
+* Decide how cancelling an Open Request should behave once Offers already exist, including whether Offer creators should be notified and what happens to outstanding Offers.
+
 ## Capabilities
 
 Deferred from US 002:

@@ -60,4 +60,14 @@ public sealed class Request
         Title = title.Trim();
         Description = description.Trim();
     }
+
+    public void Cancel()
+    {
+        if (Status != RequestStatus.Open)
+        {
+            throw new RequestNotOpenException("Only an Open Request can be cancelled.");
+        }
+
+        Status = RequestStatus.Cancelled;
+    }
 }
