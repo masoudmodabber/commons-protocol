@@ -22,6 +22,7 @@ services:
       target: development
     environment:
       ASPNETCORE_ENVIRONMENT: Development
+      ArtifactsPath: /artifacts
       ConnectionStrings__Commons: Host=database;Port=5432;Database=commons;Username=commons;Password=commons
     depends_on:
       database:
@@ -30,6 +31,7 @@ services:
       - "8080:8080"
     volumes:
       - ./backend:/src/backend
+      - backend-build-artifacts:/artifacts
 
   frontend:
     build:
@@ -48,5 +50,6 @@ services:
       - frontend-node-modules:/app/node_modules
 
 volumes:
+  backend-build-artifacts:
   postgres-data:
   frontend-node-modules:
