@@ -143,7 +143,43 @@ So that I can keep track of the proposals I have made.
 
 ## US 010 Withdraw an Offer
 
-...
+As a participant
+
+I want to withdraw an Offer I submitted
+
+So that I can indicate that I no longer want to proceed with that proposal.
+
+### Acceptance Criteria
+
+1. Only the Participant who created an Offer can withdraw it.
+
+2. An Offer can be withdrawn only while its status is Active.
+
+3. Withdrawing an Offer changes its status from Active to Withdrawn.
+
+4. Withdrawing an Offer does not delete it.
+
+5. A withdrawn Offer remains visible to its creator in My Offers.
+
+6. The stored Commons accounting units, requested Capability contributions, Capability snapshots, descriptions, Request reference, and creator are not changed by withdrawal.
+
+7. A withdrawn Offer cannot return to Active.
+
+8. A withdrawn Offer must not be treated as an active Offer on the Request.
+
+9. A Participant cannot withdraw an Offer created by another Participant.
+
+10. Attempting to withdraw an Offer that is already Withdrawn is rejected.
+
+11. Attempting to withdraw any Offer whose status is not Active is rejected.
+
+12. Withdrawing an Offer does not create an Agreement, Exchange, Ledger Entry, Completed Exchange, or Commons Balance change.
+
+13. After withdrawal, the Participant can view the Offer with its Withdrawn status.
+
+14. The complete flow must be usable through the React frontend.
+
+15. The story is not complete if Offers can only be withdrawn through API calls, Postman, curl, or direct database access.
 
 ---
 

@@ -15,7 +15,51 @@ public sealed class OfferTests
         offer.RequestId.Should().Be(request.Id);
         offer.CreatorParticipantId.Should().Be(creator.Id);
         offer.CommonsAccountingUnits.Should().Be(30);
+        offer.Status.Should().Be(OfferStatus.Active);
         offer.RequestedContributions.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Creator_can_withdraw_active_offer_without_changing_stored_terms()
+    {
+        var (creator, request, requester) = CreateAvailableRequestWithRequester();
+        var capability = requester.AddCapability("Fresh Eggs");
+        var offer = creator.SubmitOffer(
+            request,
+            12,
+            [new RequestedContributionTerms(
+                capability.Id,
+                capability.Text,
+                "Two dozen eggs")]);
+
+        offer.Withdraw();
+
+        offer.Status.Should().Be(OfferStatus.Withdrawn);
+        offer.RequestId.Should().Be(request.Id);
+        offer.CreatorParticipantId.Should().Be(creator.Id);
+        offer.CommonsAccountingUnits.Should().Be(12);
+        offer.RequestedContributions.Should().ContainSingle().Which.Should().BeEquivalentTo(
+            new
+            {
+                CapabilityId = capability.Id,
+                CapabilityTextSnapshot = "Fresh Eggs",
+                Description = "Two dozen eggs"
+            },
+            options => options.ExcludingMissingMembers());
+    }
+
+    [Fact]
+    public void Withdrawn_offer_cannot_be_withdrawn_again_or_return_to_active()
+    {
+        var (creator, request) = CreateAvailableRequest();
+        var offer = creator.SubmitOffer(request, 10, []);
+        offer.Withdraw();
+
+        var act = offer.Withdraw;
+
+        act.Should().Throw<OfferNotActiveException>()
+            .WithMessage("Only an Active Offer can be withdrawn.");
+        offer.Status.Should().Be(OfferStatus.Withdrawn);
     }
 
     [Fact]

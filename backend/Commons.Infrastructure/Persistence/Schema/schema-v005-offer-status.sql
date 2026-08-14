@@ -1,0 +1,2 @@
+ALTER TABLE "Offers"
+    ADD COLUMN IF NOT EXISTS "Status" text NOT NULL DEFAULT 'Active';

@@ -14,6 +14,9 @@ internal sealed class OfferConfiguration : IEntityTypeConfiguration<Offer>
             "CK_Offers_CommonsAccountingUnits_Positive",
             "\"CommonsAccountingUnits\" IS NULL OR \"CommonsAccountingUnits\" > 0"));
         builder.HasKey(offer => offer.Id);
+        builder.Property(offer => offer.Status)
+            .HasConversion<string>()
+            .IsRequired();
 
         builder.HasOne<Request>()
             .WithMany()

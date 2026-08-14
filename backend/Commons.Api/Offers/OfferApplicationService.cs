@@ -146,6 +146,44 @@ public sealed class OfferApplicationService(CommonsDbContext dbContext)
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<WithdrawOfferResult> WithdrawAsync(
+        string authenticatedUserId,
+        Guid offerId,
+        CancellationToken cancellationToken)
+    {
+        var offer = await dbContext.Offers
+            .SingleOrDefaultAsync(existing =>
+                existing.Id == offerId
+                && dbContext.Participants.Any(participant =>
+                    participant.Id == existing.CreatorParticipantId
+                    && participant.AuthenticatedUserId == authenticatedUserId),
+                cancellationToken);
+
+        if (offer is null)
+        {
+            return WithdrawOfferResult.NotFound();
+        }
+
+        try
+        {
+            offer.Withdraw();
+        }
+        catch (OfferNotActiveException exception)
+        {
+            return WithdrawOfferResult.NotActive(exception.Message);
+        }
+
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        var details = await GetForCreatorAsync(
+            authenticatedUserId,
+            offer.Id,
+            cancellationToken)
+            ?? throw new InvalidOperationException("The withdrawn Offer could not be loaded.");
+
+        return WithdrawOfferResult.Withdrawn(details);
+    }
+
     private async Task<AvailableRequestContext?> GetAvailableRequestContextAsync(
         string authenticatedUserId,
         Guid requestId,
@@ -205,6 +243,7 @@ public sealed class OfferApplicationService(CommonsDbContext dbContext)
     {
         return offers.Select(offer => new OfferDetails(
             offer.Id,
+            offer.Status.ToString(),
             offer.CommonsAccountingUnits,
             new OfferCreatorSummary(
                 offer.CreatorParticipantId,
@@ -255,6 +294,7 @@ public sealed record OfferSubmissionOptions(
 
 public sealed record OfferDetails(
     Guid Id,
+    string Status,
     long? CommonsAccountingUnits,
     OfferCreatorSummary Creator,
     OfferRequestSummary Request,
@@ -273,6 +313,28 @@ public sealed record RequestedContributionDetails(
     Guid CapabilityId,
     string CapabilityTextSnapshot,
     string Description);
+
+public enum WithdrawOfferOutcome
+{
+    Withdrawn,
+    NotFound,
+    NotActive
+}
+
+public sealed record WithdrawOfferResult(
+    WithdrawOfferOutcome Outcome,
+    OfferDetails? Offer = null,
+    string? Error = null)
+{
+    public static WithdrawOfferResult Withdrawn(OfferDetails offer) =>
+        new(WithdrawOfferOutcome.Withdrawn, offer);
+
+    public static WithdrawOfferResult NotFound() =>
+        new(WithdrawOfferOutcome.NotFound);
+
+    public static WithdrawOfferResult NotActive(string error) =>
+        new(WithdrawOfferOutcome.NotActive, Error: error);
+}
 
 public enum SubmitOfferOutcome
 {

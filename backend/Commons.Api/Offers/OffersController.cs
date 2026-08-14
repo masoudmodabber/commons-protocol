@@ -82,6 +82,31 @@ public sealed class OffersController(OfferApplicationService offerService) : Con
         return offers is null ? NotFound() : Ok(offers);
     }
 
+    [HttpPost("offers/{offerId:guid}/withdraw")]
+    public async Task<IActionResult> Withdraw(
+        Guid offerId,
+        CancellationToken cancellationToken)
+    {
+        var result = await offerService.WithdrawAsync(
+            GetAuthenticatedUserId(),
+            offerId,
+            cancellationToken);
+
+        return result.Outcome switch
+        {
+            WithdrawOfferOutcome.Withdrawn => Ok(result.Offer),
+            WithdrawOfferOutcome.NotFound => NotFound(new ProblemDetails
+            {
+                Title = "The Offer does not exist or was not created by this Participant."
+            }),
+            WithdrawOfferOutcome.NotActive => Conflict(new ProblemDetails
+            {
+                Title = result.Error
+            }),
+            _ => throw new InvalidOperationException("Unknown withdraw Offer outcome.")
+        };
+    }
+
     private string GetAuthenticatedUserId() =>
         User.FindFirstValue(ClaimTypes.NameIdentifier)
         ?? throw new InvalidOperationException("The authenticated user has no identifier claim.");

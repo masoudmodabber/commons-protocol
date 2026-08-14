@@ -5,6 +5,7 @@ import {
   getMyOffers,
   getOfferSubmissionOptions,
   submitOffer,
+  withdrawOffer,
 } from "./api";
 import { navigate } from "./navigation";
 import { Field } from "./ui";
@@ -199,6 +200,7 @@ export function MyOffersPage({ accessToken }: { accessToken: string }) {
           {offersQuery.data.map(offer => (
             <li key={offer.id}>
               <a href={`#/offers/${offer.id}`}>{offer.request.title}</a>
+              <span className="request-status">{offer.status}</span>
               <p className="request-creator">
                 Request created by {offer.request.creator.displayName}
               </p>
@@ -237,6 +239,14 @@ export function OfferDetailPage({
     queryKey: ["offer", accessToken, offerId],
     queryFn: () => getOffer(accessToken, offerId),
   });
+  const queryClient = useQueryClient();
+  const withdrawMutation = useMutation({
+    mutationFn: () => withdrawOffer(accessToken, offerId),
+    onSuccess: async (offer) => {
+      queryClient.setQueryData(["offer", accessToken, offer.id], offer);
+      await queryClient.invalidateQueries({ queryKey: ["my-offers", accessToken] });
+    },
+  });
 
   if (offerQuery.isPending) {
     return <p className="status-message feature-page">Loading your Offer…</p>;
@@ -255,6 +265,7 @@ export function OfferDetailPage({
           <p className="eyebrow">Your submitted Offer</p>
           <h1 id="offer-heading">Offer for {offer.request.title}</h1>
         </div>
+        <span className="request-status">{offer.status}</span>
       </div>
       <p className="request-description">{offer.request.description}</p>
       <dl className="request-details">
@@ -283,11 +294,24 @@ export function OfferDetailPage({
         </section>
       )}
       <div className="request-actions">
+        {offer.status === "Active" && (
+          <button
+            className="danger-button"
+            type="button"
+            disabled={withdrawMutation.isPending}
+            onClick={() => withdrawMutation.mutate()}
+          >
+            {withdrawMutation.isPending ? "Withdrawing…" : "Withdraw Offer"}
+          </button>
+        )}
         <a className="text-link" href="#/offers">Back to My Offers</a>
         <a className="text-link" href={`#/available-requests/${offer.request.id}`}>
           View Request
         </a>
       </div>
+      {withdrawMutation.isError && (
+        <p className="error-message" role="alert">{withdrawMutation.error.message}</p>
+      )}
     </section>
   );
 }

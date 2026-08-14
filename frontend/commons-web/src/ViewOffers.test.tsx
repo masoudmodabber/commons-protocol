@@ -43,6 +43,7 @@ function offer(
 ) {
   return {
     id,
+    status: "Active" as const,
     commonsAccountingUnits,
     creator: { participantId: "participant-bob", displayName: "Bob" },
     request: {
@@ -129,7 +130,8 @@ describe("US 009 View my Offers", () => {
     expect(screen.getByText("Two dozen eggs")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Back to My Offers" }))
       .toHaveAttribute("href", "#/offers");
-    expect(screen.queryByRole("button", { name: /withdraw|accept|reject|negotiate/i }))
+    expect(screen.getByRole("button", { name: "Withdraw Offer" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /accept|reject|negotiate/i }))
       .not.toBeInTheDocument();
 
     for (const [, options] of vi.mocked(fetch).mock.calls) {

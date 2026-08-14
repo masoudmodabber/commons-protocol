@@ -24,6 +24,12 @@ Deferred from US 008:
 
 * Reconsider whether Commons accounting units need fractional values after observing real exchange behaviour. Whole units are used initially to avoid unnecessary monetary precision and currency-like presentation.
 
+Deferred from US 010:
+
+* Decide whether withdrawing an Offer after negotiation has started should require additional rules or notifications.
+
+* Decide whether the Request creator should receive a notification when an Offer is withdrawn.
+
 ## Requests
 
 Deferred from US 003:

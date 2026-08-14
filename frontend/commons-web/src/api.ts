@@ -53,6 +53,7 @@ export interface OfferSubmissionOptions {
 
 export interface OfferDetails {
   id: string;
+  status: "Active" | "Withdrawn";
   commonsAccountingUnits: number | null;
   creator: { participantId: string; displayName: string };
   request: OfferSubmissionOptions["request"];
@@ -226,6 +227,14 @@ export function getOffer(accessToken: string, offerId: string): Promise<OfferDet
 
 export function getMyOffers(accessToken: string): Promise<OfferDetails[]> {
   return request<OfferDetails[]>("/api/offers", {}, accessToken);
+}
+
+export function withdrawOffer(accessToken: string, offerId: string): Promise<OfferDetails> {
+  return request<OfferDetails>(
+    `/api/offers/${offerId}/withdraw`,
+    { method: "POST" },
+    accessToken,
+  );
 }
 
 export function editRequest(

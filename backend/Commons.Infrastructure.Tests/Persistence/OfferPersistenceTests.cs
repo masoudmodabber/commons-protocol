@@ -29,6 +29,8 @@ public sealed class OfferPersistenceTests
         offer.FindProperty(nameof(Offer.CommonsAccountingUnits))!.ClrType
             .Should().Be(typeof(long?));
         offer.FindProperty(nameof(Offer.CommonsAccountingUnits))!.IsNullable.Should().BeTrue();
+        offer.FindProperty(nameof(Offer.Status))!.ClrType.Should().Be(typeof(OfferStatus));
+        offer.FindProperty(nameof(Offer.Status))!.IsNullable.Should().BeFalse();
         offer.GetCheckConstraints().Should().ContainSingle(constraint =>
             constraint.Name == "CK_Offers_CommonsAccountingUnits_Positive");
     }

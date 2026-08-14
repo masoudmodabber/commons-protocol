@@ -46,6 +46,7 @@ public sealed class Offer
         CreatorParticipantId = creatorParticipantId;
         RequestId = requestId;
         CommonsAccountingUnits = commonsAccountingUnits;
+        Status = OfferStatus.Active;
 
         foreach (var terms in contributionTerms)
         {
@@ -65,8 +66,20 @@ public sealed class Offer
 
     public long? CommonsAccountingUnits { get; private set; }
 
+    public OfferStatus Status { get; private set; }
+
     public IReadOnlyCollection<RequestedContribution> RequestedContributions =>
         requestedContributions.AsReadOnly();
+
+    public void Withdraw()
+    {
+        if (Status != OfferStatus.Active)
+        {
+            throw new OfferNotActiveException("Only an Active Offer can be withdrawn.");
+        }
+
+        Status = OfferStatus.Withdrawn;
+    }
 }
 
 public sealed record RequestedContributionTerms(

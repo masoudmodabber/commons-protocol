@@ -64,6 +64,7 @@ describe("US 008 Submit an Offer", () => {
       if (url.pathname === "/api/requests/request-1/offers" && init?.method === "POST") {
         submittedOffer = {
           id: "offer-1",
+          status: "Active",
           commonsAccountingUnits: 12,
           creator: { participantId: "participant-2", displayName: "Bob" },
           request,
@@ -144,7 +145,8 @@ describe("US 008 Submit an Offer", () => {
     expect(screen.getByText("12")).toBeInTheDocument();
     expect(screen.getByText("A dozen eggs")).toBeInTheDocument();
     expect(screen.getByText("Airport trip on Saturday")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /accept|reject|withdraw/i }))
+    expect(screen.getByRole("button", { name: "Withdraw Offer" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /accept|reject|negotiate/i }))
       .not.toBeInTheDocument();
 
     await waitFor(() => {
