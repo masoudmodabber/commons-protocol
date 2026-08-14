@@ -292,7 +292,7 @@ describe("US 003 to US 005 Request flows", () => {
 
     renderApp();
 
-    fireEvent.click(await screen.findByRole("link", { name: "Requests" }));
+    fireEvent.click(await screen.findByRole("link", { name: "My Requests" }));
     expect(await screen.findByRole("heading", { name: "My Requests" })).toBeInTheDocument();
     expect(await screen.findByText("You have not created any Requests yet.")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("link", { name: "Create Request" }));
@@ -404,7 +404,7 @@ describe("US 003 to US 005 Request flows", () => {
     });
 
     renderApp();
-    fireEvent.click(await screen.findByRole("link", { name: "Requests" }));
+    fireEvent.click(await screen.findByRole("link", { name: "My Requests" }));
     await screen.findByRole("heading", { name: "My Requests" });
     fireEvent.click(screen.getByRole("link", { name: "Create Request" }));
     await screen.findByRole("heading", { name: "Create a Request" });

@@ -19,7 +19,13 @@ export function AuthenticatedLayout({
             Capabilities
           </NavigationLink>
           <NavigationLink href="#/requests" active={path.startsWith("/requests")}>
-            Requests
+            My Requests
+          </NavigationLink>
+          <NavigationLink
+            href="#/available-requests"
+            active={path.startsWith("/available-requests")}
+          >
+            Available Requests
           </NavigationLink>
         </nav>
         {children}

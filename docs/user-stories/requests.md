@@ -148,7 +148,7 @@ So that I can discover ways I may be able to help.
 
 4. Only Open Requests are shown in the browse list.
 
-5. The Participant's own Requests may also appear in the list.
+5. Requests created by the current Participant are not shown in Available Requests.
 
 6. Each Request in the list shows enough information to understand the need, including at least:
    * Title.

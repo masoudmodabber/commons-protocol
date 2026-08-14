@@ -26,10 +26,7 @@ export function MyRequestsPage({ accessToken }: { accessToken: string }) {
           <p className="eyebrow">Requests you created</p>
           <h1 id="requests-heading">My Requests</h1>
         </div>
-        <div className="request-actions">
-          <a className="text-link" href="#/requests/browse">Browse Requests</a>
-          <a className="primary-link" href="#/requests/new">Create Request</a>
-        </div>
+        <a className="primary-link" href="#/requests/new">Create Request</a>
       </div>
 
       {requestsQuery.isPending && <p className="status-message">Loading your Requests…</p>}
@@ -64,10 +61,9 @@ export function BrowseRequestsPage({ accessToken }: { accessToken: string }) {
     <section className="feature-page requests" aria-labelledby="browse-requests-heading">
       <div className="section-heading">
         <div>
-          <p className="eyebrow">Open needs in your Home Commons</p>
-          <h1 id="browse-requests-heading">Browse Requests</h1>
+          <p className="eyebrow">Open needs from other Participants in your Home Commons</p>
+          <h1 id="browse-requests-heading">Available Requests</h1>
         </div>
-        <a className="text-link" href="#/requests">My Requests</a>
       </div>
 
       {requestsQuery.isPending && <p className="status-message">Loading Requests…</p>}
@@ -75,13 +71,15 @@ export function BrowseRequestsPage({ accessToken }: { accessToken: string }) {
         <p className="error-message" role="alert">{requestsQuery.error.message}</p>
       )}
       {requestsQuery.isSuccess && requestsQuery.data.length === 0 && (
-        <p className="empty-state">There are no Open Requests in your Home Commons.</p>
+        <p className="empty-state">
+          There are no Open Requests from other Participants in your Home Commons.
+        </p>
       )}
       {requestsQuery.isSuccess && requestsQuery.data.length > 0 && (
         <ul className="request-list">
           {requestsQuery.data.map((request) => (
             <li key={request.id}>
-              <a href={`#/requests/browse/${request.id}`}>{request.title}</a>
+              <a href={`#/available-requests/${request.id}`}>{request.title}</a>
               <span className="request-status">{request.status}</span>
               <p>{request.description}</p>
               <p className="request-creator">Requested by {request.creator.displayName}</p>
@@ -289,7 +287,7 @@ export function BrowseRequestDetailPage({
         <div><dt>Home Commons</dt><dd>{request.homeCommons.name}</dd></div>
       </dl>
       <div className="request-actions">
-        <a className="text-link" href="#/requests/browse">Back to Browse Requests</a>
+        <a className="text-link" href="#/available-requests">Back to Available Requests</a>
       </div>
     </section>
   );

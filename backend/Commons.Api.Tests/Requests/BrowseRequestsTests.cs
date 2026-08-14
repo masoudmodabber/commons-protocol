@@ -18,7 +18,7 @@ public sealed class BrowseRequestsTests
         Guid.Parse("dc66ee37-8646-4afd-9014-768fb75c8753");
 
     [Fact]
-    public async Task Participant_browses_only_open_requests_in_their_home_commons()
+    public async Task Participant_browses_only_other_participants_open_requests_in_home_commons()
     {
         await using var application = new CommonsApiApplication();
         var aliceClient = await application.CreateSeededClientAsync("user-1");
@@ -43,13 +43,14 @@ public sealed class BrowseRequestsTests
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         requests.Should().NotBeNull();
         requests!.Select(request => request.Id).Should().BeEquivalentTo(
-            new[] { aliceRequest.Id, bobOpenRequest.Id });
+            new[] { bobOpenRequest.Id });
         requests.Should().Contain(request =>
             request.Id == bobOpenRequest.Id
             && request.Title == "Bob needs a ladder"
             && request.Description == "Description for Bob needs a ladder"
             && request.Creator.DisplayName == "Bob"
             && request.Status == "Open");
+        requests.Should().NotContain(request => request.Id == aliceRequest.Id);
         requests.Should().NotContain(request => request.Id == bobCancelledRequest.Id);
         requests.Should().NotContain(request => request.Id == otherCommonsRequest.Id);
 
@@ -59,6 +60,21 @@ public sealed class BrowseRequestsTests
         (await dbContext.Participants.CountAsync()).Should().Be(3);
         (await dbContext.Set<Membership>().CountAsync()).Should().Be(3);
         (await dbContext.Capabilities.CountAsync()).Should().Be(0);
+    }
+
+    [Fact]
+    public async Task Participant_cannot_view_own_request_through_browse_detail()
+    {
+        await using var application = new CommonsApiApplication();
+        var client = await application.CreateSeededClientAsync("user-1");
+        await JoinParticipantAsync(client, CommonsApiApplication.HomeCommonsId, "Alice");
+        var ownRequest = await CreateRequestAsync(client, "Alice needs seedlings");
+
+        var response = await client.GetAsync($"/api/requests/browse/{ownRequest.Id}");
+        var ownedResponse = await client.GetAsync($"/api/requests/{ownRequest.Id}");
+
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        ownedResponse.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     [Fact]

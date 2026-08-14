@@ -71,11 +71,11 @@ public sealed class RequestApplicationService(CommonsDbContext dbContext)
         string authenticatedUserId,
         CancellationToken cancellationToken)
     {
-        var homeCommonsId = await GetHomeCommonsIdAsync(
+        var browseScope = await GetBrowseScopeAsync(
             authenticatedUserId,
             cancellationToken);
 
-        if (homeCommonsId is null)
+        if (browseScope is null)
         {
             return null;
         }
@@ -83,7 +83,8 @@ public sealed class RequestApplicationService(CommonsDbContext dbContext)
         var requests = dbContext.Requests
             .AsNoTracking()
             .Where(request =>
-                request.HomeCommonsId == homeCommonsId.Value
+                request.HomeCommonsId == browseScope.HomeCommonsId
+                && request.CreatorParticipantId != browseScope.ParticipantId
                 && request.Status == RequestStatus.Open);
 
         return await ProjectDetails(requests)
@@ -95,11 +96,11 @@ public sealed class RequestApplicationService(CommonsDbContext dbContext)
         Guid requestId,
         CancellationToken cancellationToken)
     {
-        var homeCommonsId = await GetHomeCommonsIdAsync(
+        var browseScope = await GetBrowseScopeAsync(
             authenticatedUserId,
             cancellationToken);
 
-        if (homeCommonsId is null)
+        if (browseScope is null)
         {
             return null;
         }
@@ -108,7 +109,8 @@ public sealed class RequestApplicationService(CommonsDbContext dbContext)
             .AsNoTracking()
             .Where(request =>
                 request.Id == requestId
-                && request.HomeCommonsId == homeCommonsId.Value
+                && request.HomeCommonsId == browseScope.HomeCommonsId
+                && request.CreatorParticipantId != browseScope.ParticipantId
                 && request.Status == RequestStatus.Open);
 
         return await ProjectDetails(requests)
@@ -124,16 +126,20 @@ public sealed class RequestApplicationService(CommonsDbContext dbContext)
                 && participant.AuthenticatedUserId == authenticatedUserId));
     }
 
-    private Task<Guid?> GetHomeCommonsIdAsync(
+    private Task<BrowseScope?> GetBrowseScopeAsync(
         string authenticatedUserId,
         CancellationToken cancellationToken)
     {
         return dbContext.Participants
             .AsNoTracking()
             .Where(participant => participant.AuthenticatedUserId == authenticatedUserId)
-            .Select(participant => (Guid?)participant.Membership.HomeCommonsId)
+            .Select(participant => new BrowseScope(
+                participant.Id,
+                participant.Membership.HomeCommonsId))
             .SingleOrDefaultAsync(cancellationToken);
     }
+
+    private sealed record BrowseScope(Guid ParticipantId, Guid HomeCommonsId);
 
     private IQueryable<RequestDetails> ProjectDetails(IQueryable<RequestEntity> requests)
     {

@@ -80,7 +80,7 @@ function ParticipantApplication({
   onSignOut: () => void;
 }) {
   const path = useHashPath();
-  const browseRequestMatch = /^\/requests\/browse\/([^/]+)$/.exec(path);
+  const availableRequestMatch = /^\/available-requests\/([^/]+)$/.exec(path);
   const requestMatch = /^\/requests\/([^/]+)$/.exec(path);
 
   let page = <ProfilePage profile={profile} />;
@@ -91,13 +91,13 @@ function ParticipantApplication({
     page = <MyRequestsPage accessToken={accessToken} />;
   } else if (path === "/requests/new") {
     page = <CreateRequestPage profile={profile} accessToken={accessToken} />;
-  } else if (path === "/requests/browse") {
+  } else if (path === "/available-requests") {
     page = <BrowseRequestsPage accessToken={accessToken} />;
-  } else if (browseRequestMatch) {
+  } else if (availableRequestMatch) {
     page = (
       <BrowseRequestDetailPage
         accessToken={accessToken}
-        requestId={browseRequestMatch[1]}
+        requestId={availableRequestMatch[1]}
       />
     );
   } else if (requestMatch) {

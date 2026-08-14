@@ -31,24 +31,23 @@ const profile = {
   capabilities: [],
 };
 
-const requests = [
-  {
-    id: "request-1",
-    title: "Help repairing a fence",
-    description: "One garden fence panel needs replacing.",
-    status: "Open",
-    creator: { participantId: "participant-1", displayName: "Alice" },
-    homeCommons: { id: "commons-1", name: "Brisbane Commons" },
-  },
-  {
-    id: "request-2",
-    title: "Borrow a wheelbarrow",
-    description: "Needed for a community garden working bee.",
-    status: "Open",
-    creator: { participantId: "participant-2", displayName: "Bob" },
-    homeCommons: { id: "commons-1", name: "Brisbane Commons" },
-  },
-];
+const ownRequest = {
+  id: "request-1",
+  title: "Help repairing a fence",
+  description: "One garden fence panel needs replacing.",
+  status: "Open",
+  creator: { participantId: "participant-1", displayName: "Alice" },
+  homeCommons: { id: "commons-1", name: "Brisbane Commons" },
+};
+
+const availableRequest = {
+  id: "request-2",
+  title: "Borrow a wheelbarrow",
+  description: "Needed for a community garden working bee.",
+  status: "Open",
+  creator: { participantId: "participant-2", displayName: "Bob" },
+  homeCommons: { id: "commons-1", name: "Brisbane Commons" },
+};
 
 describe("US 006 Browse Requests", () => {
   afterEach(() => {
@@ -62,15 +61,15 @@ describe("US 006 Browse Requests", () => {
       const path = input.toString();
 
       if (path.endsWith("/api/requests/browse/request-2")) {
-        return jsonResponse(requests[1]);
+        return jsonResponse(availableRequest);
       }
 
       if (path.endsWith("/api/requests/browse")) {
-        return jsonResponse(requests);
+        return jsonResponse([availableRequest]);
       }
 
       if (path.endsWith("/api/requests")) {
-        return jsonResponse([requests[0]]);
+        return jsonResponse([ownRequest]);
       }
 
       if (path.endsWith("/api/participants/me")) {
@@ -82,19 +81,28 @@ describe("US 006 Browse Requests", () => {
 
     renderApp();
 
-    fireEvent.click(await screen.findByRole("link", { name: "Requests" }));
-    expect(await screen.findByRole("heading", { name: "My Requests" })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("link", { name: "Browse Requests" }));
+    const myRequestsLink = await screen.findByRole("link", { name: "My Requests" });
+    const availableRequestsLink = screen.getByRole("link", { name: "Available Requests" });
+    expect(myRequestsLink).toHaveAttribute("href", "#/requests");
+    expect(availableRequestsLink).toHaveAttribute("href", "#/available-requests");
 
-    expect(await screen.findByRole("heading", { name: "Browse Requests" })).toBeInTheDocument();
+    fireEvent.click(myRequestsLink);
+    expect(await screen.findByRole("heading", { name: "My Requests" })).toBeInTheDocument();
     expect(await screen.findByRole("link", { name: "Help repairing a fence" }))
       .toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Borrow a wheelbarrow" })).toBeInTheDocument();
-    expect(screen.getByText("One garden fence panel needs replacing.")).toBeInTheDocument();
+    fireEvent.click(availableRequestsLink);
+
+    expect(await screen.findByRole("heading", { name: "Available Requests" }))
+      .toBeInTheDocument();
+    expect(availableRequestsLink).toHaveAttribute("aria-current", "page");
+    expect(myRequestsLink).not.toHaveAttribute("aria-current");
+    expect(await screen.findByRole("link", { name: "Borrow a wheelbarrow" }))
+      .toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Help repairing a fence" }))
+      .not.toBeInTheDocument();
     expect(screen.getByText("Needed for a community garden working bee.")).toBeInTheDocument();
-    expect(screen.getByText("Requested by Alice")).toBeInTheDocument();
     expect(screen.getByText("Requested by Bob")).toBeInTheDocument();
-    expect(screen.getAllByText("Open")).toHaveLength(2);
+    expect(screen.getByText("Open")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("link", { name: "Borrow a wheelbarrow" }));
 
@@ -106,7 +114,8 @@ describe("US 006 Browse Requests", () => {
     expect(screen.getByText("Open")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Edit Request" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Cancel Request" })).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Back to Browse Requests" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Back to Available Requests" }))
+      .toBeInTheDocument();
 
     const browseCalls = vi.mocked(fetch).mock.calls.filter(([input]) =>
       input.toString().includes("/api/requests/browse"));
@@ -118,7 +127,7 @@ describe("US 006 Browse Requests", () => {
 
   it("shows the empty state when the Home Commons has no Open Requests", async () => {
     sessionStorage.setItem("commons-access-token", "access-token");
-    window.location.hash = "/requests/browse";
+    window.location.hash = "/available-requests";
 
     vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
       const path = input.toString();
@@ -136,8 +145,10 @@ describe("US 006 Browse Requests", () => {
 
     renderApp();
 
-    expect(await screen.findByRole("heading", { name: "Browse Requests" })).toBeInTheDocument();
-    expect(await screen.findByText("There are no Open Requests in your Home Commons."))
+    expect(await screen.findByRole("heading", { name: "Available Requests" }))
       .toBeInTheDocument();
+    expect(await screen.findByText(
+      "There are no Open Requests from other Participants in your Home Commons.",
+    )).toBeInTheDocument();
   });
 });
