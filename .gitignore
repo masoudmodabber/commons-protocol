@@ -1,8 +1,40 @@
-commons-protocol-docs.zip
+commons-protocol-docs*.zip
+
 **/bin/
 **/obj/
 **/node_modules/
 **/dist/
 *.tsbuildinfo
+
 **/Others/
+
+# Personal AI / development workflow
 docs/00_READ_FIRST_CHATGPT_CODEX_WORKFLOW.md
+
+# Local environment files
+**/.env
+**/.env.local
+**/.env.*.local
+
+# Expo / React Native local output
+**/.expo/
+**/.expo-shared/
+
+# IDE and editor state
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+*.tmp
+*.swp
+*~

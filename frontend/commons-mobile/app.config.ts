@@ -49,6 +49,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     plugins: [
       "expo-router",
       "expo-status-bar",
+      "expo-secure-store",
       [
         "expo-build-properties",
         {
