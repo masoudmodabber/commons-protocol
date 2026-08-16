@@ -5,6 +5,7 @@ import type { AuthApi } from "../api/auth-api";
 import { ApiError, type HttpClient } from "../api/http-client";
 import {
   availableCommonsQueryKey,
+  participantCapabilitiesQueryKey,
   participantProfileQueryKey,
 } from "../api/participants-api";
 import { SessionProvider, useSession } from "../auth/session-context";
@@ -64,6 +65,9 @@ describe("mobile session", () => {
       defaultOptions: { queries: { retry: false, gcTime: Infinity } },
     });
     queryClient.setQueryData(participantProfileQueryKey, { id: "participant-1" });
+    queryClient.setQueryData(participantCapabilitiesQueryKey, [
+      { id: "capability-1", text: "Carpentry" },
+    ]);
     queryClient.setQueryData(availableCommonsQueryKey, [{ id: "commons-1" }]);
     const view = await render(
       <QueryClientProvider client={queryClient}>
@@ -90,6 +94,9 @@ describe("mobile session", () => {
     expect(await view.findByText("unauthenticated")).toBeOnTheScreen();
     expect(dependencies.tokenStore.delete).toHaveBeenCalledTimes(1);
     expect(queryClient.getQueryData(participantProfileQueryKey)).toBeUndefined();
+    expect(
+      queryClient.getQueryData(participantCapabilitiesQueryKey),
+    ).toBeUndefined();
     expect(queryClient.getQueryData(availableCommonsQueryKey)).toBeUndefined();
   });
 

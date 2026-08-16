@@ -4,6 +4,7 @@ import { useSession } from "../auth/session-context";
 import { ErrorMessage } from "../components/form-controls";
 import { ScreenLayout } from "../components/screen-layout";
 import { SignOutButton } from "../components/sign-out-button";
+import { CapabilitiesSection } from "../participants/capabilities-section";
 import { useParticipantProfile } from "../participants/use-participant-profile";
 import { StartupScreen } from "./startup-screen";
 
@@ -54,6 +55,7 @@ export function ProfileScreen() {
           {profile.bio ?? "No bio provided."}
         </Text>
       </View>
+      <CapabilitiesSection />
     </ScreenLayout>
   );
 }

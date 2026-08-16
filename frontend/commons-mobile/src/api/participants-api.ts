@@ -1,10 +1,15 @@
 import type {
+  CapabilitySummary,
   CommonsSummary,
   JoinCommonsInput,
   ParticipantProfile,
 } from "./contracts";
 
 export const participantProfileQueryKey = ["participant", "me"] as const;
+export const participantCapabilitiesQueryKey = [
+  ...participantProfileQueryKey,
+  "capabilities",
+] as const;
 export const availableCommonsQueryKey = ["commons", "available"] as const;
 
 export interface AuthenticatedRequest {
@@ -15,6 +20,9 @@ export interface ParticipantsApi {
   getAvailableCommons(): Promise<CommonsSummary[]>;
   getMyProfile(): Promise<ParticipantProfile>;
   joinCommons(input: JoinCommonsInput): Promise<void>;
+  getMyCapabilities(): Promise<CapabilitySummary[]>;
+  addCapability(text: string): Promise<CapabilitySummary>;
+  removeCapability(capabilityId: string): Promise<void>;
 }
 
 export function createParticipantsApi(
@@ -34,6 +42,24 @@ export function createParticipantsApi(
         method: "POST",
         body: JSON.stringify(input),
       });
+    },
+
+    getMyCapabilities() {
+      return request<CapabilitySummary[]>("/api/participants/me/capabilities");
+    },
+
+    addCapability(text) {
+      return request<CapabilitySummary>("/api/participants/me/capabilities", {
+        method: "POST",
+        body: JSON.stringify({ text }),
+      });
+    },
+
+    removeCapability(capabilityId) {
+      return request<void>(
+        `/api/participants/me/capabilities/${capabilityId}`,
+        { method: "DELETE" },
+      );
     },
   };
 }

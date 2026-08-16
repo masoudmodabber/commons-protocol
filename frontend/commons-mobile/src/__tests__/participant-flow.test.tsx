@@ -113,10 +113,14 @@ describe("US 001 participant flow", () => {
     );
   });
 
-  it("shows the participant profile and Home Commons without later-story capabilities", async () => {
+  it("shows the participant profile, Home Commons, and Capability management", async () => {
     const request = jest.fn(async (path: string) => {
       if (path === "/api/participants/me") {
-        return { ...profile, capabilities: [{ id: "capability-1", text: "Carpentry" }] };
+        return profile;
+      }
+
+      if (path === "/api/participants/me/capabilities") {
+        return [{ id: "capability-1", text: "Carpentry" }];
       }
 
       throw new Error(`Unexpected request: ${path}`);
@@ -127,8 +131,8 @@ describe("US 001 participant flow", () => {
     expect(await view.findByRole("header", { name: "Alice" })).toBeOnTheScreen();
     expect(view.getAllByText("Home Commons")).toHaveLength(2);
     expect(view.getByText("Happy to help locally.")).toBeOnTheScreen();
-    expect(view.queryByText("Capabilities")).not.toBeOnTheScreen();
-    expect(view.queryByText("Carpentry")).not.toBeOnTheScreen();
+    expect(view.getByRole("header", { name: "Capabilities" })).toBeOnTheScreen();
+    expect(await view.findByText("Carpentry")).toBeOnTheScreen();
   });
 
   it("recovers a duplicate join by loading the server-owned profile", async () => {

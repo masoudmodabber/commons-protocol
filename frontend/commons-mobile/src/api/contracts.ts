@@ -18,6 +18,11 @@ export interface ParticipantProfile {
   homeCommons: CommonsSummary;
 }
 
+export interface CapabilitySummary {
+  id: string;
+  text: string;
+}
+
 export interface JoinCommonsInput {
   homeCommonsId: string;
   displayName: string;

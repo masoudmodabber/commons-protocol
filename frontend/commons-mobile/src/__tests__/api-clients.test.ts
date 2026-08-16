@@ -59,6 +59,38 @@ describe("mobile API clients", () => {
     expect(request.mock.calls[0][1].body).not.toContain("userId");
   });
 
+  it("uses current-participant Capability endpoints without client identity values", async () => {
+    const request = jest.fn()
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce({ id: "capability-1", text: "Carpentry" })
+      .mockResolvedValueOnce(undefined);
+    const participantsApi = createParticipantsApi(request);
+
+    await participantsApi.getMyCapabilities();
+    await participantsApi.addCapability("  Carpentry  ");
+    await participantsApi.removeCapability("capability-1");
+
+    expect(request).toHaveBeenNthCalledWith(
+      1,
+      "/api/participants/me/capabilities",
+    );
+    expect(request).toHaveBeenNthCalledWith(
+      2,
+      "/api/participants/me/capabilities",
+      {
+        method: "POST",
+        body: JSON.stringify({ text: "  Carpentry  " }),
+      },
+    );
+    expect(request).toHaveBeenNthCalledWith(
+      3,
+      "/api/participants/me/capabilities/capability-1",
+      { method: "DELETE" },
+    );
+    expect(request.mock.calls.flat().join(" ")).not.toContain("participantId");
+    expect(request.mock.calls.flat().join(" ")).not.toContain("userId");
+  });
+
   it("adds the bearer token and surfaces backend problem details", async () => {
     const fetchMock = jest.mocked(fetch);
     fetchMock.mockResolvedValueOnce({
