@@ -1,0 +1,45 @@
+{
+  "name": "commons-mobile",
+  "version": "0.0.0",
+  "private": true,
+  "engines": {
+    "node": ">=24.3.0 <25"
+  },
+  "main": "expo-router/entry",
+  "scripts": {
+    "start": "APP_VARIANT=development expo start --dev-client",
+    "android": "APP_VARIANT=development expo run:android",
+    "ios": "APP_VARIANT=development expo run:ios",
+    "typecheck": "tsc --noEmit",
+    "test": "jest",
+    "doctor": "expo-doctor",
+    "export:android": "expo export --platform android --output-dir dist/android",
+    "export:ios": "expo export --platform ios --output-dir dist/ios"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.101.4",
+    "expo": "~57.0.13",
+    "expo-build-properties": "~57.0.11",
+    "expo-constants": "~57.0.11",
+    "expo-dev-client": "~57.0.12",
+    "expo-linking": "~57.0.6",
+    "expo-router": "~57.0.13",
+    "expo-status-bar": "~57.0.1",
+    "react": "19.2.3",
+    "react-native": "0.86.2",
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-screens": "~4.26.0"
+  },
+  "devDependencies": {
+    "@testing-library/react-native": "14.0.1",
+    "@types/jest": "29.5.14",
+    "@types/react": "~19.2.4",
+    "expo-doctor": "1.20.2",
+    "jest": "~29.7.0",
+    "jest-expo": "~57.0.4",
+    "typescript": "~6.0.3"
+  },
+  "overrides": {
+    "react-dom": "19.2.3"
+  }
+}

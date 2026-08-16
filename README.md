@@ -223,3 +223,71 @@ development server using Node.js 24. Source directories are bind-mounted into
 their containers, so backend changes automatically restart the API and
 frontend changes are applied through hot module replacement. Rebuild the
 containers only after changing dependencies, Dockerfiles, or Compose settings.
+
+## Mobile Development Foundation
+
+The Android and iOS client is a separate Expo application under
+`frontend/commons-mobile`. It is not launched by Docker Compose. Docker Compose
+provides the backend on host port `8080`, and the mobile development build
+connects to that backend using a device-reachable address.
+
+Install the mobile dependencies with Node.js 24:
+
+```bash
+cd frontend/commons-mobile
+npm ci
+cp .env.example .env.local
+```
+
+Set `EXPO_PUBLIC_API_BASE_URL` in `.env.local` for the target device:
+
+* Android emulator: `http://10.0.2.2:8080`
+* Android physical device: `http://<development-machine-LAN-IP>:8080`
+* iPhone physical device: `http://<development-machine-LAN-IP>:8080`
+
+The physical device and development machine must be on the same local network,
+and the host firewall must allow inbound TCP traffic on port `8080`.
+
+Start the backend in the first terminal:
+
+```bash
+docker compose up --build
+```
+
+Create, install, and start the Android development build from a second terminal:
+
+```bash
+cd frontend/commons-mobile
+npm run android
+```
+
+After the development build is installed, ordinary development sessions can
+start Metro without rebuilding the native application:
+
+```bash
+cd frontend/commons-mobile
+npm start
+```
+
+The first Android command requires Android Studio, an Android SDK, an emulator
+or USB-debuggable device, and the Java version required by the installed Android
+toolchain. Ordinary TypeScript changes use Metro and do not require rebuilding
+the native development client. Rebuild it after changing native dependencies or
+Expo native configuration.
+
+Linux cannot run Xcode or the iOS Simulator. An iOS development build must
+eventually be produced on a Mac or through EAS Build, then installed on a
+physical iPhone that can reach Metro and the local backend. This repository is
+not currently bound to an Expo account and contains no EAS project ID or signing
+credentials.
+
+Run the credential-free mobile validation locally with:
+
+```bash
+cd frontend/commons-mobile
+APP_VARIANT=development EXPO_PUBLIC_API_BASE_URL=http://10.0.2.2:8080 npm run typecheck
+APP_VARIANT=development EXPO_PUBLIC_API_BASE_URL=http://10.0.2.2:8080 npm test -- --runInBand
+APP_VARIANT=development EXPO_PUBLIC_API_BASE_URL=http://10.0.2.2:8080 npm run doctor
+APP_VARIANT=development EXPO_PUBLIC_API_BASE_URL=http://10.0.2.2:8080 npm run export:android
+APP_VARIANT=development EXPO_PUBLIC_API_BASE_URL=http://10.0.2.2:8080 npm run export:ios
+```
