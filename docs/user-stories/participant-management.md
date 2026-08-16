@@ -79,7 +79,3 @@ So that other participants can understand what I may be able to contribute to th
 13. Predefined Capability categories or a controlled taxonomy are not part of this story.
 
 14. Autocomplete, recommendations, semantic matching, and intelligent Capability suggestions are not part of this story.
-
-15. The complete flow must be usable through the React frontend.
-
-16. The story is not complete if Capabilities can only be managed through API calls, Postman, curl, or direct database access.

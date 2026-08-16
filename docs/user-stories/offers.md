@@ -93,10 +93,6 @@ For example:
 
 35. Accepting, rejecting, withdrawing, comparing, or negotiating Offers is not part of this story.
 
-36. The complete flow must be usable through the React frontend.
-
-37. The story is not complete if Offers can only be submitted through API calls, Postman, curl, or direct database access.
-
 ---
 
 ## US 009 View my Offers
@@ -135,10 +131,6 @@ So that I can keep track of the proposals I have made.
 
 13. Viewing submitted Offers does not create an Agreement, Exchange, Ledger Entry, Completed Exchange, or Commons Balance change.
 
-14. The complete flow must be usable through the React frontend.
-
-15. The story is not complete if submitted Offers can only be viewed through API calls, Postman, curl, or direct database access.
-
 ---
 
 ## US 010 Withdraw an Offer
@@ -176,10 +168,6 @@ So that I can indicate that I no longer want to proceed with that proposal.
 12. Withdrawing an Offer does not create an Agreement, Exchange, Ledger Entry, Completed Exchange, or Commons Balance change.
 
 13. After withdrawal, the Participant can view the Offer with its Withdrawn status.
-
-14. The complete flow must be usable through the React frontend.
-
-15. The story is not complete if Offers can only be withdrawn through API calls, Postman, curl, or direct database access.
 
 ---
 
@@ -239,13 +227,7 @@ Offers may differ in Commons accounting units, requested Capability contribution
 
 22. Request ownership must not be accepted from the client as authoritative.
 
-23. The complete flow must be usable through the React frontend.
-
-24. The story is not complete if Offers can only be viewed through API calls, Postman, curl, or direct database access.
-
 ---
-
-## US 012 Accept an Offer
 
 ## US 012 Accept an Offer
 
@@ -332,7 +314,3 @@ So that the selected proposal becomes a mutual Agreement between me and the Offe
 34. Cancelling or terminating an Agreement is not part of this story.
 
 35. Dispute handling is not part of this story.
-
-36. The complete acceptance flow must be usable through the React frontend.
-
-37. The story is not complete if an Offer can only be accepted through API calls, Postman, curl, or direct database access.

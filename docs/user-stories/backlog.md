@@ -96,3 +96,13 @@ Deferred from US 002:
 ## Participant Management
 
 * Moving from one Home Commons to another after the migration rules have been designed.
+
+## Mobile Client
+
+The initial Android and iOS client does not require offline operation or background synchronisation.
+
+Consider offline access and synchronisation only after observing whether unreliable connectivity materially interferes with real Commons Market usage.
+
+Platform capabilities such as camera access, location access, biometric authentication, deep linking, sharing integrations, and other device features should be introduced only when required by a defined participant behaviour.
+
+Push notification behaviour is not deferred here because Notifications already have their own epic. The delivery mechanism should be decided when those stories are designed.

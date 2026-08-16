@@ -10,7 +10,13 @@ The protocol preserves the strengths of free markets while exploring an alternat
 
 It is designed as a protocol rather than an application.
 
-The software exists to validate the protocol, not define it.
+The software exists to validate the protocol, not define it. The first software implementation is Commons Market.
+
+Commons Market uses a shared backend and API with participant clients for Android, iOS, and the web.
+
+Android and iOS are the primary participant interfaces, while the web application remains fully supported.
+
+All clients implement the same Commons Protocol behaviour.
 
 ---
 

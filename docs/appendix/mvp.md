@@ -67,3 +67,60 @@ Excluding these concepts from the MVP does not mean they are rejected.
 It means they are not required to test the first core hypothesis:
 
 > Can a community coordinate everyday voluntary exchange through direct reciprocity and a shared reciprocal Ledger instead of relying entirely on conventional money?
+
+# MVP Client Scope
+
+The first Commons Market implementation supports three participant client platforms:
+
+* Android.
+* iOS.
+* Web.
+
+Android and iOS are the primary participant interfaces.
+
+The web client remains a fully supported interface.
+
+Android and iOS are implemented from a shared React Native and Expo mobile codebase.
+
+The web client remains the existing React application.
+
+All participant facing MVP capabilities should be usable through Android, iOS, and web unless a user story explicitly documents a justified platform exception.
+
+Functional consistency does not require identical user interfaces.
+
+Each client may use interaction patterns appropriate to its platform while producing the same protocol outcomes and enforcing the same Domain rules.
+
+All clients communicate with the same backend API.
+
+The client used by a Participant must not change:
+
+* Participant identity.
+* Home Commons rules.
+* Request behaviour.
+* Offer behaviour.
+* Agreement behaviour.
+* Exchange behaviour.
+* Commons Balance behaviour.
+* Ledger behaviour.
+* Authorization rules.
+
+The initial mobile implementation does not automatically require:
+
+* Offline operation.
+* Background synchronisation.
+* Device location access.
+* Camera access.
+* Contact access.
+* Biometric authentication.
+* Platform specific widgets.
+* Platform specific features that are not required by an existing user story.
+
+These capabilities may be introduced later when they provide a clear benefit or are required by a user story.
+
+Notification delivery will be designed as part of the Notifications epic rather than being assumed as part of the initial mobile client foundation.
+
+Production Android distribution should target Google Play.
+
+Production iOS distribution should target the Apple App Store.
+
+Development and prerelease distribution may use appropriate internal Android distribution and Apple TestFlight.

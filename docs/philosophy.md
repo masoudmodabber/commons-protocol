@@ -363,11 +363,11 @@ Trust emerges from transparent participation history rather than popularity metr
 
 ---
 
-# The App
+# The First Implementation
 
-The first implementation should remain intentionally simple.
+The first Commons Market implementation should remain intentionally simple.
 
-Members can:
+Participants can:
 
 1. Establish or join a geographic Commons.
 2. Describe what they can provide.
@@ -379,9 +379,13 @@ Members can:
 8. Record Commons Balance changes when an Exchange uses Commons reciprocity.
 9. Build factual participation history.
 
-Future versions will support Cross Commons exchanges between participants whose Commons have established Reciprocity Agreements.
+The implementation may provide multiple client applications.
 
-The app exists to test the protocol.
+Those clients are interfaces to the same Commons Protocol and must not become separate definitions of the protocol.
+
+Future versions will support Cross Commons Exchanges between Participants whose Commons have established Reciprocity Agreements.
+
+The implementation exists to test the protocol.
 
 ---
 

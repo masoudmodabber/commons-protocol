@@ -42,10 +42,6 @@ So that other participants in my Home Commons can offer to help.
 
 15. Browsing or discovering Requests created by other Participants is not part of this story.
 
-16. The complete flow must be usable through the React frontend.
-
-17. The story is not complete if Requests can only be created through API calls, Postman, curl, or direct database access.
-
 ---
 
 ## US 004 Edit a Request
@@ -86,10 +82,6 @@ So that I can correct or clarify what I need while the Request is still Open.
 
 14. After saving changes, the Participant can view the updated Request.
 
-15. The complete flow must be usable through the React frontend.
-
-16. The story is not complete if Requests can only be edited through API calls, Postman, curl, or direct database access.
-
 ---
 
 ## US 005 Cancel a Request
@@ -123,10 +115,6 @@ So that other participants know I no longer need help with it.
 10. After cancellation, the Participant can view the Request with its Cancelled status.
 
 11. Editing a Cancelled Request is not allowed.
-
-12. The complete flow must be usable through the React frontend.
-
-13. The story is not complete if Requests can only be cancelled through API calls, Postman, curl, or direct database access.
 
 ---
 
@@ -172,10 +160,6 @@ So that I can discover ways I may be able to help.
 
 14. Cancelled or otherwise non Open Requests created by other Participants are not visible through the browse flow.
 
-15. The complete flow must be usable through the React frontend.
-
-16. The story is not complete if Requests can only be browsed through API calls, Postman, curl, or direct database access.
-
 ---
 
 ## US 007 Search Requests
@@ -217,8 +201,4 @@ So that I can more easily find Requests I may be able to help with.
 14. Searching does not create an Offer, Agreement, Exchange, Ledger Entry, or Commons Balance change.
 
 15. Search does not implement categories, tags, semantic matching, fuzzy matching, Capability matching, recommendations, or ranking based on historical behaviour.
-
-16. The complete flow must be usable through the React frontend.
-
-17. The story is not complete if search can only be performed through API calls, Postman, curl, or direct database access.
 ...
