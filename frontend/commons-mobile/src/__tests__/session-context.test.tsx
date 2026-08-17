@@ -8,6 +8,7 @@ import {
   participantCapabilitiesQueryKey,
   participantProfileQueryKey,
 } from "../api/participants-api";
+import { requestDetailQueryKey } from "../api/requests-api";
 import { SessionProvider, useSession } from "../auth/session-context";
 import type { RefreshTokenStore } from "../auth/secure-token-store";
 
@@ -68,6 +69,10 @@ describe("mobile session", () => {
     queryClient.setQueryData(participantCapabilitiesQueryKey, [
       { id: "capability-1", text: "Carpentry" },
     ]);
+    queryClient.setQueryData(requestDetailQueryKey("request-1"), {
+      id: "request-1",
+      title: "A Request",
+    });
     queryClient.setQueryData(availableCommonsQueryKey, [{ id: "commons-1" }]);
     const view = await render(
       <QueryClientProvider client={queryClient}>
@@ -96,6 +101,9 @@ describe("mobile session", () => {
     expect(queryClient.getQueryData(participantProfileQueryKey)).toBeUndefined();
     expect(
       queryClient.getQueryData(participantCapabilitiesQueryKey),
+    ).toBeUndefined();
+    expect(
+      queryClient.getQueryData(requestDetailQueryKey("request-1")),
     ).toBeUndefined();
     expect(queryClient.getQueryData(availableCommonsQueryKey)).toBeUndefined();
   });

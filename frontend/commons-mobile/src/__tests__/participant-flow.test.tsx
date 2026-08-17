@@ -11,10 +11,12 @@ import { JoinCommonsScreen } from "../screens/join-commons-screen";
 import { ProfileScreen } from "../screens/profile-screen";
 
 const mockRouterReplace = jest.fn();
+const mockRouterPush = jest.fn();
 
 jest.mock("expo-router", () => ({
   useRouter: () => ({
     replace: mockRouterReplace,
+    push: mockRouterPush,
   }),
 }));
 
@@ -71,6 +73,7 @@ function createHarness(httpClient: HttpClient) {
 describe("US 001 participant flow", () => {
   beforeEach(() => {
     mockRouterReplace.mockClear();
+    mockRouterPush.mockClear();
   });
 
   it("selects an existing Commons, joins with no client identity, and caches the server profile", async () => {
@@ -98,6 +101,11 @@ describe("US 001 participant flow", () => {
     await fireEvent.press(view.getByRole("button", { name: "Join this Commons" }));
 
     await waitFor(() => expect(mockRouterReplace).toHaveBeenCalledWith("/"));
+    await waitFor(() => {
+      expect(
+        view.getByRole("button", { name: "Join this Commons" }),
+      ).toBeEnabled();
+    });
 
     const joinCall = request.mock.calls.find(
       ([path, options]) =>
@@ -133,6 +141,8 @@ describe("US 001 participant flow", () => {
     expect(view.getByText("Happy to help locally.")).toBeOnTheScreen();
     expect(view.getByRole("header", { name: "Capabilities" })).toBeOnTheScreen();
     expect(await view.findByText("Carpentry")).toBeOnTheScreen();
+    await fireEvent.press(view.getByRole("button", { name: "Create a Request" }));
+    expect(mockRouterPush).toHaveBeenCalledWith("/requests/new");
   });
 
   it("recovers a duplicate join by loading the server-owned profile", async () => {
@@ -159,6 +169,11 @@ describe("US 001 participant flow", () => {
     await fireEvent.press(view.getByRole("button", { name: "Join this Commons" }));
 
     await waitFor(() => expect(mockRouterReplace).toHaveBeenCalledWith("/"));
+    await waitFor(() => {
+      expect(
+        view.getByRole("button", { name: "Join this Commons" }),
+      ).toBeEnabled();
+    });
     expect(harness.queryClient.getQueryData(participantProfileQueryKey)).toEqual(
       profile,
     );

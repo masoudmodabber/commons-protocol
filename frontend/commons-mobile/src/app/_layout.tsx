@@ -34,6 +34,8 @@ function Navigation() {
       </Stack.Protected>
       <Stack.Protected guard={hasProfile}>
         <Stack.Screen name="profile" />
+        <Stack.Screen name="requests/new" />
+        <Stack.Screen name="requests/[requestId]" />
       </Stack.Protected>
     </Stack>
   );

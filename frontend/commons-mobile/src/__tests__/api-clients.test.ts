@@ -1,6 +1,7 @@
 import { createAuthApi } from "../api/auth-api";
 import { createHttpClient, ApiError, type HttpClient } from "../api/http-client";
 import { createParticipantsApi } from "../api/participants-api";
+import { createRequestsApi } from "../api/requests-api";
 
 describe("mobile API clients", () => {
   beforeEach(() => {
@@ -89,6 +90,27 @@ describe("mobile API clients", () => {
     );
     expect(request.mock.calls.flat().join(" ")).not.toContain("participantId");
     expect(request.mock.calls.flat().join(" ")).not.toContain("userId");
+  });
+
+  it("creates and reads a Request without submitting ownership values", async () => {
+    const request = jest.fn()
+      .mockResolvedValueOnce({ id: "request-1", status: "Open" })
+      .mockResolvedValueOnce({ id: "request-1", status: "Open" });
+    const requestsApi = createRequestsApi(request);
+    const input = {
+      title: "  Help repairing a fence  ",
+      description: "  One garden fence panel needs replacing.  ",
+    };
+
+    await requestsApi.createRequest(input);
+    await requestsApi.getRequest("request-1");
+
+    expect(request).toHaveBeenNthCalledWith(1, "/api/requests", {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+    expect(request).toHaveBeenNthCalledWith(2, "/api/requests/request-1");
+    expect(JSON.parse(request.mock.calls[0][1].body)).toEqual(input);
   });
 
   it("adds the bearer token and surfaces backend problem details", async () => {

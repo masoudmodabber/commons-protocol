@@ -23,6 +23,24 @@ export interface CapabilitySummary {
   text: string;
 }
 
+export interface CreateRequestInput {
+  title: string;
+  description: string;
+}
+
+export interface RequestDetails {
+  id: string;
+  title: string;
+  description: string;
+  status: "Open" | "Cancelled" | "Matched";
+  creator: {
+    participantId: string;
+    displayName: string;
+  };
+  homeCommons: CommonsSummary;
+  agreementId?: string | null;
+}
+
 export interface JoinCommonsInput {
   homeCommonsId: string;
   displayName: string;

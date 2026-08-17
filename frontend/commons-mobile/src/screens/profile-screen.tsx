@@ -1,7 +1,8 @@
+import { useRouter, type Href } from "expo-router";
 import { useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { useSession } from "../auth/session-context";
-import { ErrorMessage } from "../components/form-controls";
+import { ErrorMessage, PrimaryButton } from "../components/form-controls";
 import { ScreenLayout } from "../components/screen-layout";
 import { SignOutButton } from "../components/sign-out-button";
 import { CapabilitiesSection } from "../participants/capabilities-section";
@@ -9,6 +10,7 @@ import { useParticipantProfile } from "../participants/use-participant-profile";
 import { StartupScreen } from "./startup-screen";
 
 export function ProfileScreen() {
+  const router = useRouter();
   const session = useSession();
   const profileQuery = useParticipantProfile();
   const [signingOut, setSigningOut] = useState(false);
@@ -55,6 +57,10 @@ export function ProfileScreen() {
           {profile.bio ?? "No bio provided."}
         </Text>
       </View>
+      <PrimaryButton
+        label="Create a Request"
+        onPress={() => router.push("/requests/new" as Href)}
+      />
       <CapabilitiesSection />
     </ScreenLayout>
   );
