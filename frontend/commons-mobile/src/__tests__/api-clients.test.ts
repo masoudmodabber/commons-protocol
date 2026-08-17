@@ -113,6 +113,25 @@ describe("mobile API clients", () => {
     expect(JSON.parse(request.mock.calls[0][1].body)).toEqual(input);
   });
 
+  it("browses Requests without submitting scope or search values", async () => {
+    const request = jest.fn()
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce({ id: "request-2", status: "Open" });
+    const requestsApi = createRequestsApi(request);
+
+    await requestsApi.browseRequests();
+    await requestsApi.getBrowseRequest("request-2");
+
+    expect(request).toHaveBeenNthCalledWith(1, "/api/requests/browse");
+    expect(request).toHaveBeenNthCalledWith(
+      2,
+      "/api/requests/browse/request-2",
+    );
+    expect(request.mock.calls.flat().join(" ")).not.toMatch(
+      /commonsId|participantId|userId|creatorId|ownership|search/i,
+    );
+  });
+
   it("edits only Request title and description", async () => {
     const request = jest.fn().mockResolvedValue({
       id: "request-1",
@@ -133,6 +152,22 @@ describe("mobile API clients", () => {
       body: JSON.stringify(input),
     });
     expect(JSON.parse(request.mock.calls[0][1].body)).toEqual(input);
+  });
+
+  it("cancels a Request with a bodyless lifecycle command", async () => {
+    const request = jest.fn().mockResolvedValue({
+      id: "request-1",
+      status: "Cancelled",
+    });
+    const requestsApi = createRequestsApi(request);
+
+    await requestsApi.cancelRequest("request-1");
+
+    expect(request).toHaveBeenCalledWith(
+      "/api/requests/request-1/cancel",
+      { method: "POST" },
+    );
+    expect(request.mock.calls[0][1].body).toBeUndefined();
   });
 
   it("adds the bearer token and surfaces backend problem details", async () => {

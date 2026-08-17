@@ -57,10 +57,16 @@ export function ProfileScreen() {
           {profile.bio ?? "No bio provided."}
         </Text>
       </View>
-      <PrimaryButton
-        label="Create a Request"
-        onPress={() => router.push("/requests/new" as Href)}
-      />
+      <View style={styles.requestActions}>
+        <PrimaryButton
+          label="Browse Available Requests"
+          onPress={() => router.push("/available-requests" as Href)}
+        />
+        <PrimaryButton
+          label="Create a Request"
+          onPress={() => router.push("/requests/new" as Href)}
+        />
+      </View>
       <CapabilitiesSection />
     </ScreenLayout>
   );
@@ -83,4 +89,5 @@ const styles = StyleSheet.create({
   },
   value: { color: "#17251d", fontSize: 17, lineHeight: 25 },
   emptyValue: { color: "#687a6f", fontSize: 16, fontStyle: "italic" },
+  requestActions: { gap: 10 },
 });

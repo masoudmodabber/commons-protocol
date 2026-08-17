@@ -141,6 +141,10 @@ describe("US 001 participant flow", () => {
     expect(view.getByText("Happy to help locally.")).toBeOnTheScreen();
     expect(view.getByRole("header", { name: "Capabilities" })).toBeOnTheScreen();
     expect(await view.findByText("Carpentry")).toBeOnTheScreen();
+    await fireEvent.press(
+      view.getByRole("button", { name: "Browse Available Requests" }),
+    );
+    expect(mockRouterPush).toHaveBeenCalledWith("/available-requests");
     await fireEvent.press(view.getByRole("button", { name: "Create a Request" }));
     expect(mockRouterPush).toHaveBeenCalledWith("/requests/new");
   });

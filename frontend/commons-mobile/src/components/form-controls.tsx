@@ -24,12 +24,14 @@ export function PrimaryButton({
   pendingLabel,
   pending = false,
   disabled = false,
+  tone = "primary",
   onPress,
 }: {
   label: string;
   pendingLabel?: string;
   pending?: boolean;
   disabled?: boolean;
+  tone?: "primary" | "danger";
   onPress: () => void;
 }) {
   const isDisabled = pending || disabled;
@@ -42,8 +44,13 @@ export function PrimaryButton({
       onPress={onPress}
       style={({ pressed }) => [
         styles.primaryButton,
+        tone === "danger" && styles.dangerButton,
         isDisabled && styles.disabledButton,
-        pressed && !isDisabled && styles.pressedButton,
+        pressed &&
+          !isDisabled &&
+          (tone === "danger"
+            ? styles.pressedDangerButton
+            : styles.pressedButton),
       ]}
     >
       {pending ? <ActivityIndicator color="#ffffff" size="small" /> : null}
@@ -125,6 +132,8 @@ const styles = StyleSheet.create({
   },
   disabledButton: { opacity: 0.5 },
   pressedButton: { backgroundColor: "#1d5035" },
+  dangerButton: { backgroundColor: "#9b342a" },
+  pressedDangerButton: { backgroundColor: "#79271f" },
   primaryButtonText: {
     color: "#ffffff",
     fontSize: 16,

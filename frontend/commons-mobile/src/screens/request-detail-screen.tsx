@@ -56,6 +56,19 @@ export function RequestDetailScreen({ requestId }: { requestId: string }) {
       }
     },
   });
+  const cancelMutation = useMutation({
+    mutationFn: () => requestsApi.cancelRequest(requestId),
+    onSuccess: (request) => {
+      queryClient.setQueryData(requestDetailQueryKey(request.id), request);
+      setDetailError(null);
+    },
+    onError: async (error) => {
+      if (error instanceof ApiError && error.status === 409) {
+        setDetailError(error.message);
+        await requestQuery.refetch();
+      }
+    },
+  });
 
   if (requestQuery.isPending) {
     return (
@@ -145,13 +158,30 @@ export function RequestDetailScreen({ requestId }: { requestId: string }) {
       eyebrow="Your Request"
       title={request.title}
     >
-      {detailError ? <ErrorMessage message={detailError} /> : null}
+      {detailError ? (
+        <ErrorMessage message={detailError} />
+      ) : cancelMutation.isError ? (
+        <ErrorMessage message={cancelMutation.error.message} />
+      ) : null}
       <Detail label="Status" value={request.status} />
       <Detail label="Description" value={request.description} />
       <Detail label="Requested by" value={request.creator.displayName} />
       <Detail label="Home Commons" value={request.homeCommons.name} />
       {request.status === "Open" && !detailError ? (
-        <PrimaryButton label="Edit Request" onPress={beginEditing} />
+        <View style={styles.actions}>
+          <PrimaryButton
+            disabled={cancelMutation.isPending}
+            label="Edit Request"
+            onPress={beginEditing}
+          />
+          <PrimaryButton
+            label="Cancel Request"
+            onPress={() => cancelMutation.mutate()}
+            pending={cancelMutation.isPending}
+            pendingLabel="Cancelling…"
+            tone="danger"
+          />
+        </View>
       ) : null}
       <TextButton
         label="Back to profile"
@@ -171,6 +201,7 @@ function Detail({ label, value }: { label: string; value: string }) {
 }
 
 const styles = StyleSheet.create({
+  actions: { gap: 10 },
   detail: {
     marginBottom: 14,
     borderRadius: 12,

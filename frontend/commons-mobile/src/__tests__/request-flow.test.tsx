@@ -63,7 +63,7 @@ function createHarness() {
   return { Wrapper, queryClient };
 }
 
-describe("US 003 Request creation", () => {
+describe("mobile Request flows", () => {
   beforeEach(() => {
     mockRequest.mockReset();
     mockRouterReplace.mockReset();
@@ -198,7 +198,8 @@ describe("US 003 Request creation", () => {
     expect(view.getByText("Brisbane Commons")).toBeOnTheScreen();
     expect(mockRequest).toHaveBeenCalledWith("/api/requests/request-1");
     expect(view.getByRole("button", { name: "Edit Request" })).toBeOnTheScreen();
-    expect(view.queryByRole("button", { name: /Cancel|Offer|Browse|Search/i }))
+    expect(view.getByRole("button", { name: "Cancel Request" })).toBeOnTheScreen();
+    expect(view.queryByRole("button", { name: /Offer|Browse|Search/i }))
       .not.toBeOnTheScreen();
   });
 
@@ -418,6 +419,150 @@ describe("US 003 Request creation", () => {
         .not.toBeOnTheScreen();
     },
   );
+
+  it("cancels an Open Request directly and displays the authoritative response", async () => {
+    const cancelledRequest: RequestDetails = {
+      ...createdRequest,
+      status: "Cancelled",
+    };
+    mockRequest
+      .mockResolvedValueOnce(createdRequest)
+      .mockResolvedValueOnce(cancelledRequest);
+    const harness = createHarness();
+    const view = await render(<RequestDetailScreen requestId="request-1" />, {
+      wrapper: harness.Wrapper,
+    });
+
+    await view.findByRole("header", { name: "Help repairing a fence" });
+    await fireEvent.press(view.getByRole("button", { name: "Cancel Request" }));
+
+    expect(await view.findByText("Cancelled")).toBeOnTheScreen();
+    expect(view.getByRole("header", { name: "Help repairing a fence" })).toBeOnTheScreen();
+    expect(view.getByText("One garden fence panel needs replacing.")).toBeOnTheScreen();
+    expect(view.getByText("Alice")).toBeOnTheScreen();
+    expect(view.getByText("Brisbane Commons")).toBeOnTheScreen();
+    expect(view.queryByRole("button", { name: "Edit Request" })).not.toBeOnTheScreen();
+    expect(view.queryByRole("button", { name: "Cancel Request" })).not.toBeOnTheScreen();
+    expect(mockRequest).toHaveBeenNthCalledWith(
+      2,
+      "/api/requests/request-1/cancel",
+      { method: "POST" },
+    );
+    expect(mockRequest.mock.calls[1][1].body).toBeUndefined();
+    expect(harness.queryClient.getQueryData(requestDetailQueryKey("request-1")))
+      .toEqual(cancelledRequest);
+  });
+
+  it("disables both lifecycle controls while cancellation is pending", async () => {
+    let resolveCancellation!: (request: RequestDetails) => void;
+    const cancelledRequest: RequestDetails = {
+      ...createdRequest,
+      status: "Cancelled",
+    };
+    mockRequest
+      .mockResolvedValueOnce(createdRequest)
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveCancellation = resolve;
+          }),
+      );
+    const view = await render(<RequestDetailScreen requestId="request-1" />, {
+      wrapper: createHarness().Wrapper,
+    });
+
+    await view.findByRole("header", { name: "Help repairing a fence" });
+    await fireEvent.press(view.getByRole("button", { name: "Cancel Request" }));
+
+    await waitFor(() => {
+      expect(view.getByRole("button", { name: "Cancelling…" })).toBeDisabled();
+    });
+    expect(view.getByRole("button", { name: "Edit Request" })).toBeDisabled();
+    await act(async () => resolveCancellation(cancelledRequest));
+    expect(await view.findByText("Cancelled")).toBeOnTheScreen();
+  });
+
+  it("refreshes authoritative details after a cancellation conflict", async () => {
+    const matchedRequest: RequestDetails = {
+      ...createdRequest,
+      status: "Matched",
+      agreementId: "agreement-1",
+    };
+    mockRequest
+      .mockResolvedValueOnce(createdRequest)
+      .mockRejectedValueOnce(
+        new ApiError(409, "Only an Open Request can be cancelled."),
+      )
+      .mockResolvedValueOnce(matchedRequest);
+    const harness = createHarness();
+    const view = await render(<RequestDetailScreen requestId="request-1" />, {
+      wrapper: harness.Wrapper,
+    });
+
+    await view.findByRole("header", { name: "Help repairing a fence" });
+    await fireEvent.press(view.getByRole("button", { name: "Cancel Request" }));
+
+    expect(await view.findByRole("alert")).toHaveTextContent(
+      "Only an Open Request can be cancelled.",
+    );
+    expect(await view.findByText("Matched")).toBeOnTheScreen();
+    expect(view.queryByRole("button", { name: "Edit Request" })).not.toBeOnTheScreen();
+    expect(view.queryByRole("button", { name: "Cancel Request" })).not.toBeOnTheScreen();
+    expect(mockRequest).toHaveBeenNthCalledWith(3, "/api/requests/request-1");
+    expect(harness.queryClient.getQueryData(requestDetailQueryKey("request-1")))
+      .toEqual(matchedRequest);
+  });
+
+  it("keeps cached data unchanged after an ownership-safe cancellation rejection", async () => {
+    mockRequest
+      .mockResolvedValueOnce(createdRequest)
+      .mockRejectedValueOnce(
+        new ApiError(
+          404,
+          "The Request does not exist or was not created by this Participant.",
+        ),
+      );
+    const harness = createHarness();
+    const view = await render(<RequestDetailScreen requestId="request-1" />, {
+      wrapper: harness.Wrapper,
+    });
+
+    await view.findByRole("header", { name: "Help repairing a fence" });
+    await fireEvent.press(view.getByRole("button", { name: "Cancel Request" }));
+
+    expect(await view.findByRole("alert")).toHaveTextContent(
+      "The Request does not exist or was not created by this Participant.",
+    );
+    expect(view.getByText("Open")).toBeOnTheScreen();
+    expect(harness.queryClient.getQueryData(requestDetailQueryKey("request-1")))
+      .toEqual(createdRequest);
+    expect(mockRequest).toHaveBeenCalledTimes(2);
+  });
+
+  it("keeps the Request visible after a general cancellation failure and allows retry", async () => {
+    const cancelledRequest: RequestDetails = {
+      ...createdRequest,
+      status: "Cancelled",
+    };
+    mockRequest
+      .mockResolvedValueOnce(createdRequest)
+      .mockRejectedValueOnce(new Error("The Request could not be cancelled."))
+      .mockResolvedValueOnce(cancelledRequest);
+    const view = await render(<RequestDetailScreen requestId="request-1" />, {
+      wrapper: createHarness().Wrapper,
+    });
+
+    await view.findByRole("header", { name: "Help repairing a fence" });
+    await fireEvent.press(view.getByRole("button", { name: "Cancel Request" }));
+
+    expect(await view.findByRole("alert")).toHaveTextContent(
+      "The Request could not be cancelled.",
+    );
+    expect(view.getByText("Open")).toBeOnTheScreen();
+    await fireEvent.press(view.getByRole("button", { name: "Cancel Request" }));
+    expect(await view.findByText("Cancelled")).toBeOnTheScreen();
+    expect(mockRequest).toHaveBeenCalledTimes(3);
+  });
 
   it("shows a loading state while fetching a creator-owned Request", async () => {
     let resolveRequest!: (request: RequestDetails) => void;
