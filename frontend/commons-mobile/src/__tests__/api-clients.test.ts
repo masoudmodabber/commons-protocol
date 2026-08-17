@@ -1,15 +1,21 @@
 import { createAuthApi } from "../api/auth-api";
+import {
+  agreementDetailQueryKey,
+  createAgreementsApi,
+} from "../api/agreements-api";
 import { createHttpClient, ApiError, type HttpClient } from "../api/http-client";
 import { createParticipantsApi } from "../api/participants-api";
 import {
   availableRequestsQueryKey,
   availableRequestsSearchQueryKey,
   createRequestsApi,
+  participantRequestsQueryKey,
 } from "../api/requests-api";
 import {
   createOffersApi,
   offerDetailQueryKey,
   offerSubmissionOptionsQueryKey,
+  requestOffersQueryKey,
 } from "../api/offers-api";
 import { participantProfileQueryKey } from "../api/participants-api";
 
@@ -105,6 +111,7 @@ describe("mobile API clients", () => {
   it("creates and reads a Request without submitting ownership values", async () => {
     const request = jest.fn()
       .mockResolvedValueOnce({ id: "request-1", status: "Open" })
+      .mockResolvedValueOnce([{ id: "request-1", status: "Open" }])
       .mockResolvedValueOnce({ id: "request-1", status: "Open" });
     const requestsApi = createRequestsApi(request);
     const input = {
@@ -113,13 +120,15 @@ describe("mobile API clients", () => {
     };
 
     await requestsApi.createRequest(input);
+    await requestsApi.getMyRequests();
     await requestsApi.getRequest("request-1");
 
     expect(request).toHaveBeenNthCalledWith(1, "/api/requests", {
       method: "POST",
       body: JSON.stringify(input),
     });
-    expect(request).toHaveBeenNthCalledWith(2, "/api/requests/request-1");
+    expect(request).toHaveBeenNthCalledWith(2, "/api/requests");
+    expect(request).toHaveBeenNthCalledWith(3, "/api/requests/request-1");
     expect(JSON.parse(request.mock.calls[0][1].body)).toEqual(input);
   });
 
@@ -225,6 +234,9 @@ describe("mobile API clients", () => {
     await offersApi.getMyOffers();
     await offersApi.getOffer("offer-1");
     await offersApi.withdrawOffer("offer-1");
+    await offersApi.getRequestOffers("request-1");
+    await offersApi.acceptOffer("offer-2");
+    await createAgreementsApi(request).getAgreement("agreement-1");
 
     expect(request).toHaveBeenNthCalledWith(
       1,
@@ -243,6 +255,20 @@ describe("mobile API clients", () => {
       { method: "POST" },
     );
     expect(request.mock.calls[4][1].body).toBeUndefined();
+    expect(request).toHaveBeenNthCalledWith(
+      6,
+      "/api/requests/request-1/offers",
+    );
+    expect(request).toHaveBeenNthCalledWith(
+      7,
+      "/api/offers/offer-2/accept",
+      { method: "POST" },
+    );
+    expect(request.mock.calls[6][1].body).toBeUndefined();
+    expect(request).toHaveBeenNthCalledWith(
+      8,
+      "/api/agreements/agreement-1",
+    );
     const submitted = JSON.parse(request.mock.calls[1][1].body);
     expect(submitted).toEqual(input);
     expect(submitted).not.toHaveProperty("participantId");
@@ -267,6 +293,16 @@ describe("mobile API clients", () => {
       ...participantProfileQueryKey,
       "offers",
       "offer-1",
+    ]);
+    expect(requestOffersQueryKey("request-1")).toEqual([
+      ...participantRequestsQueryKey,
+      "request-1",
+      "offers",
+    ]);
+    expect(agreementDetailQueryKey("agreement-1")).toEqual([
+      ...participantProfileQueryKey,
+      "agreements",
+      "agreement-1",
     ]);
   });
 

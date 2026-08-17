@@ -39,8 +39,11 @@ function Navigation() {
         <Stack.Screen name="available-requests/[requestId]/offer" />
         <Stack.Screen name="offers/index" />
         <Stack.Screen name="offers/[offerId]" />
+        <Stack.Screen name="agreements/[agreementId]" />
+        <Stack.Screen name="requests/index" />
         <Stack.Screen name="requests/new" />
         <Stack.Screen name="requests/[requestId]" />
+        <Stack.Screen name="requests/[requestId]/offers" />
       </Stack.Protected>
     </Stack>
   );

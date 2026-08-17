@@ -144,6 +144,14 @@ export function OfferDetailScreen({ offerId }: { offerId: string }) {
           tone="danger"
         />
       ) : null}
+      {offer.agreementId ? (
+        <PrimaryButton
+          label="View Agreement"
+          onPress={() =>
+            router.push(`/agreements/${offer.agreementId}` as Href)
+          }
+        />
+      ) : null}
       <TextButton
         label="Back to My Offers"
         onPress={() => router.replace("/offers" as Href)}

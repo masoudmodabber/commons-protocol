@@ -9,6 +9,7 @@ import { RequestDetailScreen } from "../screens/request-detail-screen";
 
 const mockRequest = jest.fn();
 const mockRouterReplace = jest.fn();
+const mockRouterPush = jest.fn();
 
 const profile: ParticipantProfile = {
   id: "participant-1",
@@ -35,7 +36,7 @@ const updatedRequest: RequestDetails = {
 };
 
 jest.mock("expo-router", () => ({
-  useRouter: () => ({ replace: mockRouterReplace }),
+  useRouter: () => ({ replace: mockRouterReplace, push: mockRouterPush }),
 }));
 
 jest.mock("../auth/session-context", () => ({
@@ -67,6 +68,7 @@ describe("mobile Request flows", () => {
   beforeEach(() => {
     mockRequest.mockReset();
     mockRouterReplace.mockReset();
+    mockRouterPush.mockReset();
   });
 
   it("requires a title and description without asking for ownership values", async () => {
@@ -199,8 +201,36 @@ describe("mobile Request flows", () => {
     expect(mockRequest).toHaveBeenCalledWith("/api/requests/request-1");
     expect(view.getByRole("button", { name: "Edit Request" })).toBeOnTheScreen();
     expect(view.getByRole("button", { name: "Cancel Request" })).toBeOnTheScreen();
-    expect(view.queryByRole("button", { name: /Offer|Browse|Search/i }))
-      .not.toBeOnTheScreen();
+    await fireEvent.press(view.getByRole("button", { name: "View Offers" }));
+    expect(mockRouterPush).toHaveBeenCalledWith(
+      "/requests/request-1/offers",
+    );
+  });
+
+  it("opens the persisted Agreement from a Matched Request", async () => {
+    mockRequest.mockResolvedValueOnce({
+      ...createdRequest,
+      status: "Matched",
+      agreementId: "agreement-1",
+    });
+    const view = await render(<RequestDetailScreen requestId="request-1" />, {
+      wrapper: createHarness().Wrapper,
+    });
+
+    await fireEvent.press(
+      await view.findByRole("button", { name: "View Agreement" }),
+    );
+
+    expect(mockRouterPush).toHaveBeenCalledWith("/agreements/agreement-1");
+    expect(
+      view.queryByRole("button", { name: "View Offers" }),
+    ).not.toBeOnTheScreen();
+    expect(
+      view.queryByRole("button", { name: "Edit Request" }),
+    ).not.toBeOnTheScreen();
+    expect(
+      view.queryByRole("button", { name: "Cancel Request" }),
+    ).not.toBeOnTheScreen();
   });
 
   it("edits an Open Request with raw text and displays the authoritative response", async () => {

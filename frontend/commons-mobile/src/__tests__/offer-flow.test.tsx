@@ -342,6 +342,7 @@ describe("US 008 mobile Offer submission", () => {
 describe("US 008 and US 009 mobile Offer detail", () => {
   beforeEach(() => {
     mockRequest.mockReset();
+    mockRouterPush.mockReset();
     mockRouterReplace.mockReset();
   });
 
@@ -403,6 +404,7 @@ describe("US 008 and US 009 mobile Offer detail", () => {
 describe("US 010 mobile Offer withdrawal", () => {
   beforeEach(() => {
     mockRequest.mockReset();
+    mockRouterPush.mockReset();
     mockRouterReplace.mockReset();
   });
 
@@ -466,6 +468,26 @@ describe("US 010 mobile Offer withdrawal", () => {
       expect(mockRequest).toHaveBeenCalledTimes(1);
     },
   );
+
+  it("opens the persisted Agreement from an Accepted Offer", async () => {
+    mockRequest.mockResolvedValueOnce({
+      ...authoritativeOffer,
+      status: "Accepted",
+      agreementId: "agreement-1",
+    });
+    const view = await render(<OfferDetailScreen offerId="offer-1" />, {
+      wrapper: createHarness().Wrapper,
+    });
+
+    await fireEvent.press(
+      await view.findByRole("button", { name: "View Agreement" }),
+    );
+
+    expect(mockRouterPush).toHaveBeenCalledWith("/agreements/agreement-1");
+    expect(
+      view.queryByRole("button", { name: "Withdraw Offer" }),
+    ).not.toBeOnTheScreen();
+  });
 
   it("disables withdrawal and prevents duplicate submission while pending", async () => {
     let resolveWithdrawal!: (offer: OfferDetails) => void;

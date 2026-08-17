@@ -94,6 +94,35 @@ export interface OfferDetails {
   agreementId?: string | null;
 }
 
+export interface RequestOfferComparison {
+  request: OfferRequestSummary;
+  offers: OfferDetails[];
+}
+
+export interface AgreementDetails {
+  id: string;
+  request: {
+    id: string;
+    title: string;
+    description: string;
+    status: "Matched";
+    creator: {
+      participantId: string;
+      displayName: string;
+    };
+  };
+  acceptedOffer: {
+    id: string;
+    status: "Accepted";
+    creator: {
+      participantId: string;
+      displayName: string;
+    };
+  };
+  commonsAccountingUnits: number | null;
+  requestedContributions: OfferDetails["requestedContributions"];
+}
+
 export interface JoinCommonsInput {
   homeCommonsId: string;
   displayName: string;

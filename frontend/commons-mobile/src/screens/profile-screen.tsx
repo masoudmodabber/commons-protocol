@@ -67,6 +67,10 @@ export function ProfileScreen() {
           onPress={() => router.push("/requests/new" as Href)}
         />
         <PrimaryButton
+          label="My Requests"
+          onPress={() => router.push("/requests" as Href)}
+        />
+        <PrimaryButton
           label="My Offers"
           onPress={() => router.push("/offers" as Href)}
         />

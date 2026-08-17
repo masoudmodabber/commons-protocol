@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, waitFor } from "@testing-library/react-native";
 import { Text, Pressable } from "react-native";
 import type { AuthApi } from "../api/auth-api";
+import { agreementDetailQueryKey } from "../api/agreements-api";
 import { ApiError, type HttpClient } from "../api/http-client";
 import {
   availableCommonsQueryKey,
@@ -12,12 +13,14 @@ import {
   availableRequestDetailQueryKey,
   availableRequestsQueryKey,
   availableRequestsSearchQueryKey,
+  participantRequestsQueryKey,
   requestDetailQueryKey,
 } from "../api/requests-api";
 import {
   offerDetailQueryKey,
   offerSubmissionOptionsQueryKey,
   participantOffersQueryKey,
+  requestOffersQueryKey,
 } from "../api/offers-api";
 import { SessionProvider, useSession } from "../auth/session-context";
 import type { RefreshTokenStore } from "../auth/secure-token-store";
@@ -79,6 +82,9 @@ describe("mobile session", () => {
     queryClient.setQueryData(participantCapabilitiesQueryKey, [
       { id: "capability-1", text: "Carpentry" },
     ]);
+    queryClient.setQueryData(participantRequestsQueryKey, [
+      { id: "request-1", title: "A Request" },
+    ]);
     queryClient.setQueryData(requestDetailQueryKey("request-1"), {
       id: "request-1",
       title: "A Request",
@@ -103,6 +109,13 @@ describe("mobile session", () => {
     queryClient.setQueryData(offerDetailQueryKey("offer-1"), {
       id: "offer-1",
       status: "Active",
+    });
+    queryClient.setQueryData(requestOffersQueryKey("request-1"), {
+      request: { id: "request-1" },
+      offers: [{ id: "offer-2", status: "Active" }],
+    });
+    queryClient.setQueryData(agreementDetailQueryKey("agreement-1"), {
+      id: "agreement-1",
     });
     queryClient.setQueryData(availableCommonsQueryKey, [{ id: "commons-1" }]);
     const view = await render(
@@ -136,6 +149,7 @@ describe("mobile session", () => {
     expect(
       queryClient.getQueryData(requestDetailQueryKey("request-1")),
     ).toBeUndefined();
+    expect(queryClient.getQueryData(participantRequestsQueryKey)).toBeUndefined();
     expect(queryClient.getQueryData(availableRequestsQueryKey)).toBeUndefined();
     expect(
       queryClient.getQueryData(availableRequestDetailQueryKey("request-2")),
@@ -148,6 +162,12 @@ describe("mobile session", () => {
     ).toBeUndefined();
     expect(queryClient.getQueryData(participantOffersQueryKey)).toBeUndefined();
     expect(queryClient.getQueryData(offerDetailQueryKey("offer-1"))).toBeUndefined();
+    expect(
+      queryClient.getQueryData(requestOffersQueryKey("request-1")),
+    ).toBeUndefined();
+    expect(
+      queryClient.getQueryData(agreementDetailQueryKey("agreement-1")),
+    ).toBeUndefined();
     expect(queryClient.getQueryData(availableCommonsQueryKey)).toBeUndefined();
   });
 

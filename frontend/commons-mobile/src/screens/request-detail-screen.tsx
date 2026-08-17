@@ -79,9 +79,14 @@ export function RequestDetailScreen({ requestId }: { requestId: string }) {
   }
 
   if (requestQuery.isError) {
+    const message =
+      requestQuery.error instanceof ApiError && requestQuery.error.status === 404
+        ? "This Request is not available."
+        : requestQuery.error.message;
+
     return (
       <ScreenLayout eyebrow="Your Request" title="Request unavailable">
-        <ErrorMessage message={requestQuery.error.message} />
+        <ErrorMessage message={message} />
         <PrimaryButton
           label="Try again"
           onPress={() => void requestQuery.refetch()}
@@ -167,22 +172,39 @@ export function RequestDetailScreen({ requestId }: { requestId: string }) {
       <Detail label="Description" value={request.description} />
       <Detail label="Requested by" value={request.creator.displayName} />
       <Detail label="Home Commons" value={request.homeCommons.name} />
-      {request.status === "Open" && !detailError ? (
-        <View style={styles.actions}>
+      <View style={styles.actions}>
+        {request.agreementId ? (
           <PrimaryButton
-            disabled={cancelMutation.isPending}
-            label="Edit Request"
-            onPress={beginEditing}
+            label="View Agreement"
+            onPress={() =>
+              router.push(`/agreements/${request.agreementId}` as Href)
+            }
           />
+        ) : (
           <PrimaryButton
-            label="Cancel Request"
-            onPress={() => cancelMutation.mutate()}
-            pending={cancelMutation.isPending}
-            pendingLabel="Cancelling…"
-            tone="danger"
+            label="View Offers"
+            onPress={() =>
+              router.push(`/requests/${request.id}/offers` as Href)
+            }
           />
-        </View>
-      ) : null}
+        )}
+        {request.status === "Open" && !detailError ? (
+          <>
+            <PrimaryButton
+              disabled={cancelMutation.isPending}
+              label="Edit Request"
+              onPress={beginEditing}
+            />
+            <PrimaryButton
+              label="Cancel Request"
+              onPress={() => cancelMutation.mutate()}
+              pending={cancelMutation.isPending}
+              pendingLabel="Cancelling…"
+              tone="danger"
+            />
+          </>
+        ) : null}
+      </View>
       <TextButton
         label="Back to profile"
         onPress={() => router.replace("/profile" as Href)}

@@ -32,6 +32,7 @@ export function availableRequestsSearchQueryKey(searchTerm?: string) {
 
 export interface RequestsApi {
   createRequest(input: CreateRequestInput): Promise<RequestDetails>;
+  getMyRequests(): Promise<RequestDetails[]>;
   getRequest(requestId: string): Promise<RequestDetails>;
   browseRequests(searchTerm?: string): Promise<RequestDetails[]>;
   getBrowseRequest(requestId: string): Promise<RequestDetails>;
@@ -49,6 +50,10 @@ export function createRequestsApi(request: AuthenticatedRequest): RequestsApi {
         method: "POST",
         body: JSON.stringify(input),
       });
+    },
+
+    getMyRequests() {
+      return request<RequestDetails[]>("/api/requests");
     },
 
     getRequest(requestId) {
