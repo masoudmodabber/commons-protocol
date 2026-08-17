@@ -28,6 +28,11 @@ export interface CreateRequestInput {
   description: string;
 }
 
+export interface EditRequestInput {
+  title: string;
+  description: string;
+}
+
 export interface RequestDetails {
   id: string;
   title: string;

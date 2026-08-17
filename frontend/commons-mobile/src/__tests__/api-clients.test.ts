@@ -113,6 +113,28 @@ describe("mobile API clients", () => {
     expect(JSON.parse(request.mock.calls[0][1].body)).toEqual(input);
   });
 
+  it("edits only Request title and description", async () => {
+    const request = jest.fn().mockResolvedValue({
+      id: "request-1",
+      title: "Corrected title",
+      description: "Corrected description",
+      status: "Open",
+    });
+    const requestsApi = createRequestsApi(request);
+    const input = {
+      title: "  Corrected title  ",
+      description: "  Corrected description  ",
+    };
+
+    await requestsApi.editRequest("request-1", input);
+
+    expect(request).toHaveBeenCalledWith("/api/requests/request-1", {
+      method: "PUT",
+      body: JSON.stringify(input),
+    });
+    expect(JSON.parse(request.mock.calls[0][1].body)).toEqual(input);
+  });
+
   it("adds the bearer token and surfaces backend problem details", async () => {
     const fetchMock = jest.mocked(fetch);
     fetchMock.mockResolvedValueOnce({

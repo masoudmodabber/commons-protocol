@@ -28,6 +28,12 @@ const createdRequest: RequestDetails = {
   agreementId: null,
 };
 
+const updatedRequest: RequestDetails = {
+  ...createdRequest,
+  title: "Corrected fence repair",
+  description: "Two garden fence panels need replacing.",
+};
+
 jest.mock("expo-router", () => ({
   useRouter: () => ({ replace: mockRouterReplace }),
 }));
@@ -177,7 +183,7 @@ describe("US 003 Request creation", () => {
     expect(mockRouterReplace).not.toHaveBeenCalled();
   });
 
-  it("loads and displays only the creator-owned read-only Request details", async () => {
+  it("loads and displays the creator-owned Request details", async () => {
     mockRequest.mockResolvedValueOnce(createdRequest);
     const view = await render(<RequestDetailScreen requestId="request-1" />, {
       wrapper: createHarness().Wrapper,
@@ -191,9 +197,227 @@ describe("US 003 Request creation", () => {
     expect(view.getByText("Alice")).toBeOnTheScreen();
     expect(view.getByText("Brisbane Commons")).toBeOnTheScreen();
     expect(mockRequest).toHaveBeenCalledWith("/api/requests/request-1");
-    expect(view.queryByRole("button", { name: /Edit|Cancel|Offer|Browse|Search/i }))
+    expect(view.getByRole("button", { name: "Edit Request" })).toBeOnTheScreen();
+    expect(view.queryByRole("button", { name: /Cancel|Offer|Browse|Search/i }))
       .not.toBeOnTheScreen();
   });
+
+  it("edits an Open Request with raw text and displays the authoritative response", async () => {
+    mockRequest
+      .mockResolvedValueOnce(createdRequest)
+      .mockResolvedValueOnce(updatedRequest);
+    const harness = createHarness();
+    const view = await render(<RequestDetailScreen requestId="request-1" />, {
+      wrapper: harness.Wrapper,
+    });
+
+    await view.findByRole("header", { name: "Help repairing a fence" });
+    await fireEvent.press(view.getByRole("button", { name: "Edit Request" }));
+    const title = view.getByLabelText("Request title");
+    const description = view.getByLabelText("Description");
+    expect(title).toHaveDisplayValue("Help repairing a fence");
+    expect(description).toHaveDisplayValue(
+      "One garden fence panel needs replacing.",
+    );
+
+    await fireEvent.changeText(title, "  Client-side title  ");
+    await fireEvent.changeText(description, "  Client-side description  ");
+    await fireEvent.press(view.getByRole("button", { name: "Save changes" }));
+
+    expect(
+      await view.findByRole("header", { name: "Corrected fence repair" }),
+    ).toBeOnTheScreen();
+    expect(view.getByText("Two garden fence panels need replacing.")).toBeOnTheScreen();
+    expect(view.getByText("Open")).toBeOnTheScreen();
+    expect(view.getByText("Alice")).toBeOnTheScreen();
+    expect(view.getByText("Brisbane Commons")).toBeOnTheScreen();
+    expect(mockRequest).toHaveBeenNthCalledWith(
+      2,
+      "/api/requests/request-1",
+      {
+        method: "PUT",
+        body: JSON.stringify({
+          title: "  Client-side title  ",
+          description: "  Client-side description  ",
+        }),
+      },
+    );
+    expect(harness.queryClient.getQueryData(requestDetailQueryKey("request-1")))
+      .toEqual(updatedRequest);
+
+    const body = mockRequest.mock.calls[1][1].body as string;
+    expect(Object.keys(JSON.parse(body))).toEqual(["title", "description"]);
+  });
+
+  it("rejects empty edits locally and discards changes without cancelling the Request", async () => {
+    mockRequest.mockResolvedValueOnce(createdRequest);
+    const view = await render(<RequestDetailScreen requestId="request-1" />, {
+      wrapper: createHarness().Wrapper,
+    });
+
+    await view.findByRole("header", { name: "Help repairing a fence" });
+    await fireEvent.press(view.getByRole("button", { name: "Edit Request" }));
+    await fireEvent.changeText(view.getByLabelText("Request title"), "   ");
+    expect(view.getByRole("button", { name: "Save changes" })).toBeDisabled();
+    expect(view.getByRole("button", { name: "Discard changes" })).toBeOnTheScreen();
+    expect(view.queryByRole("button", { name: "Cancel Request" })).not.toBeOnTheScreen();
+
+    await fireEvent.press(view.getByRole("button", { name: "Discard changes" }));
+    expect(
+      view.getByRole("header", { name: "Help repairing a fence" }),
+    ).toBeOnTheScreen();
+    expect(mockRequest).toHaveBeenCalledTimes(1);
+  });
+
+  it("disables editing controls while saving", async () => {
+    let resolveEdit!: (request: RequestDetails) => void;
+    mockRequest
+      .mockResolvedValueOnce(createdRequest)
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveEdit = resolve;
+          }),
+      );
+    const view = await render(<RequestDetailScreen requestId="request-1" />, {
+      wrapper: createHarness().Wrapper,
+    });
+
+    await view.findByRole("header", { name: "Help repairing a fence" });
+    await fireEvent.press(view.getByRole("button", { name: "Edit Request" }));
+    await fireEvent.press(view.getByRole("button", { name: "Save changes" }));
+
+    await waitFor(() => {
+      expect(view.getByRole("button", { name: "Saving…" })).toBeDisabled();
+    });
+    expect(view.getByLabelText("Request title")).toBeDisabled();
+    expect(view.getByLabelText("Description")).toBeDisabled();
+    expect(view.getByRole("button", { name: "Discard changes" })).toBeDisabled();
+    await act(async () => resolveEdit(updatedRequest));
+    expect(
+      await view.findByRole("header", { name: "Corrected fence repair" }),
+    ).toBeOnTheScreen();
+  });
+
+  it("retains edits when backend validation rejects them", async () => {
+    mockRequest
+      .mockResolvedValueOnce(createdRequest)
+      .mockRejectedValueOnce(new ApiError(400, "A Request requires a title."));
+    const view = await render(<RequestDetailScreen requestId="request-1" />, {
+      wrapper: createHarness().Wrapper,
+    });
+
+    await view.findByRole("header", { name: "Help repairing a fence" });
+    await fireEvent.press(view.getByRole("button", { name: "Edit Request" }));
+    await fireEvent.changeText(view.getByLabelText("Request title"), "Changed title");
+    await fireEvent.press(view.getByRole("button", { name: "Save changes" }));
+
+    expect(await view.findByRole("alert")).toHaveTextContent(
+      "A Request requires a title.",
+    );
+    expect(view.getByLabelText("Request title")).toHaveDisplayValue("Changed title");
+    expect(view.getByRole("header", { name: "Edit Request" })).toBeOnTheScreen();
+  });
+
+  it("retains edits after a general failure and allows retry", async () => {
+    mockRequest
+      .mockResolvedValueOnce(createdRequest)
+      .mockRejectedValueOnce(new Error("The Request could not be saved."))
+      .mockResolvedValueOnce(updatedRequest);
+    const view = await render(<RequestDetailScreen requestId="request-1" />, {
+      wrapper: createHarness().Wrapper,
+    });
+
+    await view.findByRole("header", { name: "Help repairing a fence" });
+    await fireEvent.press(view.getByRole("button", { name: "Edit Request" }));
+    await fireEvent.changeText(view.getByLabelText("Request title"), "Changed title");
+    await fireEvent.press(view.getByRole("button", { name: "Save changes" }));
+
+    expect(await view.findByRole("alert")).toHaveTextContent(
+      "The Request could not be saved.",
+    );
+    expect(view.getByLabelText("Request title")).toHaveDisplayValue("Changed title");
+    await fireEvent.press(view.getByRole("button", { name: "Save changes" }));
+    expect(
+      await view.findByRole("header", { name: "Corrected fence repair" }),
+    ).toBeOnTheScreen();
+    expect(mockRequest).toHaveBeenCalledTimes(3);
+  });
+
+  it("leaves edit mode and refreshes authoritative details after a lifecycle conflict", async () => {
+    const cancelledRequest: RequestDetails = {
+      ...createdRequest,
+      status: "Cancelled",
+    };
+    mockRequest
+      .mockResolvedValueOnce(createdRequest)
+      .mockRejectedValueOnce(
+        new ApiError(409, "Only an Open Request can be edited."),
+      )
+      .mockResolvedValueOnce(cancelledRequest);
+    const harness = createHarness();
+    const view = await render(<RequestDetailScreen requestId="request-1" />, {
+      wrapper: harness.Wrapper,
+    });
+
+    await view.findByRole("header", { name: "Help repairing a fence" });
+    await fireEvent.press(view.getByRole("button", { name: "Edit Request" }));
+    await fireEvent.changeText(view.getByLabelText("Request title"), "Changed title");
+    await fireEvent.press(view.getByRole("button", { name: "Save changes" }));
+
+    expect(await view.findByRole("alert")).toHaveTextContent(
+      "Only an Open Request can be edited.",
+    );
+    expect(await view.findByText("Cancelled")).toBeOnTheScreen();
+    expect(view.queryByRole("header", { name: "Edit Request" })).not.toBeOnTheScreen();
+    expect(view.queryByRole("button", { name: "Edit Request" })).not.toBeOnTheScreen();
+    expect(mockRequest).toHaveBeenNthCalledWith(3, "/api/requests/request-1");
+    expect(harness.queryClient.getQueryData(requestDetailQueryKey("request-1")))
+      .toEqual(cancelledRequest);
+  });
+
+  it("keeps cached data unchanged after an ownership-safe edit rejection", async () => {
+    mockRequest
+      .mockResolvedValueOnce(createdRequest)
+      .mockRejectedValueOnce(
+        new ApiError(
+          404,
+          "The Request does not exist or was not created by this Participant.",
+        ),
+      );
+    const harness = createHarness();
+    const view = await render(<RequestDetailScreen requestId="request-1" />, {
+      wrapper: harness.Wrapper,
+    });
+
+    await view.findByRole("header", { name: "Help repairing a fence" });
+    await fireEvent.press(view.getByRole("button", { name: "Edit Request" }));
+    await fireEvent.changeText(view.getByLabelText("Request title"), "Changed title");
+    await fireEvent.press(view.getByRole("button", { name: "Save changes" }));
+
+    expect(await view.findByRole("alert")).toHaveTextContent(
+      "The Request does not exist or was not created by this Participant.",
+    );
+    expect(harness.queryClient.getQueryData(requestDetailQueryKey("request-1")))
+      .toEqual(createdRequest);
+    expect(mockRequest).toHaveBeenCalledTimes(2);
+  });
+
+  it.each(["Cancelled", "Matched"] as const)(
+    "does not offer editing when the Request is %s",
+    async (status) => {
+      mockRequest.mockResolvedValueOnce({ ...createdRequest, status });
+      const view = await render(<RequestDetailScreen requestId="request-1" />, {
+        wrapper: createHarness().Wrapper,
+      });
+
+      expect(await view.findByText(status)).toBeOnTheScreen();
+      expect(view.queryByRole("button", { name: "Edit Request" }))
+        .not.toBeOnTheScreen();
+      expect(view.queryByRole("button", { name: "Cancel Request" }))
+        .not.toBeOnTheScreen();
+    },
+  );
 
   it("shows a loading state while fetching a creator-owned Request", async () => {
     let resolveRequest!: (request: RequestDetails) => void;

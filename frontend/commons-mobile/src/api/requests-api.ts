@@ -1,4 +1,8 @@
-import type { CreateRequestInput, RequestDetails } from "./contracts";
+import type {
+  CreateRequestInput,
+  EditRequestInput,
+  RequestDetails,
+} from "./contracts";
 import type { AuthenticatedRequest } from "./participants-api";
 import { participantProfileQueryKey } from "./participants-api";
 
@@ -14,6 +18,10 @@ export function requestDetailQueryKey(requestId: string) {
 export interface RequestsApi {
   createRequest(input: CreateRequestInput): Promise<RequestDetails>;
   getRequest(requestId: string): Promise<RequestDetails>;
+  editRequest(
+    requestId: string,
+    input: EditRequestInput,
+  ): Promise<RequestDetails>;
 }
 
 export function createRequestsApi(request: AuthenticatedRequest): RequestsApi {
@@ -27,6 +35,13 @@ export function createRequestsApi(request: AuthenticatedRequest): RequestsApi {
 
     getRequest(requestId) {
       return request<RequestDetails>(`/api/requests/${requestId}`);
+    },
+
+    editRequest(requestId, input) {
+      return request<RequestDetails>(`/api/requests/${requestId}`, {
+        method: "PUT",
+        body: JSON.stringify(input),
+      });
     },
   };
 }
