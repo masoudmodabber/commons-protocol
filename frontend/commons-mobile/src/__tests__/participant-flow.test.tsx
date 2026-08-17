@@ -147,6 +147,8 @@ describe("US 001 participant flow", () => {
     expect(mockRouterPush).toHaveBeenCalledWith("/available-requests");
     await fireEvent.press(view.getByRole("button", { name: "Create a Request" }));
     expect(mockRouterPush).toHaveBeenCalledWith("/requests/new");
+    await fireEvent.press(view.getByRole("button", { name: "My Offers" }));
+    expect(mockRouterPush).toHaveBeenCalledWith("/offers");
   });
 
   it("recovers a duplicate join by loading the server-owned profile", async () => {

@@ -28,6 +28,7 @@ export function offerSubmissionOptionsQueryKey(requestId: string) {
 export interface OffersApi {
   getSubmissionOptions(requestId: string): Promise<OfferSubmissionOptions>;
   submitOffer(requestId: string, input: SubmitOfferInput): Promise<OfferDetails>;
+  getMyOffers(): Promise<OfferDetails[]>;
   getOffer(offerId: string): Promise<OfferDetails>;
 }
 
@@ -44,6 +45,10 @@ export function createOffersApi(request: AuthenticatedRequest): OffersApi {
         method: "POST",
         body: JSON.stringify(input),
       });
+    },
+
+    getMyOffers() {
+      return request<OfferDetails[]>("/api/offers");
     },
 
     getOffer(offerId) {

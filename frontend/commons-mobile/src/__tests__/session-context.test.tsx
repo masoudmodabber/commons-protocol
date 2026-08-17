@@ -17,6 +17,7 @@ import {
 import {
   offerDetailQueryKey,
   offerSubmissionOptionsQueryKey,
+  participantOffersQueryKey,
 } from "../api/offers-api";
 import { SessionProvider, useSession } from "../auth/session-context";
 import type { RefreshTokenStore } from "../auth/secure-token-store";
@@ -96,6 +97,9 @@ describe("mobile session", () => {
       request: { id: "request-2" },
       capabilities: [],
     });
+    queryClient.setQueryData(participantOffersQueryKey, [
+      { id: "offer-1", status: "Active" },
+    ]);
     queryClient.setQueryData(offerDetailQueryKey("offer-1"), {
       id: "offer-1",
       status: "Active",
@@ -142,6 +146,7 @@ describe("mobile session", () => {
     expect(
       queryClient.getQueryData(offerSubmissionOptionsQueryKey("request-2")),
     ).toBeUndefined();
+    expect(queryClient.getQueryData(participantOffersQueryKey)).toBeUndefined();
     expect(queryClient.getQueryData(offerDetailQueryKey("offer-1"))).toBeUndefined();
     expect(queryClient.getQueryData(availableCommonsQueryKey)).toBeUndefined();
   });

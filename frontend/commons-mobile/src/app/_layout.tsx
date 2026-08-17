@@ -37,6 +37,7 @@ function Navigation() {
         <Stack.Screen name="available-requests/index" />
         <Stack.Screen name="available-requests/[requestId]" />
         <Stack.Screen name="available-requests/[requestId]/offer" />
+        <Stack.Screen name="offers/index" />
         <Stack.Screen name="offers/[offerId]" />
         <Stack.Screen name="requests/new" />
         <Stack.Screen name="requests/[requestId]" />

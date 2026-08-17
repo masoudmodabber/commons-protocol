@@ -66,6 +66,10 @@ export function ProfileScreen() {
           label="Create a Request"
           onPress={() => router.push("/requests/new" as Href)}
         />
+        <PrimaryButton
+          label="My Offers"
+          onPress={() => router.push("/offers" as Href)}
+        />
       </View>
       <CapabilitiesSection />
     </ScreenLayout>

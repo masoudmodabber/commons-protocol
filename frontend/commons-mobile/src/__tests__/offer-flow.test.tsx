@@ -336,7 +336,7 @@ describe("US 008 mobile Offer submission", () => {
   });
 });
 
-describe("US 008 mobile Offer detail", () => {
+describe("US 008 and US 009 mobile Offer detail", () => {
   beforeEach(() => {
     mockRequest.mockReset();
     mockRouterReplace.mockReset();
@@ -364,5 +364,33 @@ describe("US 008 mobile Offer detail", () => {
     expect(view.queryByRole("button", { name: /Withdraw/i })).not.toBeOnTheScreen();
     expect(view.queryByRole("button", { name: /Accept/i })).not.toBeOnTheScreen();
     expect(view.queryByRole("button", { name: /Reject/i })).not.toBeOnTheScreen();
+    await fireEvent.press(
+      view.getByRole("button", { name: "Back to My Offers" }),
+    );
+    expect(mockRouterReplace).toHaveBeenCalledWith("/offers");
+  });
+
+  it("does not disclose why an untrusted Offer identifier returned 404", async () => {
+    mockRequest.mockRejectedValueOnce(
+      new ApiError(404, "This Offer belongs to another Participant."),
+    );
+    const view = await render(
+      <OfferDetailScreen offerId="another-participants-offer" />,
+      { wrapper: createHarness().Wrapper },
+    );
+
+    expect(await view.findByRole("alert")).toHaveTextContent(
+      "This Offer is not available.",
+    );
+    expect(
+      view.queryByText("This Offer belongs to another Participant."),
+    ).not.toBeOnTheScreen();
+    expect(mockRequest).toHaveBeenCalledWith(
+      "/api/offers/another-participants-offer",
+    );
+    await fireEvent.press(
+      view.getByRole("button", { name: "Back to My Offers" }),
+    );
+    expect(mockRouterReplace).toHaveBeenCalledWith("/offers");
   });
 });

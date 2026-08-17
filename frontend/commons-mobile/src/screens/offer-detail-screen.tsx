@@ -48,8 +48,8 @@ export function OfferDetailScreen({ offerId }: { offerId: string }) {
           onPress={() => void offerQuery.refetch()}
         />
         <TextButton
-          label="Back to Available Requests"
-          onPress={() => router.replace("/available-requests" as Href)}
+          label="Back to My Offers"
+          onPress={() => router.replace("/offers" as Href)}
         />
       </ScreenLayout>
     );
@@ -87,10 +87,8 @@ export function OfferDetailScreen({ offerId }: { offerId: string }) {
         </View>
       ) : null}
       <TextButton
-        label="Back to Request"
-        onPress={() =>
-          router.replace(`/available-requests/${offer.request.id}` as Href)
-        }
+        label="Back to My Offers"
+        onPress={() => router.replace("/offers" as Href)}
       />
     </ScreenLayout>
   );
