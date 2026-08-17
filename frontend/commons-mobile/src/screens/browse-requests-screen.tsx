@@ -1,21 +1,24 @@
 import { useQuery } from "@tanstack/react-query";
 import { useRouter, type Href } from "expo-router";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from "react-native";
 import type { RequestDetails } from "../api/contracts";
 import {
-  availableRequestsQueryKey,
+  availableRequestsSearchQueryKey,
   createRequestsApi,
 } from "../api/requests-api";
 import { useSession } from "../auth/session-context";
 import {
   ErrorMessage,
+  Field,
+  formControlStyles,
   PrimaryButton,
   TextButton,
 } from "../components/form-controls";
@@ -24,16 +27,27 @@ import { ScreenLayout } from "../components/screen-layout";
 export function BrowseRequestsScreen() {
   const router = useRouter();
   const session = useSession();
+  const [searchText, setSearchText] = useState("");
+  const [appliedSearchTerm, setAppliedSearchTerm] = useState<string>();
   const requestsApi = useMemo(
     () => createRequestsApi(session.request),
     [session.request],
   );
   const requestsQuery = useQuery({
-    queryKey: availableRequestsQueryKey,
-    queryFn: () => requestsApi.browseRequests(),
+    queryKey: availableRequestsSearchQueryKey(appliedSearchTerm),
+    queryFn: () => requestsApi.browseRequests(appliedSearchTerm),
     enabled: session.status === "authenticated",
     retry: false,
   });
+
+  function applySearch() {
+    setAppliedSearchTerm(searchText.trim() ? searchText : undefined);
+  }
+
+  function clearSearch() {
+    setSearchText("");
+    setAppliedSearchTerm(undefined);
+  }
 
   return (
     <ScreenLayout
@@ -41,10 +55,31 @@ export function BrowseRequestsScreen() {
       eyebrow="Your Home Commons"
       title="Available Requests"
     >
+      <View style={styles.search}>
+        <Field label="Search Available Requests">
+          <TextInput
+            accessibilityLabel="Search Available Requests"
+            onChangeText={setSearchText}
+            onSubmitEditing={applySearch}
+            returnKeyType="search"
+            style={formControlStyles.input}
+            value={searchText}
+          />
+        </Field>
+        <PrimaryButton label="Search" onPress={applySearch} />
+        {appliedSearchTerm !== undefined ? (
+          <TextButton label="Clear search" onPress={clearSearch} />
+        ) : null}
+      </View>
+
       {requestsQuery.isPending ? (
         <View style={styles.status}>
           <ActivityIndicator color="#276544" size="small" />
-          <Text style={styles.statusText}>Loading Available Requests…</Text>
+          <Text style={styles.statusText}>
+            {appliedSearchTerm
+              ? "Searching Available Requests…"
+              : "Loading Available Requests…"}
+          </Text>
         </View>
       ) : null}
 
@@ -60,7 +95,9 @@ export function BrowseRequestsScreen() {
 
       {requestsQuery.isSuccess && requestsQuery.data.length === 0 ? (
         <Text style={styles.empty}>
-          There are no Open Requests from other Participants in your Home Commons.
+          {appliedSearchTerm
+            ? "No Available Requests match your search."
+            : "There are no Open Requests from other Participants in your Home Commons."}
         </Text>
       ) : null}
 
@@ -116,6 +153,7 @@ function AvailableRequestItem({
 }
 
 const styles = StyleSheet.create({
+  search: { marginBottom: 24 },
   status: {
     flexDirection: "row",
     alignItems: "center",

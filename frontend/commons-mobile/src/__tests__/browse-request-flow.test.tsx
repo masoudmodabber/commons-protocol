@@ -3,6 +3,10 @@ import { act, fireEvent, render, waitFor } from "@testing-library/react-native";
 import type { PropsWithChildren } from "react";
 import type { RequestDetails } from "../api/contracts";
 import { ApiError } from "../api/http-client";
+import {
+  availableRequestsQueryKey,
+  availableRequestsSearchQueryKey,
+} from "../api/requests-api";
 import { BrowseRequestDetailScreen } from "../screens/browse-request-detail-screen";
 import { BrowseRequestsScreen } from "../screens/browse-requests-screen";
 
@@ -58,7 +62,7 @@ function createHarness() {
   return { Wrapper, queryClient };
 }
 
-describe("US 006 mobile Request browsing", () => {
+describe("US 006 and US 007 mobile Request browsing", () => {
   beforeEach(() => {
     mockRequest.mockReset();
     mockRouterPush.mockReset();
@@ -83,9 +87,9 @@ describe("US 006 mobile Request browsing", () => {
     expect(view.getAllByText("Open")).toHaveLength(2);
     expect(mockRequest).toHaveBeenCalledWith("/api/requests/browse");
     expect(mockRequest).toHaveBeenCalledTimes(1);
-    expect(view.queryByLabelText(/search/i)).not.toBeOnTheScreen();
+    expect(view.getByLabelText("Search Available Requests")).toBeOnTheScreen();
 
-    const requestButtons = view.getAllByRole("button").slice(0, 2);
+    const requestButtons = view.getAllByRole("button", { name: /^View / });
     expect(requestButtons[0]).toHaveAccessibleName("View Transport to an appointment");
     expect(requestButtons[1]).toHaveAccessibleName("View Help repairing a fence");
 
@@ -97,7 +101,7 @@ describe("US 006 mobile Request browsing", () => {
     );
   });
 
-  it("shows the empty state without introducing search or later actions", async () => {
+  it("shows the normal empty state without introducing later actions", async () => {
     mockRequest.mockResolvedValueOnce([]);
     const view = await render(<BrowseRequestsScreen />, {
       wrapper: createHarness().Wrapper,
@@ -108,7 +112,148 @@ describe("US 006 mobile Request browsing", () => {
         "There are no Open Requests from other Participants in your Home Commons.",
       ),
     ).toBeOnTheScreen();
-    expect(view.queryByRole("button", { name: /Offer|Search/i })).not.toBeOnTheScreen();
+    expect(view.queryByRole("button", { name: /Offer/i })).not.toBeOnTheScreen();
+  });
+
+  it("searches explicitly with raw text and replaces old results while loading", async () => {
+    let resolveSearch!: (requests: RequestDetails[]) => void;
+    mockRequest
+      .mockResolvedValueOnce([transportRequest])
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveSearch = resolve;
+          }),
+      );
+    const harness = createHarness();
+    const view = await render(<BrowseRequestsScreen />, {
+      wrapper: harness.Wrapper,
+    });
+    const searchInput = view.getByLabelText("Search Available Requests");
+
+    expect(await view.findByText("Transport to an appointment")).toBeOnTheScreen();
+    await fireEvent.changeText(searchInput, "  FENCE panel  ");
+    expect(mockRequest).toHaveBeenCalledTimes(1);
+
+    await fireEvent.press(view.getByRole("button", { name: "Search" }));
+    await waitFor(() => {
+      expect(mockRequest).toHaveBeenNthCalledWith(
+        2,
+        "/api/requests/browse?search=%20%20FENCE%20panel%20%20",
+      );
+    });
+    expect(view.getByText("Searching Available Requests…")).toBeOnTheScreen();
+    expect(view.queryByText("Transport to an appointment")).not.toBeOnTheScreen();
+
+    await act(async () => resolveSearch([fenceRequest]));
+    expect(await view.findByText("Help repairing a fence")).toBeOnTheScreen();
+    expect(searchInput).toHaveDisplayValue("  FENCE panel  ");
+    expect(
+      harness.queryClient.getQueryData(
+        availableRequestsSearchQueryKey("  FENCE panel  "),
+      ),
+    ).toEqual([fenceRequest]);
+  });
+
+  it("uses the normal browse key for empty and whitespace-only submissions", async () => {
+    mockRequest
+      .mockResolvedValueOnce([transportRequest])
+      .mockResolvedValueOnce([fenceRequest])
+      .mockResolvedValue([transportRequest]);
+    const harness = createHarness();
+    const view = await render(<BrowseRequestsScreen />, {
+      wrapper: harness.Wrapper,
+    });
+    const searchInput = view.getByLabelText("Search Available Requests");
+
+    expect(await view.findByText("Transport to an appointment")).toBeOnTheScreen();
+    await fireEvent.changeText(searchInput, "   ");
+    await fireEvent.press(view.getByRole("button", { name: "Search" }));
+    expect(view.getByText("Transport to an appointment")).toBeOnTheScreen();
+    expect(mockRequest).toHaveBeenCalledTimes(1);
+
+    await fireEvent.changeText(searchInput, "fence");
+    await fireEvent.press(view.getByRole("button", { name: "Search" }));
+    expect(await view.findByText("Help repairing a fence")).toBeOnTheScreen();
+
+    await fireEvent.changeText(searchInput, "");
+    await fireEvent.press(view.getByRole("button", { name: "Search" }));
+    expect(await view.findByText("Transport to an appointment")).toBeOnTheScreen();
+
+    const queryKeys = harness.queryClient
+      .getQueryCache()
+      .getAll()
+      .map((query) => query.queryKey);
+    expect(queryKeys).toContainEqual(availableRequestsQueryKey);
+    expect(queryKeys).toContainEqual(
+      availableRequestsSearchQueryKey("fence"),
+    );
+    expect(queryKeys).not.toContainEqual([
+      ...availableRequestsQueryKey,
+      "search",
+      "",
+    ]);
+    expect(queryKeys).not.toContainEqual([
+      ...availableRequestsQueryKey,
+      "search",
+      "   ",
+    ]);
+    expect(
+      mockRequest.mock.calls.filter(
+        ([path]) => path === "/api/requests/browse",
+      ).length,
+    ).toBeGreaterThanOrEqual(1);
+  });
+
+  it("shows a search-specific empty state and clears back to normal browsing", async () => {
+    mockRequest
+      .mockResolvedValueOnce([transportRequest])
+      .mockResolvedValueOnce([])
+      .mockResolvedValue([transportRequest]);
+    const view = await render(<BrowseRequestsScreen />, {
+      wrapper: createHarness().Wrapper,
+    });
+    const searchInput = view.getByLabelText("Search Available Requests");
+
+    expect(await view.findByText("Transport to an appointment")).toBeOnTheScreen();
+    await fireEvent.changeText(searchInput, "missing");
+    await fireEvent.press(view.getByRole("button", { name: "Search" }));
+    expect(
+      await view.findByText("No Available Requests match your search."),
+    ).toBeOnTheScreen();
+
+    await fireEvent.press(view.getByRole("button", { name: "Clear search" }));
+    expect(searchInput).toHaveDisplayValue("");
+    expect(await view.findByText("Transport to an appointment")).toBeOnTheScreen();
+  });
+
+  it("retries the active searched query after a failure", async () => {
+    mockRequest
+      .mockResolvedValueOnce([transportRequest])
+      .mockRejectedValueOnce(new Error("Search could not be completed."))
+      .mockResolvedValueOnce([fenceRequest]);
+    const view = await render(<BrowseRequestsScreen />, {
+      wrapper: createHarness().Wrapper,
+    });
+    const searchInput = view.getByLabelText("Search Available Requests");
+
+    expect(await view.findByText("Transport to an appointment")).toBeOnTheScreen();
+    await fireEvent.changeText(searchInput, "  fence  ");
+    await fireEvent.press(view.getByRole("button", { name: "Search" }));
+    expect(await view.findByRole("alert")).toHaveTextContent(
+      "Search could not be completed.",
+    );
+
+    await fireEvent.press(view.getByRole("button", { name: "Try again" }));
+    expect(await view.findByText("Help repairing a fence")).toBeOnTheScreen();
+    expect(mockRequest).toHaveBeenNthCalledWith(
+      2,
+      "/api/requests/browse?search=%20%20fence%20%20",
+    );
+    expect(mockRequest).toHaveBeenNthCalledWith(
+      3,
+      "/api/requests/browse?search=%20%20fence%20%20",
+    );
   });
 
   it("shows loading and retries a failed browse request", async () => {

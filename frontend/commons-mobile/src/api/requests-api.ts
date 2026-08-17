@@ -24,10 +24,16 @@ export function availableRequestDetailQueryKey(requestId: string) {
   return [...availableRequestsQueryKey, requestId] as const;
 }
 
+export function availableRequestsSearchQueryKey(searchTerm?: string) {
+  return searchTerm?.trim()
+    ? [...availableRequestsQueryKey, "search", searchTerm] as const
+    : availableRequestsQueryKey;
+}
+
 export interface RequestsApi {
   createRequest(input: CreateRequestInput): Promise<RequestDetails>;
   getRequest(requestId: string): Promise<RequestDetails>;
-  browseRequests(): Promise<RequestDetails[]>;
+  browseRequests(searchTerm?: string): Promise<RequestDetails[]>;
   getBrowseRequest(requestId: string): Promise<RequestDetails>;
   editRequest(
     requestId: string,
@@ -49,8 +55,12 @@ export function createRequestsApi(request: AuthenticatedRequest): RequestsApi {
       return request<RequestDetails>(`/api/requests/${requestId}`);
     },
 
-    browseRequests() {
-      return request<RequestDetails[]>("/api/requests/browse");
+    browseRequests(searchTerm) {
+      const path = searchTerm?.trim()
+        ? `/api/requests/browse?search=${encodeURIComponent(searchTerm)}`
+        : "/api/requests/browse";
+
+      return request<RequestDetails[]>(path);
     },
 
     getBrowseRequest(requestId) {

@@ -1,7 +1,11 @@
 import { createAuthApi } from "../api/auth-api";
 import { createHttpClient, ApiError, type HttpClient } from "../api/http-client";
 import { createParticipantsApi } from "../api/participants-api";
-import { createRequestsApi } from "../api/requests-api";
+import {
+  availableRequestsQueryKey,
+  availableRequestsSearchQueryKey,
+  createRequestsApi,
+} from "../api/requests-api";
 
 describe("mobile API clients", () => {
   beforeEach(() => {
@@ -130,6 +134,33 @@ describe("mobile API clients", () => {
     expect(request.mock.calls.flat().join(" ")).not.toMatch(
       /commonsId|participantId|userId|creatorId|ownership|search/i,
     );
+  });
+
+  it("sends meaningful search text raw and uses normal browsing for empty text", async () => {
+    const request = jest.fn().mockResolvedValue([]);
+    const requestsApi = createRequestsApi(request);
+
+    await requestsApi.browseRequests("  Fence Repair  ");
+    await requestsApi.browseRequests("");
+    await requestsApi.browseRequests("   ");
+
+    expect(request).toHaveBeenNthCalledWith(
+      1,
+      "/api/requests/browse?search=%20%20Fence%20Repair%20%20",
+    );
+    expect(request).toHaveBeenNthCalledWith(2, "/api/requests/browse");
+    expect(request).toHaveBeenNthCalledWith(3, "/api/requests/browse");
+    expect(availableRequestsSearchQueryKey("")).toBe(
+      availableRequestsQueryKey,
+    );
+    expect(availableRequestsSearchQueryKey("   ")).toBe(
+      availableRequestsQueryKey,
+    );
+    expect(availableRequestsSearchQueryKey("  Fence Repair  ")).toEqual([
+      ...availableRequestsQueryKey,
+      "search",
+      "  Fence Repair  ",
+    ]);
   });
 
   it("edits only Request title and description", async () => {

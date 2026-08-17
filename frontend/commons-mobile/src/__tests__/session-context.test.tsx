@@ -11,6 +11,7 @@ import {
 import {
   availableRequestDetailQueryKey,
   availableRequestsQueryKey,
+  availableRequestsSearchQueryKey,
   requestDetailQueryKey,
 } from "../api/requests-api";
 import { SessionProvider, useSession } from "../auth/session-context";
@@ -84,6 +85,9 @@ describe("mobile session", () => {
       id: "request-2",
       title: "An available Request",
     });
+    queryClient.setQueryData(availableRequestsSearchQueryKey("fence"), [
+      { id: "request-2", title: "An available Request" },
+    ]);
     queryClient.setQueryData(availableCommonsQueryKey, [{ id: "commons-1" }]);
     const view = await render(
       <QueryClientProvider client={queryClient}>
@@ -119,6 +123,9 @@ describe("mobile session", () => {
     expect(queryClient.getQueryData(availableRequestsQueryKey)).toBeUndefined();
     expect(
       queryClient.getQueryData(availableRequestDetailQueryKey("request-2")),
+    ).toBeUndefined();
+    expect(
+      queryClient.getQueryData(availableRequestsSearchQueryKey("fence")),
     ).toBeUndefined();
     expect(queryClient.getQueryData(availableCommonsQueryKey)).toBeUndefined();
   });
