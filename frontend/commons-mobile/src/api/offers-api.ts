@@ -30,6 +30,7 @@ export interface OffersApi {
   submitOffer(requestId: string, input: SubmitOfferInput): Promise<OfferDetails>;
   getMyOffers(): Promise<OfferDetails[]>;
   getOffer(offerId: string): Promise<OfferDetails>;
+  withdrawOffer(offerId: string): Promise<OfferDetails>;
 }
 
 export function createOffersApi(request: AuthenticatedRequest): OffersApi {
@@ -53,6 +54,12 @@ export function createOffersApi(request: AuthenticatedRequest): OffersApi {
 
     getOffer(offerId) {
       return request<OfferDetails>(`/api/offers/${offerId}`);
+    },
+
+    withdrawOffer(offerId) {
+      return request<OfferDetails>(`/api/offers/${offerId}/withdraw`, {
+        method: "POST",
+      });
     },
   };
 }

@@ -224,6 +224,7 @@ describe("mobile API clients", () => {
     await offersApi.submitOffer("request-2", input);
     await offersApi.getMyOffers();
     await offersApi.getOffer("offer-1");
+    await offersApi.withdrawOffer("offer-1");
 
     expect(request).toHaveBeenNthCalledWith(
       1,
@@ -236,6 +237,12 @@ describe("mobile API clients", () => {
     );
     expect(request).toHaveBeenNthCalledWith(3, "/api/offers");
     expect(request).toHaveBeenNthCalledWith(4, "/api/offers/offer-1");
+    expect(request).toHaveBeenNthCalledWith(
+      5,
+      "/api/offers/offer-1/withdraw",
+      { method: "POST" },
+    );
+    expect(request.mock.calls[4][1].body).toBeUndefined();
     const submitted = JSON.parse(request.mock.calls[1][1].body);
     expect(submitted).toEqual(input);
     expect(submitted).not.toHaveProperty("participantId");

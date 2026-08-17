@@ -3,7 +3,10 @@ import { act, fireEvent, render, waitFor } from "@testing-library/react-native";
 import type { PropsWithChildren } from "react";
 import type { OfferDetails, OfferSubmissionOptions } from "../api/contracts";
 import { ApiError } from "../api/http-client";
-import { offerDetailQueryKey } from "../api/offers-api";
+import {
+  offerDetailQueryKey,
+  participantOffersQueryKey,
+} from "../api/offers-api";
 import { OfferDetailScreen } from "../screens/offer-detail-screen";
 import {
   parseCommonsAccountingUnits,
@@ -342,7 +345,7 @@ describe("US 008 and US 009 mobile Offer detail", () => {
     mockRouterReplace.mockReset();
   });
 
-  it("loads authoritative Offer terms read only without later-story actions", async () => {
+  it("loads authoritative Offer terms without actions beyond withdrawal", async () => {
     mockRequest.mockResolvedValueOnce(authoritativeOffer);
     const view = await render(<OfferDetailScreen offerId="offer-1" />, {
       wrapper: createHarness().Wrapper,
@@ -361,7 +364,9 @@ describe("US 008 and US 009 mobile Offer detail", () => {
       view.getByText("Two hours of careful carpentry"),
     ).toBeOnTheScreen();
     expect(view.queryByRole("textbox")).not.toBeOnTheScreen();
-    expect(view.queryByRole("button", { name: /Withdraw/i })).not.toBeOnTheScreen();
+    expect(
+      view.getByRole("button", { name: "Withdraw Offer" }),
+    ).toBeOnTheScreen();
     expect(view.queryByRole("button", { name: /Accept/i })).not.toBeOnTheScreen();
     expect(view.queryByRole("button", { name: /Reject/i })).not.toBeOnTheScreen();
     await fireEvent.press(
@@ -392,5 +397,209 @@ describe("US 008 and US 009 mobile Offer detail", () => {
       view.getByRole("button", { name: "Back to My Offers" }),
     );
     expect(mockRouterReplace).toHaveBeenCalledWith("/offers");
+  });
+});
+
+describe("US 010 mobile Offer withdrawal", () => {
+  beforeEach(() => {
+    mockRequest.mockReset();
+    mockRouterReplace.mockReset();
+  });
+
+  it("withdraws an Active Offer directly and caches the complete response", async () => {
+    const otherOffer = { ...authoritativeOffer, id: "offer-2" };
+    const withdrawnOffer: OfferDetails = {
+      ...authoritativeOffer,
+      status: "Withdrawn",
+    };
+    mockRequest
+      .mockResolvedValueOnce(authoritativeOffer)
+      .mockResolvedValueOnce(withdrawnOffer);
+    const harness = createHarness();
+    harness.queryClient.setQueryData(participantOffersQueryKey, [
+      otherOffer,
+      authoritativeOffer,
+    ]);
+    const view = await render(<OfferDetailScreen offerId="offer-1" />, {
+      wrapper: harness.Wrapper,
+    });
+
+    await fireEvent.press(
+      await view.findByRole("button", { name: "Withdraw Offer" }),
+    );
+
+    expect(await view.findByText("Withdrawn")).toBeOnTheScreen();
+    expect(mockRequest).toHaveBeenNthCalledWith(
+      2,
+      "/api/offers/offer-1/withdraw",
+      { method: "POST" },
+    );
+    expect(mockRequest.mock.calls[1][1].body).toBeUndefined();
+    expect(
+      view.queryByRole("button", { name: "Withdraw Offer" }),
+    ).not.toBeOnTheScreen();
+    expect(view.getByText("30")).toBeOnTheScreen();
+    expect(view.getByText("Carpentry")).toBeOnTheScreen();
+    expect(
+      view.getByText("Two hours of careful carpentry"),
+    ).toBeOnTheScreen();
+    expect(
+      harness.queryClient.getQueryData(offerDetailQueryKey("offer-1")),
+    ).toEqual(withdrawnOffer);
+    expect(
+      harness.queryClient.getQueryData(participantOffersQueryKey),
+    ).toEqual([otherOffer, withdrawnOffer]);
+  });
+
+  it.each(["Withdrawn", "Accepted", "Closed"] as const)(
+    "does not expose withdrawal for a %s Offer",
+    async (status) => {
+      mockRequest.mockResolvedValueOnce({ ...authoritativeOffer, status });
+      const view = await render(<OfferDetailScreen offerId="offer-1" />, {
+        wrapper: createHarness().Wrapper,
+      });
+
+      expect(await view.findByText(status)).toBeOnTheScreen();
+      expect(
+        view.queryByRole("button", { name: "Withdraw Offer" }),
+      ).not.toBeOnTheScreen();
+      expect(mockRequest).toHaveBeenCalledTimes(1);
+    },
+  );
+
+  it("disables withdrawal and prevents duplicate submission while pending", async () => {
+    let resolveWithdrawal!: (offer: OfferDetails) => void;
+    mockRequest
+      .mockResolvedValueOnce(authoritativeOffer)
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveWithdrawal = resolve;
+          }),
+      );
+    const view = await render(<OfferDetailScreen offerId="offer-1" />, {
+      wrapper: createHarness().Wrapper,
+    });
+
+    await fireEvent.press(
+      await view.findByRole("button", { name: "Withdraw Offer" }),
+    );
+    const pending = await view.findByRole("button", { name: "Withdrawing…" });
+    expect(pending).toBeDisabled();
+    expect(view.getByText("One garden fence panel needs replacing.")).toBeOnTheScreen();
+    await fireEvent.press(pending);
+    expect(mockRequest).toHaveBeenCalledTimes(2);
+
+    await act(async () =>
+      resolveWithdrawal({ ...authoritativeOffer, status: "Withdrawn" }),
+    );
+    expect(await view.findByText("Withdrawn")).toBeOnTheScreen();
+  });
+
+  it("refetches authoritative detail and invalidates My Offers after conflict", async () => {
+    const acceptedOffer: OfferDetails = {
+      ...authoritativeOffer,
+      status: "Accepted",
+      agreementId: "agreement-1",
+    };
+    mockRequest
+      .mockResolvedValueOnce(authoritativeOffer)
+      .mockRejectedValueOnce(
+        new ApiError(409, "Only an Active Offer can be withdrawn."),
+      )
+      .mockResolvedValueOnce(acceptedOffer);
+    const harness = createHarness();
+    harness.queryClient.setQueryData(participantOffersQueryKey, [
+      authoritativeOffer,
+    ]);
+    const view = await render(<OfferDetailScreen offerId="offer-1" />, {
+      wrapper: harness.Wrapper,
+    });
+
+    await fireEvent.press(
+      await view.findByRole("button", { name: "Withdraw Offer" }),
+    );
+
+    expect(await view.findByRole("alert")).toHaveTextContent(
+      "Only an Active Offer can be withdrawn.",
+    );
+    expect(await view.findByText("Accepted")).toBeOnTheScreen();
+    expect(mockRequest).toHaveBeenNthCalledWith(3, "/api/offers/offer-1");
+    expect(
+      view.queryByRole("button", { name: "Withdraw Offer" }),
+    ).not.toBeOnTheScreen();
+    expect(
+      harness.queryClient.getQueryData(offerDetailQueryKey("offer-1")),
+    ).toEqual(acceptedOffer);
+    expect(
+      harness.queryClient.getQueryState(participantOffersQueryKey)?.isInvalidated,
+    ).toBe(true);
+  });
+
+  it("keeps cached data and uses a generic message after a withdrawal 404", async () => {
+    mockRequest
+      .mockResolvedValueOnce(authoritativeOffer)
+      .mockRejectedValueOnce(
+        new ApiError(404, "This Offer belongs to another Participant."),
+      );
+    const harness = createHarness();
+    harness.queryClient.setQueryData(participantOffersQueryKey, [
+      authoritativeOffer,
+    ]);
+    const view = await render(<OfferDetailScreen offerId="offer-1" />, {
+      wrapper: harness.Wrapper,
+    });
+
+    await fireEvent.press(
+      await view.findByRole("button", { name: "Withdraw Offer" }),
+    );
+
+    expect(await view.findByRole("alert")).toHaveTextContent(
+      "This Offer is not available.",
+    );
+    expect(
+      view.queryByText("This Offer belongs to another Participant."),
+    ).not.toBeOnTheScreen();
+    expect(
+      harness.queryClient.getQueryData(offerDetailQueryKey("offer-1")),
+    ).toEqual(authoritativeOffer);
+    expect(
+      harness.queryClient.getQueryData(participantOffersQueryKey),
+    ).toEqual([authoritativeOffer]);
+    expect(mockRequest).toHaveBeenCalledTimes(2);
+  });
+
+  it("preserves authoritative data after a general failure and permits retry", async () => {
+    const withdrawnOffer: OfferDetails = {
+      ...authoritativeOffer,
+      status: "Withdrawn",
+    };
+    mockRequest
+      .mockResolvedValueOnce(authoritativeOffer)
+      .mockRejectedValueOnce(new Error("Withdrawal could not be completed."))
+      .mockResolvedValueOnce(withdrawnOffer);
+    const harness = createHarness();
+    const view = await render(<OfferDetailScreen offerId="offer-1" />, {
+      wrapper: harness.Wrapper,
+    });
+
+    await fireEvent.press(
+      await view.findByRole("button", { name: "Withdraw Offer" }),
+    );
+    expect(await view.findByRole("alert")).toHaveTextContent(
+      "Withdrawal could not be completed.",
+    );
+    expect(
+      harness.queryClient.getQueryData(offerDetailQueryKey("offer-1")),
+    ).toEqual(authoritativeOffer);
+
+    await fireEvent.press(
+      view.getByRole("button", { name: "Withdraw Offer" }),
+    );
+    expect(await view.findByText("Withdrawn")).toBeOnTheScreen();
+    expect(mockRequest).toHaveBeenCalledTimes(3);
+    expect(
+      harness.queryClient.getQueryData(participantOffersQueryKey),
+    ).toBeUndefined();
   });
 });
