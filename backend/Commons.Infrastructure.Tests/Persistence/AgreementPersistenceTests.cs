@@ -41,7 +41,11 @@ public sealed class AgreementPersistenceTests
             && foreignKey.PrincipalEntityType.ClrType == typeof(Participant))
             .Should().Be(2);
         agreement.GetCheckConstraints().Should().ContainSingle(constraint =>
-            constraint.Name == "CK_Agreements_CommonsAccountingUnits_Positive");
+            constraint.Name == "CK_Agreements_CommonsAccountingUnits_Range")
+            .Which.Sql.Should().Be(
+                "\"CommonsAccountingUnits\" IS NULL OR "
+                + "(\"CommonsAccountingUnits\" > 0 "
+                + "AND \"CommonsAccountingUnits\" <= 9007199254740991)");
     }
 
     [Fact]

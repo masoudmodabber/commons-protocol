@@ -4,6 +4,8 @@ namespace Commons.Domain.Offers;
 
 public sealed class Offer
 {
+    public const long MaximumCommonsAccountingUnits = 9_007_199_254_740_991;
+
     private readonly List<RequestedContribution> requestedContributions = [];
 
     private Offer()
@@ -16,10 +18,10 @@ public sealed class Offer
         long? commonsAccountingUnits,
         IReadOnlyCollection<ResolvedRequestedContribution> resolvedContributions)
     {
-        if (commonsAccountingUnits is <= 0)
+        if (commonsAccountingUnits is <= 0 or > MaximumCommonsAccountingUnits)
         {
             throw new DomainRuleViolationException(
-                "Commons accounting units must be a positive whole number.");
+                "Commons accounting units must be a positive whole number no greater than 9,007,199,254,740,991.");
         }
 
         if (resolvedContributions is null)

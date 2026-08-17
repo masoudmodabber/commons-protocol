@@ -14,6 +14,10 @@ import {
   availableRequestsSearchQueryKey,
   requestDetailQueryKey,
 } from "../api/requests-api";
+import {
+  offerDetailQueryKey,
+  offerSubmissionOptionsQueryKey,
+} from "../api/offers-api";
 import { SessionProvider, useSession } from "../auth/session-context";
 import type { RefreshTokenStore } from "../auth/secure-token-store";
 
@@ -88,6 +92,14 @@ describe("mobile session", () => {
     queryClient.setQueryData(availableRequestsSearchQueryKey("fence"), [
       { id: "request-2", title: "An available Request" },
     ]);
+    queryClient.setQueryData(offerSubmissionOptionsQueryKey("request-2"), {
+      request: { id: "request-2" },
+      capabilities: [],
+    });
+    queryClient.setQueryData(offerDetailQueryKey("offer-1"), {
+      id: "offer-1",
+      status: "Active",
+    });
     queryClient.setQueryData(availableCommonsQueryKey, [{ id: "commons-1" }]);
     const view = await render(
       <QueryClientProvider client={queryClient}>
@@ -127,6 +139,10 @@ describe("mobile session", () => {
     expect(
       queryClient.getQueryData(availableRequestsSearchQueryKey("fence")),
     ).toBeUndefined();
+    expect(
+      queryClient.getQueryData(offerSubmissionOptionsQueryKey("request-2")),
+    ).toBeUndefined();
+    expect(queryClient.getQueryData(offerDetailQueryKey("offer-1"))).toBeUndefined();
     expect(queryClient.getQueryData(availableCommonsQueryKey)).toBeUndefined();
   });
 

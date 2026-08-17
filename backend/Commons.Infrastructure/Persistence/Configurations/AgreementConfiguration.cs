@@ -12,8 +12,10 @@ internal sealed class AgreementConfiguration : IEntityTypeConfiguration<Agreemen
     public void Configure(EntityTypeBuilder<Agreement> builder)
     {
         builder.ToTable("Agreements", table => table.HasCheckConstraint(
-            "CK_Agreements_CommonsAccountingUnits_Positive",
-            "\"CommonsAccountingUnits\" IS NULL OR \"CommonsAccountingUnits\" > 0"));
+            "CK_Agreements_CommonsAccountingUnits_Range",
+            "\"CommonsAccountingUnits\" IS NULL OR "
+            + "(\"CommonsAccountingUnits\" > 0 "
+            + "AND \"CommonsAccountingUnits\" <= 9007199254740991)"));
         builder.HasKey(agreement => agreement.Id);
 
         builder.HasIndex(agreement => agreement.RequestId).IsUnique();

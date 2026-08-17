@@ -19,15 +19,18 @@ public sealed class SubmitOfferTests
     private static readonly Guid OtherCommonsId =
         Guid.Parse("ca291801-63b7-493f-a325-c75af863e977");
 
-    [Fact]
-    public async Task Participant_can_submit_and_view_units_only_offer()
+    [Theory]
+    [InlineData(1L)]
+    [InlineData(30L)]
+    [InlineData(Offer.MaximumCommonsAccountingUnits)]
+    public async Task Participant_can_submit_and_view_units_only_offer(long units)
     {
         await using var application = new CommonsApiApplication();
         var scenario = await CreateScenarioAsync(application);
 
         var response = await scenario.OfferCreatorClient.PostAsJsonAsync(
             $"/api/requests/{scenario.Request.Id}/offers",
-            new SubmitOfferRequest(30, []));
+            new SubmitOfferRequest(units, []));
         var created = await response.Content.ReadFromJsonAsync<OfferDetails>();
         var viewed = await scenario.OfferCreatorClient.GetFromJsonAsync<OfferDetails>(
             $"/api/offers/{created!.Id}");
@@ -36,7 +39,7 @@ public sealed class SubmitOfferTests
         response.Headers.Location.Should().Be($"http://localhost/api/offers/{created.Id}");
         created.Request.Id.Should().Be(scenario.Request.Id);
         created.Creator.DisplayName.Should().Be("Bob");
-        created.CommonsAccountingUnits.Should().Be(30);
+        created.CommonsAccountingUnits.Should().Be(units);
         created.RequestedContributions.Should().BeEmpty();
         viewed.Should().BeEquivalentTo(created);
 
@@ -96,7 +99,7 @@ public sealed class SubmitOfferTests
     }
 
     [Fact]
-    public async Task Offer_rejects_no_return_zero_negative_and_fractional_units()
+    public async Task Offer_rejects_no_return_and_invalid_units()
     {
         await using var application = new CommonsApiApplication();
         var scenario = await CreateScenarioAsync(application);
@@ -111,6 +114,9 @@ public sealed class SubmitOfferTests
         var negative = await scenario.OfferCreatorClient.PostAsJsonAsync(
             path,
             new SubmitOfferRequest(-5, []));
+        var aboveMaximum = await scenario.OfferCreatorClient.PostAsJsonAsync(
+            path,
+            new SubmitOfferRequest(Offer.MaximumCommonsAccountingUnits + 1, []));
         var fractional = await scenario.OfferCreatorClient.PostAsync(
             path,
             new StringContent(
@@ -119,11 +125,21 @@ public sealed class SubmitOfferTests
                 """,
                 Encoding.UTF8,
                 "application/json"));
+        var nonNumeric = await scenario.OfferCreatorClient.PostAsync(
+            path,
+            new StringContent(
+                """
+                {"commonsAccountingUnits":"not-a-number","requestedContributions":[]}
+                """,
+                Encoding.UTF8,
+                "application/json"));
 
         noReturn.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         zero.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         negative.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        aboveMaximum.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         fractional.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        nonNumeric.StatusCode.Should().Be(HttpStatusCode.BadRequest);
 
         await using var scope = application.Services.CreateAsyncScope();
         (await scope.ServiceProvider.GetRequiredService<CommonsDbContext>()

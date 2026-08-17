@@ -5,16 +5,19 @@ namespace Commons.Domain.Tests.Offers;
 
 public sealed class OfferTests
 {
-    [Fact]
-    public void Participant_can_submit_offer_requesting_positive_whole_units_only()
+    [Theory]
+    [InlineData(1L)]
+    [InlineData(30L)]
+    [InlineData(Offer.MaximumCommonsAccountingUnits)]
+    public void Participant_can_submit_offer_requesting_units_within_the_valid_range(long units)
     {
         var (creator, request, requestCreator) = CreateAvailableRequest();
 
-        var offer = creator.SubmitOffer(request, requestCreator, 30, []);
+        var offer = creator.SubmitOffer(request, requestCreator, units, []);
 
         offer.RequestId.Should().Be(request.Id);
         offer.CreatorParticipantId.Should().Be(creator.Id);
-        offer.CommonsAccountingUnits.Should().Be(30);
+        offer.CommonsAccountingUnits.Should().Be(units);
         offer.Status.Should().Be(OfferStatus.Active);
         offer.RequestedContributions.Should().BeEmpty();
     }
@@ -228,16 +231,18 @@ public sealed class OfferTests
     }
 
     [Theory]
-    [InlineData(0)]
-    [InlineData(-1)]
-    public void Offer_rejects_non_positive_units(long units)
+    [InlineData(0L)]
+    [InlineData(-1L)]
+    [InlineData(Offer.MaximumCommonsAccountingUnits + 1)]
+    public void Offer_rejects_units_outside_the_valid_range(long units)
     {
         var (creator, request, requestCreator) = CreateAvailableRequest();
 
         var act = () => creator.SubmitOffer(request, requestCreator, units, []);
 
         act.Should().Throw<DomainRuleViolationException>()
-            .WithMessage("Commons accounting units must be a positive whole number.");
+            .WithMessage(
+                "Commons accounting units must be a positive whole number no greater than 9,007,199,254,740,991.");
     }
 
     [Fact]

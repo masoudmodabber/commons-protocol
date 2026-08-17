@@ -32,7 +32,11 @@ public sealed class OfferPersistenceTests
         offer.FindProperty(nameof(Offer.Status))!.ClrType.Should().Be(typeof(OfferStatus));
         offer.FindProperty(nameof(Offer.Status))!.IsNullable.Should().BeFalse();
         offer.GetCheckConstraints().Should().ContainSingle(constraint =>
-            constraint.Name == "CK_Offers_CommonsAccountingUnits_Positive");
+            constraint.Name == "CK_Offers_CommonsAccountingUnits_Range")
+            .Which.Sql.Should().Be(
+                "\"CommonsAccountingUnits\" IS NULL OR "
+                + "(\"CommonsAccountingUnits\" > 0 "
+                + "AND \"CommonsAccountingUnits\" <= 9007199254740991)");
     }
 
     [Fact]

@@ -6,6 +6,12 @@ import {
   availableRequestsSearchQueryKey,
   createRequestsApi,
 } from "../api/requests-api";
+import {
+  createOffersApi,
+  offerDetailQueryKey,
+  offerSubmissionOptionsQueryKey,
+} from "../api/offers-api";
+import { participantProfileQueryKey } from "../api/participants-api";
 
 describe("mobile API clients", () => {
   beforeEach(() => {
@@ -199,6 +205,60 @@ describe("mobile API clients", () => {
       { method: "POST" },
     );
     expect(request.mock.calls[0][1].body).toBeUndefined();
+  });
+
+  it("loads Offer options, submits exact Offer terms, and reads the created Offer", async () => {
+    const request = jest.fn().mockResolvedValue({});
+    const offersApi = createOffersApi(request);
+    const input = {
+      commonsAccountingUnits: 30,
+      requestedContributions: [
+        {
+          capabilityId: "capability-1",
+          description: "  Two hours of carpentry  ",
+        },
+      ],
+    };
+
+    await offersApi.getSubmissionOptions("request-2");
+    await offersApi.submitOffer("request-2", input);
+    await offersApi.getOffer("offer-1");
+
+    expect(request).toHaveBeenNthCalledWith(
+      1,
+      "/api/requests/browse/request-2/offer-options",
+    );
+    expect(request).toHaveBeenNthCalledWith(
+      2,
+      "/api/requests/request-2/offers",
+      { method: "POST", body: JSON.stringify(input) },
+    );
+    expect(request).toHaveBeenNthCalledWith(3, "/api/offers/offer-1");
+    const submitted = JSON.parse(request.mock.calls[1][1].body);
+    expect(submitted).toEqual(input);
+    expect(submitted).not.toHaveProperty("participantId");
+    expect(submitted).not.toHaveProperty("userId");
+    expect(submitted).not.toHaveProperty("creatorId");
+    expect(submitted).not.toHaveProperty("commonsId");
+    expect(submitted).not.toHaveProperty("requestId");
+    expect(submitted.requestedContributions[0]).not.toHaveProperty(
+      "capabilityTextSnapshot",
+    );
+  });
+
+  it("keeps all Offer query state under the current-Participant root", () => {
+    expect(offerSubmissionOptionsQueryKey("request-2")).toEqual([
+      ...participantProfileQueryKey,
+      "requests",
+      "available",
+      "request-2",
+      "offer-options",
+    ]);
+    expect(offerDetailQueryKey("offer-1")).toEqual([
+      ...participantProfileQueryKey,
+      "offers",
+      "offer-1",
+    ]);
   });
 
   it("adds the bearer token and surfaces backend problem details", async () => {

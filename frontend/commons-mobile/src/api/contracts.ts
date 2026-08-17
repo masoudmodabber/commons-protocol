@@ -46,6 +46,54 @@ export interface RequestDetails {
   agreementId?: string | null;
 }
 
+export interface OfferCapabilityOption {
+  id: string;
+  text: string;
+}
+
+export interface OfferRequestSummary {
+  id: string;
+  title: string;
+  description: string;
+  creator: {
+    participantId: string;
+    displayName: string;
+  };
+  homeCommons: CommonsSummary;
+}
+
+export interface OfferSubmissionOptions {
+  request: OfferRequestSummary;
+  capabilities: OfferCapabilityOption[];
+}
+
+export interface RequestedContributionInput {
+  capabilityId: string;
+  description: string;
+}
+
+export interface SubmitOfferInput {
+  commonsAccountingUnits: number | null;
+  requestedContributions: RequestedContributionInput[];
+}
+
+export interface OfferDetails {
+  id: string;
+  status: "Active" | "Withdrawn" | "Accepted" | "Closed";
+  commonsAccountingUnits: number | null;
+  creator: {
+    participantId: string;
+    displayName: string;
+  };
+  request: OfferRequestSummary;
+  requestedContributions: Array<{
+    capabilityId: string;
+    capabilityTextSnapshot: string;
+    description: string;
+  }>;
+  agreementId?: string | null;
+}
+
 export interface JoinCommonsInput {
   homeCommonsId: string;
   displayName: string;

@@ -24,7 +24,7 @@ So that I can propose what I will provide and what I want in return.
 
 6. Commons accounting units are optional.
 
-7. If Commons accounting units are included, the value must be a positive whole number.
+7. If Commons accounting units are included, the value must be a positive whole number from 1 through 9,007,199,254,740,991 inclusive.
 
 8. Decimal Commons accounting values are not allowed.
 

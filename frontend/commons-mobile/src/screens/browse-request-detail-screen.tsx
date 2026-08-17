@@ -74,6 +74,12 @@ export function BrowseRequestDetailScreen({
       <Detail label="Description" value={request.description} />
       <Detail label="Requested by" value={request.creator.displayName} />
       <Detail label="Home Commons" value={request.homeCommons.name} />
+      <PrimaryButton
+        label="Submit an Offer"
+        onPress={() =>
+          router.push(`/available-requests/${request.id}/offer` as Href)
+        }
+      />
       <TextButton
         label="Back to Available Requests"
         onPress={() => router.replace("/available-requests" as Href)}

@@ -11,8 +11,10 @@ internal sealed class OfferConfiguration : IEntityTypeConfiguration<Offer>
     public void Configure(EntityTypeBuilder<Offer> builder)
     {
         builder.ToTable("Offers", table => table.HasCheckConstraint(
-            "CK_Offers_CommonsAccountingUnits_Positive",
-            "\"CommonsAccountingUnits\" IS NULL OR \"CommonsAccountingUnits\" > 0"));
+            "CK_Offers_CommonsAccountingUnits_Range",
+            "\"CommonsAccountingUnits\" IS NULL OR "
+            + "(\"CommonsAccountingUnits\" > 0 "
+            + "AND \"CommonsAccountingUnits\" <= 9007199254740991)"));
         builder.HasKey(offer => offer.Id);
         builder.Property(offer => offer.Status)
             .HasConversion<string>()

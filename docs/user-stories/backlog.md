@@ -22,7 +22,7 @@ Deferred from US 008:
 
 * Consider whether requested contributions should eventually become more structured than Capability plus free text description, for example quantities, units, dates, locations, or other typed details.
 
-* Reconsider whether Commons accounting units need fractional values after observing real exchange behaviour. Whole units are used initially to avoid unnecessary monetary precision and currency-like presentation.
+* Reconsider whether Commons accounting units should later support fractional values or a different numeric range after observing real exchange behaviour. For the MVP, values are whole numbers from 1 through 9,007,199,254,740,991 inclusive to avoid unnecessary monetary precision and remain exactly representable across supported clients.
 
 Deferred from US 010:
 

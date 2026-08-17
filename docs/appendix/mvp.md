@@ -42,6 +42,8 @@ When responding to a Request, a Participant may propose what they want in return
 
 For example, an Offer may request Commons accounting units or a direct contribution such as goods or services.
 
+For the MVP, a Commons accounting value proposed in an Offer must be a positive whole number from 1 through 9,007,199,254,740,991 inclusive.
+
 The requester remains free to accept, reject, or negotiate any Offer.
 
 The application should not currently suggest exchange values based on historical exchanges.

@@ -16,6 +16,7 @@
     <EmbeddedResource Include="Persistence/Schema/schema-v004-offers.sql" />
     <EmbeddedResource Include="Persistence/Schema/schema-v005-offer-status.sql" />
     <EmbeddedResource Include="Persistence/Schema/schema-v006-agreements.sql" />
+    <EmbeddedResource Include="Persistence/Schema/schema-v007-accounting-unit-range.sql" />
     <EmbeddedResource Include="Persistence/Seeding/seed-dev.sql" />
   </ItemGroup>
 

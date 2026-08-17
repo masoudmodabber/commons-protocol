@@ -13,6 +13,8 @@ import {
 import { navigate } from "./navigation";
 import { Field } from "./ui";
 
+const maximumCommonsAccountingUnits = 9_007_199_254_740_991;
+
 export function SubmitOfferPage({
   accessToken,
   requestId,
@@ -33,7 +35,9 @@ export function SubmitOfferPage({
     .map(([capabilityId, description]) => ({ capabilityId, description }));
   const parsedUnits = commonsAccountingUnits === "" ? null : Number(commonsAccountingUnits);
   const unitsAreValid = parsedUnits === null
-    || (Number.isSafeInteger(parsedUnits) && parsedUnits > 0);
+    || (Number.isSafeInteger(parsedUnits)
+      && parsedUnits > 0
+      && parsedUnits <= maximumCommonsAccountingUnits);
   const descriptionsAreValid = selectedContributions.every(
     contribution => contribution.description.trim().length > 0,
   );
@@ -113,7 +117,10 @@ export function SubmitOfferPage({
             }}
           />
         </Field>
-        <p className="offer-guidance">Enter a positive whole number, or leave this empty.</p>
+        <p className="offer-guidance">
+          Enter a positive whole number no greater than 9,007,199,254,740,991,
+          or leave this empty.
+        </p>
 
         <fieldset className="offer-capabilities">
           <legend>Requested contributions (optional)</legend>

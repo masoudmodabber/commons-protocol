@@ -65,7 +65,7 @@ describe("US 008 Submit an Offer", () => {
         submittedOffer = {
           id: "offer-1",
           status: "Active",
-          commonsAccountingUnits: 12,
+          commonsAccountingUnits: 9007199254740991,
           creator: { participantId: "participant-2", displayName: "Bob" },
           request,
           requestedContributions: [
@@ -116,14 +116,31 @@ describe("US 008 Submit an Offer", () => {
     const submit = screen.getByRole("button", { name: "Submit Offer" });
     expect(submit).toBeDisabled();
 
-    for (const invalidValue of ["1.5", "-2", "0"]) {
+    for (const invalidValue of ["1.5", "-2", "0", "not-a-number"]) {
       fireEvent.change(units, { target: { value: invalidValue } });
       expect(units).toHaveValue("");
       expect(submit).toBeDisabled();
     }
 
-    fireEvent.change(units, { target: { value: "12" } });
-    expect(units).toHaveValue("12");
+    for (const validValue of ["1", "30", "9007199254740991"]) {
+      fireEvent.change(units, { target: { value: validValue } });
+      expect(units).toHaveValue(validValue);
+      expect(submit).toBeEnabled();
+      fireEvent.change(units, { target: { value: "" } });
+      expect(submit).toBeDisabled();
+    }
+
+    fireEvent.change(units, { target: { value: "9007199254740992" } });
+    expect(units).toHaveValue("9007199254740992");
+    expect(submit).toBeDisabled();
+    fireEvent.change(units, { target: { value: "" } });
+
+    expect(screen.getByText(
+      "Enter a positive whole number no greater than 9,007,199,254,740,991, or leave this empty.",
+    )).toBeInTheDocument();
+
+    fireEvent.change(units, { target: { value: "9007199254740991" } });
+    expect(units).toHaveValue("9007199254740991");
     expect(submit).toBeEnabled();
 
     fireEvent.click(screen.getByRole("checkbox", { name: "Eggs" }));
@@ -142,7 +159,7 @@ describe("US 008 Submit an Offer", () => {
     expect(await screen.findByRole("heading", {
       name: "Offer for Help repairing a fence",
     })).toBeInTheDocument();
-    expect(screen.getByText("12")).toBeInTheDocument();
+    expect(screen.getByText("9007199254740991")).toBeInTheDocument();
     expect(screen.getByText("A dozen eggs")).toBeInTheDocument();
     expect(screen.getByText("Airport trip on Saturday")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Withdraw Offer" })).toBeInTheDocument();
@@ -155,7 +172,7 @@ describe("US 008 Submit an Offer", () => {
           === "/api/requests/request-1/offers"
         && init?.method === "POST");
       expect(submitCall?.[1]?.body).toBe(JSON.stringify({
-        commonsAccountingUnits: 12,
+        commonsAccountingUnits: 9007199254740991,
         requestedContributions: [
           { capabilityId: "capability-1", description: "  A dozen eggs  " },
           { capabilityId: "capability-2", description: "  Airport trip on Saturday  " },

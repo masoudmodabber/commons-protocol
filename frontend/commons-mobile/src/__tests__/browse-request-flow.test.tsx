@@ -78,7 +78,9 @@ describe("US 006 and US 007 mobile Request browsing", () => {
     expect(
       await view.findByRole("header", { name: "Available Requests" }),
     ).toBeOnTheScreen();
-    expect(view.getByText("Transport to an appointment")).toBeOnTheScreen();
+    expect(
+      await view.findByText("Transport to an appointment"),
+    ).toBeOnTheScreen();
     expect(view.getByText("I need a lift on Tuesday morning.")).toBeOnTheScreen();
     expect(view.getByText("Requested by Carol")).toBeOnTheScreen();
     expect(view.getByText("Help repairing a fence")).toBeOnTheScreen();
@@ -300,7 +302,16 @@ describe("US 006 and US 007 mobile Request browsing", () => {
     );
     expect(view.queryByRole("button", { name: "Edit Request" })).not.toBeOnTheScreen();
     expect(view.queryByRole("button", { name: "Cancel Request" })).not.toBeOnTheScreen();
-    expect(view.queryByRole("button", { name: /Offer/i })).not.toBeOnTheScreen();
+    expect(
+      view.getByRole("button", { name: "Submit an Offer" }),
+    ).toBeOnTheScreen();
+
+    await fireEvent.press(
+      view.getByRole("button", { name: "Submit an Offer" }),
+    );
+    expect(mockRouterPush).toHaveBeenCalledWith(
+      "/available-requests/request-2/offer",
+    );
 
     await fireEvent.press(
       view.getByRole("button", { name: "Back to Available Requests" }),

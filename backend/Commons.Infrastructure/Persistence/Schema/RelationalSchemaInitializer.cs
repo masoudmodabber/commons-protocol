@@ -10,7 +10,8 @@ public static class RelationalSchemaInitializer
         "Commons.Infrastructure.Persistence.Schema.schema-v003-requests.sql",
         "Commons.Infrastructure.Persistence.Schema.schema-v004-offers.sql",
         "Commons.Infrastructure.Persistence.Schema.schema-v005-offer-status.sql",
-        "Commons.Infrastructure.Persistence.Schema.schema-v006-agreements.sql"
+        "Commons.Infrastructure.Persistence.Schema.schema-v006-agreements.sql",
+        "Commons.Infrastructure.Persistence.Schema.schema-v007-accounting-unit-range.sql"
     ];
 
     public static async Task InitializeAsync(

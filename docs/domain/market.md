@@ -339,6 +339,12 @@ The protocol records the agreed value.
 
 It never determines it.
 
+For the MVP, a Commons accounting value proposed in an Offer must be a positive whole number from 1 through 9,007,199,254,740,991 inclusive.
+
+An Agreement preserves the Commons accounting value from the accepted Offer.
+
+This numeric range is a Domain rule. It does not depend on the larger range supported by an implementation's database storage type.
+
 The same work may have different values:
 
 * At different times.
