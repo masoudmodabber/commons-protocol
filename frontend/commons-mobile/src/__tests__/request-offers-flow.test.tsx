@@ -182,14 +182,23 @@ describe("US 011 mobile My Requests navigation bridge", () => {
   });
 
   it("shows loading, a general failure, and retries", async () => {
+    let rejectRequests!: (error: Error) => void;
     mockRequest
-      .mockRejectedValueOnce(new Error("Requests could not be loaded."))
+      .mockImplementationOnce(
+        () =>
+          new Promise((_, reject) => {
+            rejectRequests = reject;
+          }),
+      )
       .mockResolvedValueOnce([ownedRequest]);
     const view = await render(<MyRequestsScreen />, {
       wrapper: createHarness().Wrapper,
     });
 
     expect(view.getByText("Loading your Requests…")).toBeOnTheScreen();
+    await act(async () =>
+      rejectRequests(new Error("Requests could not be loaded.")),
+    );
     expect(await view.findByRole("alert")).toHaveTextContent(
       "Requests could not be loaded.",
     );
@@ -429,8 +438,14 @@ describe("US 011 mobile received Offer comparison", () => {
   });
 
   it("shows loading, a general failure, and retries", async () => {
+    let rejectOffers!: (error: Error) => void;
     mockRequest
-      .mockRejectedValueOnce(new Error("Offers could not be loaded."))
+      .mockImplementationOnce(
+        () =>
+          new Promise((_, reject) => {
+            rejectOffers = reject;
+          }),
+      )
       .mockResolvedValueOnce(comparison);
     const view = await render(<RequestOffersScreen requestId="request-1" />, {
       wrapper: createHarness().Wrapper,
@@ -439,6 +454,9 @@ describe("US 011 mobile received Offer comparison", () => {
     expect(
       view.getByRole("header", { name: "Loading Offers…" }),
     ).toBeOnTheScreen();
+    await act(async () =>
+      rejectOffers(new Error("Offers could not be loaded.")),
+    );
     expect(await view.findByRole("alert")).toHaveTextContent(
       "Offers could not be loaded.",
     );
