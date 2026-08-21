@@ -3,7 +3,10 @@ import { useRouter, type Href } from "expo-router";
 import { useMemo, useRef } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import type { OfferDetails } from "../api/contracts";
-import { agreementDetailQueryKey } from "../api/agreements-api";
+import {
+  agreementDetailQueryKey,
+  participantAgreementsQueryKey,
+} from "../api/agreements-api";
 import { ApiError } from "../api/http-client";
 import {
   createOffersApi,
@@ -54,6 +57,10 @@ export function RequestOffersScreen({ requestId }: { requestId: string }) {
         }),
         queryClient.invalidateQueries({
           queryKey: participantRequestsQueryKey,
+          exact: true,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: participantAgreementsQueryKey,
           exact: true,
         }),
       ]);

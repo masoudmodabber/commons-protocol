@@ -30,6 +30,9 @@ export function AuthenticatedLayout({
           <NavigationLink href="#/offers" active={path.startsWith("/offers")}>
             My Offers
           </NavigationLink>
+          <NavigationLink href="#/agreements" active={path.startsWith("/agreements")}>
+            My Agreements
+          </NavigationLink>
         </nav>
         {children}
       </section>

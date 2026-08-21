@@ -58,8 +58,8 @@ export function AgreementDetailScreen({
           onPress={() => void agreementQuery.refetch()}
         />
         <TextButton
-          label="Back to profile"
-          onPress={() => router.replace("/profile" as Href)}
+          label="Back to My Agreements"
+          onPress={() => router.replace("/agreements" as Href)}
         />
       </ScreenLayout>
     );
@@ -71,12 +71,12 @@ export function AgreementDetailScreen({
   return (
     <ScreenLayout
       description={agreement.request.description}
-      eyebrow="Offer accepted"
+      eyebrow="Mutual commitment"
       title={`Agreement for ${agreement.request.title}`}
     >
       <Text style={styles.guidance}>
-        The selected Offer is Accepted, the Request is Matched, and every other
-        Active Offer on the Request is Closed.
+        These are the Request and accepted Offer terms recorded for both
+        Participants.
       </Text>
       <Detail label="Request status" value={agreement.request.status} />
       <Detail
@@ -129,8 +129,8 @@ export function AgreementDetailScreen({
         ) : null}
       </View>
       <TextButton
-        label="Back to profile"
-        onPress={() => router.replace("/profile" as Href)}
+        label="Back to My Agreements"
+        onPress={() => router.replace("/agreements" as Href)}
       />
     </ScreenLayout>
   );

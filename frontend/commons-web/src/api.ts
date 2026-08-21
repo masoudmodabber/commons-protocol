@@ -288,6 +288,10 @@ export function getAgreement(
   return request<AgreementDetails>(`/api/agreements/${agreementId}`, {}, accessToken);
 }
 
+export function getMyAgreements(accessToken: string): Promise<AgreementDetails[]> {
+  return request<AgreementDetails[]>("/api/agreements", {}, accessToken);
+}
+
 export function editRequest(
   accessToken: string,
   requestId: string,

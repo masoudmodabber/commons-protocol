@@ -12,6 +12,7 @@ export function agreementDetailQueryKey(agreementId: string) {
 }
 
 export interface AgreementsApi {
+  getMyAgreements(): Promise<AgreementDetails[]>;
   getAgreement(agreementId: string): Promise<AgreementDetails>;
 }
 
@@ -19,6 +20,9 @@ export function createAgreementsApi(
   request: AuthenticatedRequest,
 ): AgreementsApi {
   return {
+    getMyAgreements() {
+      return request<AgreementDetails[]>("/api/agreements");
+    },
     getAgreement(agreementId) {
       return request<AgreementDetails>(`/api/agreements/${agreementId}`);
     },

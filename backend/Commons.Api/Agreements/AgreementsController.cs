@@ -51,6 +51,17 @@ public sealed class AgreementsController(AgreementApplicationService agreementSe
         return agreement is null ? NotFound() : Ok(agreement);
     }
 
+    [HttpGet("agreements")]
+    public async Task<ActionResult<IReadOnlyList<AgreementDetails>>> List(
+        CancellationToken cancellationToken)
+    {
+        var agreements = await agreementService.ListForParticipantAsync(
+            GetAuthenticatedUserId(),
+            cancellationToken);
+
+        return agreements is null ? NotFound() : Ok(agreements);
+    }
+
     private string GetAuthenticatedUserId() =>
         User.FindFirstValue(ClaimTypes.NameIdentifier)
         ?? throw new InvalidOperationException("The authenticated user has no identifier claim.");

@@ -6,6 +6,7 @@ import { navigate, useHashPath } from "./navigation";
 import { CapabilitiesPage, ProfilePage } from "./participant-pages";
 import {
   AgreementDetailPage,
+  MyAgreementsPage,
   MyOffersPage,
   OfferDetailPage,
   RequestOffersPage,
@@ -106,6 +107,8 @@ function ParticipantApplication({
     page = <BrowseRequestsPage accessToken={accessToken} />;
   } else if (path === "/offers") {
     page = <MyOffersPage accessToken={accessToken} />;
+  } else if (path === "/agreements") {
+    page = <MyAgreementsPage accessToken={accessToken} participantId={profile.id} />;
   } else if (submitOfferMatch) {
     page = <SubmitOfferPage accessToken={accessToken} requestId={submitOfferMatch[1]} />;
   } else if (availableRequestMatch) {

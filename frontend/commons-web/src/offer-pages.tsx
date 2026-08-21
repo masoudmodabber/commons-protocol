@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   acceptOffer,
   getAgreement,
+  getMyAgreements,
   getOffer,
   getMyOffers,
   getOfferSubmissionOptions,
@@ -238,6 +239,72 @@ export function MyOffersPage({ accessToken }: { accessToken: string }) {
   );
 }
 
+export function MyAgreementsPage({
+  accessToken,
+  participantId,
+}: {
+  accessToken: string;
+  participantId: string;
+}) {
+  const agreementsQuery = useQuery({
+    queryKey: ["my-agreements", accessToken],
+    queryFn: () => getMyAgreements(accessToken),
+  });
+
+  return (
+    <section className="feature-page requests" aria-labelledby="my-agreements-heading">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">Your mutual commitments</p>
+          <h1 id="my-agreements-heading">My Agreements</h1>
+        </div>
+      </div>
+
+      {agreementsQuery.isPending && (
+        <p className="status-message">Loading your Agreements…</p>
+      )}
+      {agreementsQuery.isError && (
+        <p className="error-message" role="alert">{agreementsQuery.error.message}</p>
+      )}
+      {agreementsQuery.isSuccess && agreementsQuery.data.length === 0 && (
+        <p className="empty-state">You are not part of any Agreements yet.</p>
+      )}
+      {agreementsQuery.isSuccess && agreementsQuery.data.length > 0 && (
+        <ul className="request-list offer-list">
+          {agreementsQuery.data.map(agreement => {
+            const otherParticipant = participantId === agreement.request.creator.participantId
+              ? agreement.acceptedOffer.creator
+              : agreement.request.creator;
+
+            return (
+              <li key={agreement.id}>
+                <a href={`#/agreements/${agreement.id}`}>{agreement.request.title}</a>
+                <p className="request-creator">With {otherParticipant.displayName}</p>
+                <div className="offer-summary-contributions">
+                  <strong>Accepted return terms</strong>
+                  {agreement.commonsAccountingUnits !== null && (
+                    <p>{agreement.commonsAccountingUnits} Commons accounting units</p>
+                  )}
+                  {agreement.requestedContributions.length > 0 && (
+                    <ul>
+                      {agreement.requestedContributions.map(contribution => (
+                        <li key={contribution.capabilityId}>
+                          <strong>{contribution.capabilityTextSnapshot}:</strong>{" "}
+                          {contribution.description}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </section>
+  );
+}
+
 export function RequestOffersPage({
   accessToken,
   requestId,
@@ -259,6 +326,7 @@ export function RequestOffersPage({
         queryClient.invalidateQueries({ queryKey: ["request", accessToken, requestId] }),
         queryClient.invalidateQueries({ queryKey: ["my-requests", accessToken] }),
         queryClient.invalidateQueries({ queryKey: ["my-offers", accessToken] }),
+        queryClient.invalidateQueries({ queryKey: ["my-agreements", accessToken] }),
       ]);
       navigate(`/agreements/${agreement.id}`);
     },
@@ -471,14 +539,13 @@ export function AgreementDetailPage({
     <section className="feature-page requests" aria-labelledby="agreement-heading">
       <div className="section-heading">
         <div>
-          <p className="eyebrow">Offer accepted successfully</p>
+          <p className="eyebrow">Mutual commitment</p>
           <h1 id="agreement-heading">Agreement for {agreement.request.title}</h1>
         </div>
       </div>
       <p className="request-description">{agreement.request.description}</p>
       <p className="offer-comparison-guidance">
-        The selected Offer is Accepted, the Request is Matched, and any other Active
-        Offers on the Request were Closed.
+        These are the Request and accepted Offer terms recorded for both Participants.
       </p>
       <dl className="request-details">
         <div><dt>Request status</dt><dd>{agreement.request.status}</dd></div>
@@ -514,6 +581,7 @@ export function AgreementDetailPage({
         </section>
       )}
       <div className="request-actions">
+        <a className="text-link" href="#/agreements">Back to My Agreements</a>
         {participantId === agreement.request.creator.participantId && (
           <a className="text-link" href={`#/requests/${agreement.request.id}`}>
             View matched Request

@@ -108,9 +108,9 @@ describe("US 012 Accept an Offer", () => {
     expect(await screen.findByRole("heading", {
       name: "Agreement for Repair a garden gate",
     })).toBeInTheDocument();
-    expect(screen.getByText("Offer accepted successfully")).toBeInTheDocument();
-    expect(screen.getByText(/selected Offer is Accepted/i)).toBeInTheDocument();
-    expect(screen.getByText(/other Active Offers.*Closed/i)).toBeInTheDocument();
+    expect(screen.getByText("Mutual commitment")).toBeInTheDocument();
+    expect(screen.getByText(/Request and accepted Offer terms recorded/i))
+      .toBeInTheDocument();
     expect(screen.getByText("Matched")).toBeInTheDocument();
     expect(screen.getByText("Accepted")).toBeInTheDocument();
     expect(screen.getByText("Fresh Eggs")).toBeInTheDocument();

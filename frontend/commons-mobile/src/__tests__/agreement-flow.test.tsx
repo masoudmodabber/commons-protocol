@@ -97,6 +97,8 @@ describe("US 012 mobile Agreement detail", () => {
     expect(view.getByText("30")).toBeOnTheScreen();
     expect(view.getByText("Carpentry")).toBeOnTheScreen();
     expect(view.getByText("Two hours repairing the gate")).toBeOnTheScreen();
+    expect(view.getByText("Mutual commitment")).toBeOnTheScreen();
+    expect(view.getByText(/terms recorded for both Participants/)).toBeOnTheScreen();
     expect(
       harness.queryClient.getQueryData(agreementDetailQueryKey("agreement-1")),
     ).toEqual(agreement);
@@ -114,6 +116,10 @@ describe("US 012 mobile Agreement detail", () => {
     expect(
       view.queryByRole("button", { name: "View accepted Offer" }),
     ).not.toBeOnTheScreen();
+    await fireEvent.press(
+      view.getByRole("button", { name: "Back to My Agreements" }),
+    );
+    expect(mockRouterReplace).toHaveBeenCalledWith("/agreements");
   });
 
   it("lets the Offer creator return to the accepted Offer", async () => {

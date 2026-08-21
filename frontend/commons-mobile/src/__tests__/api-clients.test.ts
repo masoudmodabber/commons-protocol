@@ -2,6 +2,7 @@ import { createAuthApi } from "../api/auth-api";
 import {
   agreementDetailQueryKey,
   createAgreementsApi,
+  participantAgreementsQueryKey,
 } from "../api/agreements-api";
 import { createHttpClient, ApiError, type HttpClient } from "../api/http-client";
 import { createParticipantsApi } from "../api/participants-api";
@@ -236,6 +237,7 @@ describe("mobile API clients", () => {
     await offersApi.withdrawOffer("offer-1");
     await offersApi.getRequestOffers("request-1");
     await offersApi.acceptOffer("offer-2");
+    await createAgreementsApi(request).getMyAgreements();
     await createAgreementsApi(request).getAgreement("agreement-1");
 
     expect(request).toHaveBeenNthCalledWith(
@@ -267,6 +269,10 @@ describe("mobile API clients", () => {
     expect(request.mock.calls[6][1].body).toBeUndefined();
     expect(request).toHaveBeenNthCalledWith(
       8,
+      "/api/agreements",
+    );
+    expect(request).toHaveBeenNthCalledWith(
+      9,
       "/api/agreements/agreement-1",
     );
     const submitted = JSON.parse(request.mock.calls[1][1].body);
@@ -303,6 +309,10 @@ describe("mobile API clients", () => {
       ...participantProfileQueryKey,
       "agreements",
       "agreement-1",
+    ]);
+    expect(participantAgreementsQueryKey).toEqual([
+      ...participantProfileQueryKey,
+      "agreements",
     ]);
   });
 

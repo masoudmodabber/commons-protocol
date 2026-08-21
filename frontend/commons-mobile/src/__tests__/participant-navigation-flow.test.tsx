@@ -90,6 +90,7 @@ describe("participant protected-route navigation", () => {
         "available-requests/[requestId]/offer": () => null,
         "offers/index": () => null,
         "offers/[offerId]": () => null,
+        "agreements/index": () => null,
         "agreements/[agreementId]": () => null,
         "requests/index": () => null,
         "requests/new": () => null,

@@ -7,7 +7,10 @@ import type {
   RequestDetails,
   RequestOfferComparison,
 } from "../api/contracts";
-import { agreementDetailQueryKey } from "../api/agreements-api";
+import {
+  agreementDetailQueryKey,
+  participantAgreementsQueryKey,
+} from "../api/agreements-api";
 import { ApiError } from "../api/http-client";
 import { requestOffersQueryKey } from "../api/offers-api";
 import {
@@ -268,6 +271,7 @@ describe("US 011 mobile received Offer comparison", () => {
       .mockResolvedValueOnce(noActiveOffers);
     const harness = createHarness();
     harness.queryClient.setQueryData(participantRequestsQueryKey, [ownedRequest]);
+    harness.queryClient.setQueryData(participantAgreementsQueryKey, []);
     harness.queryClient.setQueryData(
       requestDetailQueryKey(ownedRequest.id),
       ownedRequest,
@@ -314,6 +318,10 @@ describe("US 011 mobile received Offer comparison", () => {
     });
     expect(
       harness.queryClient.getQueryState(participantRequestsQueryKey)
+        ?.isInvalidated,
+    ).toBe(true);
+    expect(
+      harness.queryClient.getQueryState(participantAgreementsQueryKey)
         ?.isInvalidated,
     ).toBe(true);
   });

@@ -1,7 +1,7 @@
 appId: com.example.commonsmarket.dev
-name: Commons Market through US 012
+name: Commons Market through US 013
 ---
-- evalScript: ${output.runId = Date.now().toString()}
+- evalScript: ${output.runId = RUN_ID}
 - evalScript: ${output.password = "Maestro123!"}
 - evalScript: ${output.aEmail = "maestro-a-" + output.runId + "@example.test"}
 - evalScript: ${output.bEmail = "maestro-b-" + output.runId + "@example.test"}
@@ -189,6 +189,25 @@ name: Commons Market through US 012
     timeout: 30000
 - scrollUntilVisible:
     element:
+      text: "Back to My Agreements"
+    direction: DOWN
+- tapOn: "Back to My Agreements"
+- extendedWaitUntil:
+    visible: "View Agreement for ${output.requestTitle}"
+    timeout: 30000
+- assertVisible: "With ${output.bName}"
+- assertVisible: "11 Commons accounting units"
+- tapOn: "View Agreement for ${output.requestTitle}"
+- extendedWaitUntil:
+    visible: "Agreement for ${output.requestTitle}"
+    timeout: 30000
+- scrollUntilVisible:
+    element:
+      text: "Back to My Agreements"
+    direction: DOWN
+- tapOn: "Back to My Agreements"
+- scrollUntilVisible:
+    element:
       text: "Back to profile"
     direction: DOWN
 - tapOn: "Back to profile"
@@ -222,6 +241,27 @@ name: Commons Market through US 012
 - assertVisible: "Accepted"
 - scrollUntilVisible:
     element:
+      text: "Back to My Agreements"
+    direction: DOWN
+- tapOn: "Back to My Agreements"
+- extendedWaitUntil:
+    visible: "View Agreement for ${output.requestTitle}"
+    timeout: 30000
+- assertVisible: "With ${output.aName}"
+- assertVisible: "11 Commons accounting units"
+- tapOn: "View Agreement for ${output.requestTitle}"
+- extendedWaitUntil:
+    visible: "Agreement for ${output.requestTitle}"
+    timeout: 30000
+- assertVisible: "${output.aName}"
+- assertVisible: "${output.bName}"
+- scrollUntilVisible:
+    element:
+      text: "Back to My Agreements"
+    direction: DOWN
+- tapOn: "Back to My Agreements"
+- scrollUntilVisible:
+    element:
       text: "Back to profile"
     direction: DOWN
 - tapOn: "Back to profile"
@@ -243,3 +283,14 @@ name: Commons Market through US 012
     timeout: 30000
 - tapOn: "View Offer for ${output.requestTitle}"
 - assertVisible: "Closed"
+- scrollUntilVisible:
+    element:
+      text: "Back to My Offers"
+    direction: DOWN
+- tapOn: "Back to My Offers"
+- tapOn: "Back to profile"
+- tapOn: "My Agreements"
+- extendedWaitUntil:
+    visible: "My Agreements"
+    timeout: 30000
+- assertVisible: "You are not part of any Agreements yet."

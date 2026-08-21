@@ -322,10 +322,14 @@ run the acceptance test in a third terminal:
 
 ```bash
 cd frontend/commons-mobile
-maestro test .maestro/flows/commons-market-through-us-012.yaml
+./.maestro/run-through-us-013.sh
 ```
 
-The flow clears only the Android development application's local state, opens
-the development client at Metro through the emulator host alias `10.0.2.2`, and
-creates all scenario-specific records through the Commons Market APIs. It does
-not clear or seed the database itself.
+The harness removes stale records from abandoned Maestro runs before starting,
+generates the scenario's unique run identifier, and opens the development client
+at Metro through the emulator host alias `10.0.2.2`. Its failure-safe teardown
+removes that run's records from the local Compose `commons` database and clears
+the Android development application's local state whether Maestro succeeds or
+fails. The cleanup is restricted to the established Maestro test account naming
+convention; it does not reset the database, remove the development seed, or
+delete Maestro diagnostic artifacts.

@@ -119,6 +119,29 @@ public sealed class AgreementApplicationService(CommonsDbContext dbContext)
             .SingleOrDefaultAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyList<AgreementDetails>?> ListForParticipantAsync(
+        string authenticatedUserId,
+        CancellationToken cancellationToken)
+    {
+        var participantId = await ResolveParticipantIdAsync(
+            authenticatedUserId,
+            cancellationToken);
+
+        if (participantId is null)
+        {
+            return null;
+        }
+
+        return await ProjectDetails(dbContext.Agreements
+                .AsNoTracking()
+                .Where(agreement =>
+                    agreement.RequestCreatorParticipantId == participantId.Value
+                    || agreement.OfferCreatorParticipantId == participantId.Value)
+                .OrderBy(agreement => agreement.RequestId)
+                .ThenBy(agreement => agreement.Id))
+            .ToListAsync(cancellationToken);
+    }
+
     private Task<Guid?> ResolveParticipantIdAsync(
         string authenticatedUserId,
         CancellationToken cancellationToken)
