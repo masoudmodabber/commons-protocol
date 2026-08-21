@@ -8,6 +8,16 @@ Items here are not rejected and are not necessarily fully designed.
 
 When an item is selected for implementation, it should be discussed, turned into a user story with acceptance criteria, and moved into the appropriate epic.
 
+## Agreement
+
+Deferred from US 013:
+
+* Define how an Agreement may later be changed or renegotiated.
+
+* Decide whether changes to an Agreement create a new version, an amendment, a replacement Agreement, or another form of negotiated record.
+
+* Define whether and under what conditions an Agreement may be cancelled or terminated before the Exchange is completed.
+
 ## Offers
 
 Deferred from US 008:
@@ -47,12 +57,6 @@ Deferred from US 011:
 * Keep clarification messaging separate from Offer term changes unless a later product decision explicitly combines them.
 
 Deferred from US 012:
-
-* Define how an Agreement may later be changed after an Offer has been accepted.
-
-* Decide whether changes to an Agreement create a new version, an amendment, a replacement Agreement, or another form of negotiated record.
-
-* Define whether and under what conditions an Agreement may be cancelled or terminated before the Exchange is completed.
 
 * Define how Participants are notified when their Offer becomes Accepted or Closed.
 

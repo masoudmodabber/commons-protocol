@@ -39,13 +39,3 @@
 10. Viewing an Agreement does not modify the Agreement, Request, Offer, Commons Balance, or Ledger.
 
 11. This story does not introduce Agreement editing, status, fulfilment, completion, cancellation, renegotiation, messaging, disputes, or any new Agreement lifecycle behaviour.
-
----
-
-## Future Agreement Behaviour
-
-Agreement modification, renegotiation, cancellation, termination, and other lifecycle behaviour remain to be designed.
-
-Clarification messaging and Offer negotiation before acceptance are tracked separately as deferred Offer behaviour.
-
-When these behaviours are selected for implementation, they should first be discussed and converted into explicit user stories with acceptance criteria.
