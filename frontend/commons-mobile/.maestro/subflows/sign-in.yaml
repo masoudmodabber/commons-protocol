@@ -1,0 +1,12 @@
+appId: com.example.commonsmarket.dev
+---
+- assertVisible: "Welcome back"
+- tapOn: "Email"
+- inputText: "${EMAIL}"
+- tapOn: "Password"
+- inputText: "${PASSWORD}"
+- pressKey: Enter
+- extendedWaitUntil:
+    visible: "${DISPLAY_NAME}"
+    timeout: 30000
+- assertVisible: "Gold Coast Commons"

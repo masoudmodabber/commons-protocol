@@ -100,12 +100,12 @@ describe("US 001 participant flow", () => {
     await fireEvent.changeText(view.getByLabelText("Short bio (optional)"), "   ");
     await fireEvent.press(view.getByRole("button", { name: "Join this Commons" }));
 
-    await waitFor(() => expect(mockRouterReplace).toHaveBeenCalledWith("/"));
     await waitFor(() => {
-      expect(
-        view.getByRole("button", { name: "Join this Commons" }),
-      ).toBeEnabled();
+      expect(harness.queryClient.getQueryData(participantProfileQueryKey)).toEqual(
+        profile,
+      );
     });
+    expect(mockRouterReplace).not.toHaveBeenCalled();
 
     const joinCall = request.mock.calls.find(
       ([path, options]) =>
@@ -116,9 +116,6 @@ describe("US 001 participant flow", () => {
       displayName: "Alice",
       bio: null,
     });
-    expect(harness.queryClient.getQueryData(participantProfileQueryKey)).toEqual(
-      profile,
-    );
   });
 
   it("shows the participant profile, Home Commons, and Capability management", async () => {
@@ -176,14 +173,11 @@ describe("US 001 participant flow", () => {
     await fireEvent.changeText(view.getByLabelText("Display name"), "Alice");
     await fireEvent.press(view.getByRole("button", { name: "Join this Commons" }));
 
-    await waitFor(() => expect(mockRouterReplace).toHaveBeenCalledWith("/"));
     await waitFor(() => {
-      expect(
-        view.getByRole("button", { name: "Join this Commons" }),
-      ).toBeEnabled();
+      expect(harness.queryClient.getQueryData(participantProfileQueryKey)).toEqual(
+        profile,
+      );
     });
-    expect(harness.queryClient.getQueryData(participantProfileQueryKey)).toEqual(
-      profile,
-    );
+    expect(mockRouterReplace).not.toHaveBeenCalled();
   });
 });

@@ -138,7 +138,10 @@ describe("US 008 mobile Offer submission", () => {
       view.getByLabelText("Commons accounting units"),
       "30",
     );
-    await fireEvent.press(view.getByRole("button", { name: "Submit Offer" }));
+    const submit = view.getByTestId("submit-offer");
+    expect(submit).toBe(view.getByRole("button", { name: "Submit Offer" }));
+    expect(submit).toBeEnabled();
+    await fireEvent.press(submit);
 
     await waitFor(() => {
       expect(mockRequest).toHaveBeenNthCalledWith(

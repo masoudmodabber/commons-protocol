@@ -151,9 +151,15 @@ The Docker environment should remain as close as practical to the production ser
 ### End to End
 
 * Playwright for the web client.
-* Mobile end to end testing should exercise the Android and iOS applications using tooling appropriate to the Expo and React Native environment.
+* Maestro for Android and iOS end to end acceptance testing.
 
-Participant facing stories should be tested through the actual supported clients rather than only through the backend API.
+End to end acceptance tests should exercise the real client application against the real backend and database rather than mocked APIs.
+
+Mobile end to end tests should focus on a small number of important participant workflows that cross multiple parts of the system. They should not duplicate every behaviour already covered by Domain, API, or client tests.
+
+The initial mobile acceptance suite lives under `frontend/commons-mobile/.maestro` and runs locally against the Android development client, the Docker-hosted backend, and PostgreSQL. Its test data is created through the application with unique values on each run; it relies only on the idempotent development Commons seed and does not require database resets or mocked Commons Market APIs.
+
+Participant facing stories should be tested through the actual supported clients where end to end coverage provides meaningful additional confidence.
 
 Tests should focus on observable participant behaviour and Domain rules rather than unnecessarily coupling themselves to client implementation details.
 

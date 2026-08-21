@@ -25,6 +25,7 @@ export function PrimaryButton({
   pending = false,
   disabled = false,
   tone = "primary",
+  testID,
   onPress,
 }: {
   label: string;
@@ -32,6 +33,7 @@ export function PrimaryButton({
   pending?: boolean;
   disabled?: boolean;
   tone?: "primary" | "danger";
+  testID?: string;
   onPress: () => void;
 }) {
   const isDisabled = pending || disabled;
@@ -42,6 +44,7 @@ export function PrimaryButton({
       accessibilityState={{ disabled: isDisabled }}
       disabled={isDisabled}
       onPress={onPress}
+      testID={testID}
       style={({ pressed }) => [
         styles.primaryButton,
         tone === "danger" && styles.dangerButton,

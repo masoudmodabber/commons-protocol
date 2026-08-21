@@ -291,3 +291,41 @@ APP_VARIANT=development EXPO_PUBLIC_API_BASE_URL=http://10.0.2.2:8080 npm run do
 APP_VARIANT=development EXPO_PUBLIC_API_BASE_URL=http://10.0.2.2:8080 npm run export:android
 APP_VARIANT=development EXPO_PUBLIC_API_BASE_URL=http://10.0.2.2:8080 npm run export:ios
 ```
+
+### Local Android acceptance test
+
+The first mobile end to end acceptance test uses Maestro to exercise the real
+Android development client, backend, Domain behaviour, and PostgreSQL database.
+It creates unique Participants, a Request, competing Offers, and an Agreement
+through the UI, so repeated runs do not require a database reset. The existing
+development seed supplies the `Gold Coast Commons` selected by the flow.
+
+Install Maestro locally using its official installation instructions. Maestro
+requires Java 17 or later and is intentionally not an npm dependency in this
+repository.
+
+Start the backend and PostgreSQL in the first terminal:
+
+```bash
+docker compose up --build
+```
+
+Install and start the Android development client and Metro in a second terminal:
+
+```bash
+cd frontend/commons-mobile
+APP_VARIANT=development EXPO_PUBLIC_API_BASE_URL=http://10.0.2.2:8080 npm run android
+```
+
+With an Android emulator running and Metro available on its default port 8081,
+run the acceptance test in a third terminal:
+
+```bash
+cd frontend/commons-mobile
+maestro test .maestro/flows/commons-market-through-us-012.yaml
+```
+
+The flow clears only the Android development application's local state, opens
+the development client at Metro through the emulator host alias `10.0.2.2`, and
+creates all scenario-specific records through the Commons Market APIs. It does
+not clear or seed the database itself.

@@ -255,6 +255,7 @@ export function SubmitOfferScreen({ requestId }: { requestId: string }) {
         onPress={submit}
         pending={pending}
         pendingLabel="Submitting Offer…"
+        testID="submit-offer"
       />
       <TextButton
         disabled={pending}

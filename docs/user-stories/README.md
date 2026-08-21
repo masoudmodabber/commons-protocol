@@ -42,6 +42,10 @@ No client is a security boundary.
 
 Authentication, authorization, ownership, Membership, and Domain rules must be enforced by trusted server side behaviour.
 
+End to end acceptance tests are added when a story completes or materially changes a critical cross system participant flow.
+
+They are not required for every individual acceptance criterion when existing Domain, API, or client tests already provide appropriate coverage.
+
 Codex should not mark a story complete while any acceptance criterion or applicable part of this Definition of Done remains unmet.
 
 ## Mobile Client Transition

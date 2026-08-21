@@ -1,0 +1,24 @@
+appId: com.example.commonsmarket.dev
+---
+- tapOn: "New here? Create an account"
+- assertVisible: "Create your account"
+- tapOn: "Email"
+- inputText: "${EMAIL}"
+- tapOn: "Password"
+- inputText: "${PASSWORD}"
+- pressKey: Enter
+- extendedWaitUntil:
+    visible: "Join a Commons"
+    timeout: 30000
+- tapOn: "Gold Coast Commons"
+- tapOn: "Display name"
+- inputText: "${DISPLAY_NAME}"
+- scrollUntilVisible:
+    element:
+      text: "Join this Commons"
+    direction: DOWN
+- tapOn: "Join this Commons"
+- extendedWaitUntil:
+    visible: "${DISPLAY_NAME}"
+    timeout: 30000
+- assertVisible: "Gold Coast Commons"

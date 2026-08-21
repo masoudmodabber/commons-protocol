@@ -1,5 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRouter, type Href } from "expo-router";
 import { useMemo, useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { ApiError } from "../api/http-client";
@@ -19,7 +18,6 @@ import { ScreenLayout } from "../components/screen-layout";
 import { SignOutButton } from "../components/sign-out-button";
 
 export function JoinCommonsScreen() {
-  const router = useRouter();
   const queryClient = useQueryClient();
   const session = useSession();
   const participantsApi = useMemo(
@@ -59,7 +57,6 @@ export function JoinCommonsScreen() {
       const profile = await participantsApi.getMyProfile();
       queryClient.setQueryData(participantProfileQueryKey, profile);
     },
-    onSuccess: () => router.replace("/" as Href),
   });
   const canJoin = homeCommonsId.length > 0 && displayName.trim().length > 0;
 

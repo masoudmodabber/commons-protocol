@@ -1,0 +1,245 @@
+appId: com.example.commonsmarket.dev
+name: Commons Market through US 012
+---
+- evalScript: ${output.runId = Date.now().toString()}
+- evalScript: ${output.password = "Maestro123!"}
+- evalScript: ${output.aEmail = "maestro-a-" + output.runId + "@example.test"}
+- evalScript: ${output.bEmail = "maestro-b-" + output.runId + "@example.test"}
+- evalScript: ${output.cEmail = "maestro-c-" + output.runId + "@example.test"}
+- evalScript: ${output.aName = "maestro-a-" + output.runId}
+- evalScript: ${output.bName = "maestro-b-" + output.runId}
+- evalScript: ${output.cName = "maestro-c-" + output.runId}
+- evalScript: ${output.requestTitle = "Maestro request " + output.runId}
+- evalScript: ${output.requestDescription = "Created by the local Android acceptance test " + output.runId}
+- clearState
+- openLink:
+    link: "commonsmarket-dev://expo-development-client/?url=http%3A%2F%2F10.0.2.2%3A8081&disableOnboarding=1"
+- runFlow:
+    when:
+      visible: "Commons Market (Dev)"
+    commands:
+      - tapOn: "Close"
+- extendedWaitUntil:
+    visible: "Welcome back"
+    timeout: 30000
+
+# Participant A registers, joins the seeded Commons, and creates a Request.
+- runFlow:
+    file: ../subflows/register-and-join.yaml
+    env:
+      EMAIL: "${output.aEmail}"
+      PASSWORD: "${output.password}"
+      DISPLAY_NAME: "${output.aName}"
+- tapOn: "Create a Request"
+- tapOn: "Request title"
+- inputText: "${output.requestTitle}"
+- tapOn: "Description"
+- inputText: "${output.requestDescription}"
+- scrollUntilVisible:
+    element:
+      text: "Create Request"
+    direction: DOWN
+- tapOn: "Create Request"
+- extendedWaitUntil:
+    visible: "${output.requestTitle}"
+    timeout: 30000
+- assertVisible: "Open"
+- scrollUntilVisible:
+    element:
+      text: "Back to profile"
+    direction: DOWN
+- tapOn: "Back to profile"
+- tapOn: "Sign out"
+- extendedWaitUntil:
+    visible: "Welcome back"
+    timeout: 30000
+
+# Participant B registers, finds A's Request, and submits the Offer to accept.
+- runFlow:
+    file: ../subflows/register-and-join.yaml
+    env:
+      EMAIL: "${output.bEmail}"
+      PASSWORD: "${output.password}"
+      DISPLAY_NAME: "${output.bName}"
+- tapOn: "Browse Available Requests"
+- tapOn: "Search Available Requests"
+- inputText: "${output.requestTitle}"
+- pressKey: Enter
+- extendedWaitUntil:
+    visible: "View ${output.requestTitle}"
+    timeout: 30000
+- tapOn: "View ${output.requestTitle}"
+- tapOn: "Submit an Offer"
+- tapOn: "Commons accounting units"
+- inputText: "11"
+- scrollUntilVisible:
+    element:
+      id: "submit-offer"
+    direction: DOWN
+- tapOn:
+    id: "submit-offer"
+- extendedWaitUntil:
+    visible: "Offer for ${output.requestTitle}"
+    timeout: 30000
+- assertVisible: "Active"
+- assertVisible: "11"
+- scrollUntilVisible:
+    element:
+      text: "Back to My Offers"
+    direction: DOWN
+- tapOn: "Back to My Offers"
+- tapOn: "Back to profile"
+- tapOn: "Sign out"
+- extendedWaitUntil:
+    visible: "Welcome back"
+    timeout: 30000
+
+# Participant C registers and submits a competing Offer.
+- runFlow:
+    file: ../subflows/register-and-join.yaml
+    env:
+      EMAIL: "${output.cEmail}"
+      PASSWORD: "${output.password}"
+      DISPLAY_NAME: "${output.cName}"
+- tapOn: "Browse Available Requests"
+- tapOn: "Search Available Requests"
+- inputText: "${output.requestTitle}"
+- pressKey: Enter
+- extendedWaitUntil:
+    visible: "View ${output.requestTitle}"
+    timeout: 30000
+- tapOn: "View ${output.requestTitle}"
+- tapOn: "Submit an Offer"
+- tapOn: "Commons accounting units"
+- inputText: "22"
+- scrollUntilVisible:
+    element:
+      id: "submit-offer"
+    direction: DOWN
+- tapOn:
+    id: "submit-offer"
+- extendedWaitUntil:
+    visible: "Offer for ${output.requestTitle}"
+    timeout: 30000
+- assertVisible: "Active"
+- assertVisible: "22"
+- scrollUntilVisible:
+    element:
+      text: "Back to My Offers"
+    direction: DOWN
+- tapOn: "Back to My Offers"
+- tapOn: "Back to profile"
+- tapOn: "Sign out"
+- extendedWaitUntil:
+    visible: "Welcome back"
+    timeout: 30000
+
+# A accepts B's Offer from the received-Offer comparison flow.
+- runFlow:
+    file: ../subflows/sign-in.yaml
+    env:
+      EMAIL: "${output.aEmail}"
+      PASSWORD: "${output.password}"
+      DISPLAY_NAME: "${output.aName}"
+- tapOn: "My Requests"
+- extendedWaitUntil:
+    visible: "View ${output.requestTitle}"
+    timeout: 30000
+- tapOn: "View ${output.requestTitle}"
+- scrollUntilVisible:
+    element:
+      text: "View Offers"
+    direction: DOWN
+- tapOn: "View Offers"
+- extendedWaitUntil:
+    visible:
+      id: "accept-offer-from-${output.bName}"
+    timeout: 30000
+- assertVisible: "${output.cName}"
+- tapOn:
+    id: "accept-offer-from-${output.bName}"
+- extendedWaitUntil:
+    visible: "Agreement for ${output.requestTitle}"
+    timeout: 30000
+- assertVisible: "Matched"
+- assertVisible: "Accepted"
+- assertVisible: "${output.aName}"
+- assertVisible: "${output.bName}"
+- scrollUntilVisible:
+    element:
+      text: "11"
+    direction: DOWN
+- assertVisible: "11"
+- scrollUntilVisible:
+    element:
+      text: "View matched Request"
+    direction: DOWN
+- tapOn: "View matched Request"
+- extendedWaitUntil:
+    visible: "${output.requestTitle}"
+    timeout: 30000
+- assertVisible: "Matched"
+- scrollUntilVisible:
+    element:
+      text: "View Agreement"
+    direction: DOWN
+- tapOn: "View Agreement"
+- extendedWaitUntil:
+    visible: "Agreement for ${output.requestTitle}"
+    timeout: 30000
+- scrollUntilVisible:
+    element:
+      text: "Back to profile"
+    direction: DOWN
+- tapOn: "Back to profile"
+- tapOn: "Sign out"
+- extendedWaitUntil:
+    visible: "Welcome back"
+    timeout: 30000
+
+# B signs back in and opens the persisted Agreement from the Accepted Offer.
+- runFlow:
+    file: ../subflows/sign-in.yaml
+    env:
+      EMAIL: "${output.bEmail}"
+      PASSWORD: "${output.password}"
+      DISPLAY_NAME: "${output.bName}"
+- tapOn: "My Offers"
+- extendedWaitUntil:
+    visible: "View Offer for ${output.requestTitle}"
+    timeout: 30000
+- tapOn: "View Offer for ${output.requestTitle}"
+- assertVisible: "Accepted"
+- scrollUntilVisible:
+    element:
+      text: "View Agreement"
+    direction: DOWN
+- tapOn: "View Agreement"
+- extendedWaitUntil:
+    visible: "Agreement for ${output.requestTitle}"
+    timeout: 30000
+- assertVisible: "Matched"
+- assertVisible: "Accepted"
+- scrollUntilVisible:
+    element:
+      text: "Back to profile"
+    direction: DOWN
+- tapOn: "Back to profile"
+- tapOn: "Sign out"
+- extendedWaitUntil:
+    visible: "Welcome back"
+    timeout: 30000
+
+# C's competing Offer remains visible and is now Closed.
+- runFlow:
+    file: ../subflows/sign-in.yaml
+    env:
+      EMAIL: "${output.cEmail}"
+      PASSWORD: "${output.password}"
+      DISPLAY_NAME: "${output.cName}"
+- tapOn: "My Offers"
+- extendedWaitUntil:
+    visible: "View Offer for ${output.requestTitle}"
+    timeout: 30000
+- tapOn: "View Offer for ${output.requestTitle}"
+- assertVisible: "Closed"

@@ -212,6 +212,7 @@ function ReceivedOffer({
           onPress={onAccept}
           pending={accepting}
           pendingLabel="Accepting…"
+          testID={`accept-offer-from-${offer.creator.displayName}`}
         />
       </View>
     </View>

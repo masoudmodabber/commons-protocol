@@ -241,6 +241,7 @@ describe("US 011 mobile received Offer comparison", () => {
     expect(harness.queryClient.getQueryData(requestOffersQueryKey("request-1")))
       .toEqual(comparison);
     expect(view.getAllByRole("button", { name: "Accept Offer" })).toHaveLength(3);
+    expect(view.getByTestId("accept-offer-from-Bob")).toBeOnTheScreen();
     expect(view.queryByRole("button", { name: /Reject/i })).not.toBeOnTheScreen();
     expect(view.queryByRole("button", { name: /Withdraw/i })).not.toBeOnTheScreen();
     expect(view.queryByRole("button", { name: /Negotiate/i })).not.toBeOnTheScreen();
